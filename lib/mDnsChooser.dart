@@ -24,9 +24,9 @@ class DnsChooser extends StatefulWidget {
 // This class does all the work for the DnsChooser.
 
 class _ChooserState extends State<DnsChooser> {
-  List<String> _nodes = [];
+  List<NodeEntry> _nodes = [];
   final MDnsClient client = MDnsClient();
-  late Future<String?> fut;
+  late Future<List<NodeEntry>> fut;
 
   // Start an mDNS client session.
 
@@ -39,8 +39,10 @@ class _ChooserState extends State<DnsChooser> {
     // the appropriate refresh of the state and widgets.
 
     fut = (() async {
+      print("starting the mDNS client ...");
       await client.start();
-      return null;
+      print("done.");
+      return <NodeEntry>[];
     })();
   }
 
@@ -48,37 +50,76 @@ class _ChooserState extends State<DnsChooser> {
 
   @override
   void dispose() {
+    print("stopping client");
     client.stop();
 
     super.dispose();
   }
 
+  Future<List<NodeEntry>> getNodes() async {
+    final List<NodeEntry> list = [];
+
+    print("querying mDNS for DrMem instances ...");
+
+    final spQuery = ResourceRecordQuery.serverPointer('_drmem._tcp');
+
+    await for (final ptr in client.lookup<PtrResourceRecord>(spQuery)) {
+      print("found PtrRec: ${ptr}");
+
+      final sQuery = ResourceRecordQuery.service(ptr.domainName);
+
+      await for (final srv in client.lookup<SrvResourceRecord>(sQuery)) {
+        print("found SrvRec: ${srv}");
+        setState(
+          () {
+            list.add(NodeEntry(ptr.domainName.replaceFirst(".${ptr.name}", ""),
+                "unknown", "${srv.target}:${srv.port}"));
+          },
+        );
+      }
+    }
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
+    return FutureBuilder<List<NodeEntry>?>(
+        initialData: [],
         future: fut,
         builder: (context, snapshot) {
-          // If we have data, then an MDNS record was received. Update the list
-          // of nodes.
+          print("in builder: ${snapshot}");
 
-          if (snapshot.hasData) {
-            setState(() {
-              _nodes.add(snapshot.data!);
-            });
+          if (snapshot.connectionState == ConnectionState.done) {
+            // If we have data, then an MDNS record was received. Update the list
+            // of nodes.
+
+            if (snapshot.hasData) {
+              for (final ii in snapshot.data!) {
+                _nodes.add(ii);
+              }
+              fut = getNodes();
+            }
           }
 
           // Build the widgets based on the current state.
 
           return _nodes.isEmpty
-              ? const CircularProgressIndicator()
+              ? CircularProgressIndicator()
               : Column(children: [
-                  Text('Available Nodes'),
+                  Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Available Nodes',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.left)),
                   Expanded(
                       child: ListView.builder(
-                    padding: const EdgeInsets.all(8),
                     itemCount: _nodes.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Text('${_nodes[index]}');
+                      return ListTile(
+                          title: Text(_nodes[index].name),
+                          contentPadding: const EdgeInsets.all(8.0),
+                          subtitle: Text(_nodes[index].location),
+                          trailing: Text(_nodes[index].address));
                     },
                   ))
                 ]);
