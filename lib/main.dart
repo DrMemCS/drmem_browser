@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nsd/nsd.dart';
 import 'mDnsChooser.dart';
 
 void main() {
@@ -11,7 +12,8 @@ class DrMemApp extends StatelessWidget {
     return MaterialApp(
       title: 'DrMem Browser',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
+        secondaryHeaderColor: Colors.orange,
       ),
       home: BaseWidget(),
     );
@@ -26,12 +28,12 @@ class BaseWidget extends StatefulWidget {
 }
 
 class _BaseState extends State<BaseWidget> {
-  String? _node;
+  Service? nodeInfo;
 
   // This widget is used when the user has selected a node.
 
-  Widget displayNode(BuildContext context) {
-    return Text('You picked: $_node');
+  Widget displayNode() {
+    return Text('You picked: ${nodeInfo!.name}');
   }
 
   @override
@@ -40,7 +42,14 @@ class _BaseState extends State<BaseWidget> {
       appBar: AppBar(
         title: Text('DrMem Browser'),
       ),
-      body: Center(child: _node == null ? DnsChooser() : displayNode(context)),
+      body: Center(
+          child: nodeInfo == null
+              ? DnsChooser((s) {
+                  setState(() {
+                    nodeInfo = s;
+                  });
+                })
+              : displayNode()),
     );
   }
 }

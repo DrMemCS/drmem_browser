@@ -1,128 +1,94 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:multicast_dns/multicast_dns.dart';
-
-// Represents an instance of DrMem, as reported via mDNS.
-
-class NodeEntry {
-  final String name;
-  final String location;
-  final String address;
-
-  NodeEntry(this.name, this.location, this.address);
-}
+import 'package:nsd/nsd.dart';
 
 // A DnsChooser starts an mDNS client session which listens for DrMem
 // announcements. As reports come in, a ListView is updated.
 
 class DnsChooser extends StatefulWidget {
-  DnsChooser({Key? key}) : super(key: key);
+  final void Function(Service) updState;
+
+  DnsChooser(this.updState, {Key? key}) : super(key: key);
 
   @override
   _ChooserState createState() => _ChooserState();
 }
 
-// This class does all the work for the DnsChooser.
+// This class holds the state for the DnsChooser.
 
 class _ChooserState extends State<DnsChooser> {
-  List<NodeEntry> _nodes = [];
-  final MDnsClient client = MDnsClient();
-  late Future<List<NodeEntry>> fut;
+  List<Service> _nodes = [];
+  Discovery? discovery;
 
-  // Start an mDNS client session.
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Make the initial Future one that connects the client to the mDNS
-    // service. It will resolve to `null` so the `FutureBuilder` can do
-    // the appropriate refresh of the state and widgets.
-
-    fut = (() async {
-      print("starting the mDNS client ...");
-      await client.start();
-      print("done.");
-      return <NodeEntry>[];
-    })();
-  }
-
-  // Free up resources associated with the mDNS session.
-
-  @override
-  void dispose() {
-    print("stopping client");
-    client.stop();
-
-    super.dispose();
-  }
-
-  Future<List<NodeEntry>> getNodes() async {
-    final List<NodeEntry> list = [];
-
-    print("querying mDNS for DrMem instances ...");
-
-    final spQuery = ResourceRecordQuery.serverPointer('_drmem._tcp');
-
-    await for (final ptr in client.lookup<PtrResourceRecord>(spQuery)) {
-      print("found PtrRec: ${ptr}");
-
-      final sQuery = ResourceRecordQuery.service(ptr.domainName);
-
-      await for (final srv in client.lookup<SrvResourceRecord>(sQuery)) {
-        print("found SrvRec: ${srv}");
-        setState(
-          () {
-            list.add(NodeEntry(ptr.domainName.replaceFirst(".${ptr.name}", ""),
-                "unknown", "${srv.target}:${srv.port}"));
-          },
+  void serviceUpdate(Service service, ServiceStatus status) {
+    if (status == ServiceStatus.found) {
+      setState(() {
+        print(service);
+        _nodes.add(service);
+        _nodes.sort(
+          (a, b) => a.name!.compareTo(b.name!),
         );
-      }
+      });
+    } else {
+      setState(() {
+        _nodes =
+            _nodes.where((element) => element.name != service.name).toList();
+      });
     }
-    return list;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<NodeEntry>?>(
-        initialData: [],
-        future: fut,
-        builder: (context, snapshot) {
-          print("in builder: ${snapshot}");
+    if (discovery == null) {
+      // Our mDNS listener, `discovery` needs to be initialized. This future
+      // starts the background process that monitors mDNS announcements. After
+      // the task is started, it registers a callback which receives incoming
+      // service announcements.
 
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If we have data, then an MDNS record was received. Update the list
-            // of nodes.
+      final Future<void> fut = (() async {
+        discovery = await startDiscovery('_drmem._tcp');
+        discovery!.addServiceListener(serviceUpdate);
+      })();
 
-            if (snapshot.hasData) {
-              for (final ii in snapshot.data!) {
-                _nodes.add(ii);
-              }
-              fut = getNodes();
-            }
-          }
+      // Return a `FutureBuilder` which only displays a progress indicator.
+      // Once the dependent future resolves, this code path won't be used
+      // anymore.
 
-          // Build the widgets based on the current state.
+      return FutureBuilder(
+          future: fut, builder: (_ctxt, _snap) => CircularProgressIndicator());
+    } else {
+      // If the list of nodes is empty, return a progress indicator. Otherwise,
+      // display a ListView containing the contents of the list.
 
-          return _nodes.isEmpty
-              ? CircularProgressIndicator()
-              : Column(children: [
-                  Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Available Nodes',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.left)),
-                  Expanded(
-                      child: ListView.builder(
-                    itemCount: _nodes.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                          title: Text(_nodes[index].name),
-                          contentPadding: const EdgeInsets.all(8.0),
-                          subtitle: Text(_nodes[index].location),
-                          trailing: Text(_nodes[index].address));
-                    },
-                  ))
-                ]);
-        });
+      return _nodes.isEmpty
+          ? CircularProgressIndicator()
+          : ListView.builder(
+              itemCount: _nodes.length,
+              itemBuilder: (BuildContext context, int index) {
+                final info = _nodes[index];
+                final String? location = info.txt?["location"] != null
+                    ? Utf8Decoder(allowMalformed: true)
+                        .convert(info.txt!["location"]!)
+                    : null;
+                final String host = info.host ?? "unknown";
+
+                return GestureDetector(
+                  onTap: () => widget.updState(info),
+                  child: Card(
+                    elevation: 4.0,
+                    child: ListTile(
+                        iconColor: Theme.of(context).colorScheme.tertiary,
+                        leading: const Icon(Icons.computer_outlined),
+                        title: Text(info.name ?? "**Unknown**"),
+                        contentPadding: const EdgeInsets.all(8.0),
+                        subtitle: location != null ? Text(location) : null,
+                        trailing: Text(
+                            "${host.substring(0, host.length - 1)}:${info.port}")),
+                  ),
+                );
+              },
+            );
+    }
   }
 }
