@@ -9,12 +9,16 @@ void main() {
 class DrMemApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Color primeColor = Colors.teal;
+
     return MaterialApp(
       title: 'DrMem Browser',
       theme: ThemeData(
-        primarySwatch: Colors.teal,
-        secondaryHeaderColor: Colors.orange,
-      ),
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: primeColor)),
+      darkTheme: ThemeData.dark()
+          .copyWith(useMaterial3: true, colorScheme: ColorScheme.dark()),
+      themeMode: ThemeMode.system,
       home: BaseWidget(),
     );
   }
