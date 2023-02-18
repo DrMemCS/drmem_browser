@@ -1,12 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.drmem_browser">
    <uses-permission android:name="android.permission.INTERNET"/>
+   <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
    <application
         android:label="drmem_browser"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
+            android:exported="true"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
