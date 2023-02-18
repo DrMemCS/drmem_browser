@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nsd/nsd.dart';
 import 'mDnsChooser.dart';
+import 'node_details.dart';
 
 void main() {
   runApp(DrMemApp());
@@ -35,12 +36,6 @@ class _BaseState extends State<BaseWidget> {
   Service? nodeInfo;
   int _selectIndex = 0;
 
-  // This widget is used when the user has selected a node.
-
-  Widget displayNode() {
-    return Text('You picked: ${nodeInfo!.name}');
-  }
-
   // Creates the navigation bar.
 
   BottomNavigationBar _buildNavBar() {
@@ -68,7 +63,7 @@ class _BaseState extends State<BaseWidget> {
               nodeInfo = s;
             });
           })
-        : displayNode();
+        : displayNode(nodeInfo!);
   }
 
   // Display "parameter page".
