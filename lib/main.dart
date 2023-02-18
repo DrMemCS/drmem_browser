@@ -33,6 +33,7 @@ class BaseWidget extends StatefulWidget {
 
 class _BaseState extends State<BaseWidget> {
   Service? nodeInfo;
+  int _selectIndex = 0;
 
   // This widget is used when the user has selected a node.
 
@@ -40,20 +41,54 @@ class _BaseState extends State<BaseWidget> {
     return Text('You picked: ${nodeInfo!.name}');
   }
 
+  // Creates the navigation bar.
+
+  BottomNavigationBar _buildNavBar() {
+    return BottomNavigationBar(
+        currentIndex: _selectIndex,
+        onTap: (value) {
+          setState(() {
+            _selectIndex = value;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.web_stories), label: "Sheets"),
+        ]);
+  }
+
+  // Displays the list of nodes or the "details" subpage.
+
+  Widget _displayNodes() {
+    return nodeInfo == null
+        ? DnsChooser((s) {
+            setState(() {
+              nodeInfo = s;
+            });
+          })
+        : displayNode();
+  }
+
+  // Display "parameter page".
+
+  Widget _displayParameters() {
+    return Text("TODO: Acquire data from DrMem.");
+  }
+
+  // This method determine which widget should be the main body of the display
+  // based on the value of the navbar.
+
+  Widget _buildBody() {
+    return Center(
+        child: _selectIndex == 0 ? _displayNodes() : _displayParameters());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('DrMem Browser'),
-      ),
-      body: Center(
-          child: nodeInfo == null
-              ? DnsChooser((s) {
-                  setState(() {
-                    nodeInfo = s;
-                  });
-                })
-              : displayNode()),
+      body: _buildBody(),
+      bottomNavigationBar: _buildNavBar(),
     );
   }
 }
