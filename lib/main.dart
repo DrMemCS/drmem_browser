@@ -44,6 +44,7 @@ class _BaseState extends State<BaseWidget> {
         onTap: (value) {
           setState(() {
             _selectIndex = value;
+            nodeInfo = null;
           });
         },
         items: [
