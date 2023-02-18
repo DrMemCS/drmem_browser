@@ -55,6 +55,7 @@ class _BaseState extends State<BaseWidget> {
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
               icon: Icon(Icons.web_stories), label: "Sheets"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Logic"),
         ]);
   }
 
@@ -76,12 +77,20 @@ class _BaseState extends State<BaseWidget> {
     return Text("TODO: Acquire data from DrMem.");
   }
 
+  // This page will be used to edit the Logic in a DrMem instance.
+
+  Widget _displayLogic() {
+    return Text("TODO: Edit logic.");
+  }
+
   // This method determine which widget should be the main body of the display
   // based on the value of the navbar.
 
   Widget _buildBody() {
     return Center(
-        child: _selectIndex == 0 ? _displayNodes() : _displayParameters());
+        child: _selectIndex == 0
+            ? _displayNodes()
+            : (_selectIndex == 1 ? _displayParameters() : _displayLogic()));
   }
 
   @override
