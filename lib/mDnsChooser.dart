@@ -42,7 +42,7 @@ class _ChooserState extends State<DnsChooser> {
 
   Widget buildTile(BuildContext context, int index) {
     final info = _nodes[index];
-    final String host = info.host ?? "unknown ";
+    final String host = info.host ?? "unknown";
 
     // Determine the location string, which is displayed as "subtitle" in the
     // tile. The location is provided in the mDNS payload as u8 data so we have
@@ -64,8 +64,7 @@ class _ChooserState extends State<DnsChooser> {
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null ? Text(location) : null,
-            trailing:
-                Text("${host.substring(0, host.length - 1)}:${info.port}")),
+            trailing: Text("${host}:${info.port}")),
       ),
     );
   }
