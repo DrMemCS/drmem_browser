@@ -66,6 +66,7 @@ class _ChooserState extends State<DnsChooser> {
       child: Card(
         elevation: 2.0,
         child: ListTile(
+            key: Key(host),
             leading: const Icon(Icons.developer_board),
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
