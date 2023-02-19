@@ -4,7 +4,7 @@ import 'mDnsChooser.dart' show propToString;
 
 Widget header(BuildContext context, String label) {
   return Padding(
-    padding: const EdgeInsets.only(top: 16.0),
+    padding: const EdgeInsets.only(top: 20.0, bottom: 8.0),
     child: Text(label, style: Theme.of(context).textTheme.titleMedium),
   );
 }
@@ -16,12 +16,25 @@ Widget infoSection(BuildContext context, String label, Widget? child) {
 }
 
 Widget buildProperty(BuildContext context, String label, String? value) {
+  final ThemeData td = Theme.of(context);
+
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(label,
-          style: TextStyle(color: Theme.of(context).secondaryHeaderColor)),
-      Text("${value ?? "unknown"}")
+      Flexible(
+        fit: FlexFit.tight,
+        flex: 8,
+        child: Text(label,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: TextStyle(color: td.hintColor)),
+      ),
+      Container(width: 10.0),
+      Flexible(
+          fit: FlexFit.tight,
+          flex: 20,
+          child: Text("${value ?? "unknown"}",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: td.indicatorColor)))
     ],
   );
 }
