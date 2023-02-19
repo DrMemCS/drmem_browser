@@ -1,6 +1,13 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:nsd/nsd.dart';
+
+String? propToString(Service info, String key) {
+  final Uint8List? tmp = info.txt?[key];
+
+  return tmp != null ? Utf8Decoder(allowMalformed: true).convert(tmp) : null;
+}
 
 // A DnsChooser starts an mDNS client session which listens for DrMem
 // announcements. As reports come in, a ListView is updated.
@@ -48,9 +55,7 @@ class _ChooserState extends State<DnsChooser> {
     // to convert it to a UTF-8 string. Invlid Unicode characters are replaced
     // with an error character.
 
-    final String? location = info.txt?["location"] != null
-        ? Utf8Decoder(allowMalformed: true).convert(info.txt!["location"]!)
-        : null;
+    final String? location = propToString(info, "location");
 
     // Return a GestureDetector -> Card -> ListTile.
 
@@ -59,7 +64,7 @@ class _ChooserState extends State<DnsChooser> {
       child: Card(
         elevation: 2.0,
         child: ListTile(
-            leading: const Icon(Icons.computer_outlined),
+            leading: const Icon(Icons.developer_board),
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null ? Text(location) : null,

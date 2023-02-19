@@ -57,14 +57,14 @@ class _BaseState extends State<BaseWidget> {
 
   // Displays the list of nodes or the "details" subpage.
 
-  Widget _displayNodes() {
+  Widget _displayNodes(BuildContext context) {
     return nodeInfo == null
         ? DnsChooser((s) {
             setState(() {
               nodeInfo = s;
             });
           })
-        : displayNode(nodeInfo!);
+        : displayNode(context, nodeInfo!);
   }
 
   // Display "parameter page".
@@ -82,17 +82,19 @@ class _BaseState extends State<BaseWidget> {
   // This method determine which widget should be the main body of the display
   // based on the value of the navbar.
 
-  Widget _buildBody() {
-    return Center(
-        child: _selectIndex == 0
-            ? _displayNodes()
-            : (_selectIndex == 1 ? _displayParameters() : _displayLogic()));
+  Widget _buildBody(BuildContext context) {
+    return SafeArea(
+      child: Center(
+          child: _selectIndex == 0
+              ? _displayNodes(context)
+              : (_selectIndex == 1 ? _displayParameters() : _displayLogic())),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(),
+      body: _buildBody(context),
       bottomNavigationBar: _buildNavBar(),
     );
   }
