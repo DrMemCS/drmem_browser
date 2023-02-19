@@ -32,7 +32,7 @@ Widget buildProperty(BuildContext context, String label, String? value) {
       Flexible(
           fit: FlexFit.tight,
           flex: 20,
-          child: Text("${value ?? "unknown"}",
+          child: Text(value ?? "unknown",
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.indicatorColor)))
     ],

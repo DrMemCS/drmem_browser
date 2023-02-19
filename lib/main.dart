@@ -4,10 +4,12 @@ import 'mDnsChooser.dart';
 import 'node_details.dart';
 
 void main() {
-  runApp(DrMemApp());
+  runApp(const DrMemApp());
 }
 
 class DrMemApp extends StatelessWidget {
+  const DrMemApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     Color primeColor = Colors.teal;
@@ -18,15 +20,15 @@ class DrMemApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: primeColor)),
       darkTheme: ThemeData.dark()
-          .copyWith(useMaterial3: true, colorScheme: ColorScheme.dark()),
+          .copyWith(useMaterial3: true, colorScheme: const ColorScheme.dark()),
       themeMode: ThemeMode.system,
-      home: BaseWidget(),
+      home: const BaseWidget(),
     );
   }
 }
 
 class BaseWidget extends StatefulWidget {
-  BaseWidget({Key? key}) : super(key: key);
+  const BaseWidget({Key? key}) : super(key: key);
 
   @override
   _BaseState createState() => _BaseState();
@@ -47,7 +49,7 @@ class _BaseState extends State<BaseWidget> {
             nodeInfo = null;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
               icon: Icon(Icons.web_stories), label: "Sheets"),
@@ -70,13 +72,13 @@ class _BaseState extends State<BaseWidget> {
   // Display "parameter page".
 
   Widget _displayParameters() {
-    return Text("TODO: Acquire data from DrMem.");
+    return const Text("TODO: Acquire data from DrMem.");
   }
 
   // This page will be used to edit the Logic in a DrMem instance.
 
   Widget _displayLogic() {
-    return Text("TODO: Edit logic.");
+    return const Text("TODO: Edit logic.");
   }
 
   // This method determine which widget should be the main body of the display

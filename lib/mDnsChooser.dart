@@ -6,7 +6,9 @@ import 'package:nsd/nsd.dart';
 String? propToString(Service info, String key) {
   final Uint8List? tmp = info.txt?[key];
 
-  return tmp != null ? Utf8Decoder(allowMalformed: true).convert(tmp) : null;
+  return tmp != null
+      ? const Utf8Decoder(allowMalformed: true).convert(tmp)
+      : null;
 }
 
 // A DnsChooser starts an mDNS client session which listens for DrMem
@@ -15,7 +17,7 @@ String? propToString(Service info, String key) {
 class DnsChooser extends StatefulWidget {
   final void Function(Service) updState;
 
-  DnsChooser(this.updState, {Key? key}) : super(key: key);
+  const DnsChooser(this.updState, {Key? key}) : super(key: key);
 
   @override
   _ChooserState createState() => _ChooserState();
@@ -68,7 +70,7 @@ class _ChooserState extends State<DnsChooser> {
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null ? Text(location) : null,
-            trailing: Text("${host}:${info.port}")),
+            trailing: Text("$host:${info.port}")),
       ),
     );
   }
@@ -91,13 +93,14 @@ class _ChooserState extends State<DnsChooser> {
       // anymore.
 
       return FutureBuilder(
-          future: fut, builder: (_ctxt, _snap) => CircularProgressIndicator());
+          future: fut,
+          builder: (ctxt, snap) => const CircularProgressIndicator());
     } else {
       // If the list of nodes is empty, return a progress indicator. Otherwise,
       // display a ListView containing the contents of the list.
 
       return _nodes.isEmpty
-          ? CircularProgressIndicator()
+          ? const CircularProgressIndicator()
           : Padding(
               padding: const EdgeInsets.all(4.0),
               child: ListView.builder(
