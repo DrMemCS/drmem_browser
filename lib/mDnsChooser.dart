@@ -31,13 +31,13 @@ class _ChooserState extends State<DnsChooser> {
 
   void serviceUpdate(Service service, ServiceStatus status) {
     if (status == ServiceStatus.found) {
-      setState(() {
-        print(service);
-        _nodes.add(service);
-        _nodes.sort(
-          (a, b) => a.name!.compareTo(b.name!),
-        );
-      });
+      var tmp =
+          _nodes.where((element) => element.name != service.name).toList();
+
+      tmp.add(service);
+      tmp.sort((a, b) => a.name!.compareTo(b.name!));
+
+      setState(() => _nodes = tmp);
     } else {
       setState(() {
         _nodes =
