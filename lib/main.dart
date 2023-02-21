@@ -38,17 +38,19 @@ class _BaseState extends State<BaseWidget> {
   Service? nodeInfo;
   int _selectIndex = 0;
 
+  void changePage(value) {
+    setState(() {
+      _selectIndex = value;
+      nodeInfo = null;
+    });
+  }
+
   // Creates the navigation bar.
 
   BottomNavigationBar _buildNavBar() {
     return BottomNavigationBar(
         currentIndex: _selectIndex,
-        onTap: (value) {
-          setState(() {
-            _selectIndex = value;
-            nodeInfo = null;
-          });
-        },
+        onTap: changePage,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
