@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:nsd/nsd.dart';
+import 'package:nsd/nsd.dart'
+    show Discovery, Service, ServiceStatus, startDiscovery;
 
 String? propToString(Service info, String key) {
   final Uint8List? tmp = info.txt?[key];

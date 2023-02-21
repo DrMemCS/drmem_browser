@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nsd/nsd.dart';
-import 'mDnsChooser.dart' show propToString;
+import 'mdns_chooser.dart';
 
 Widget header(BuildContext context, String label) {
   return Padding(

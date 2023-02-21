@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nsd/nsd.dart';
-import 'mDnsChooser.dart';
+import 'mdns_chooser.dart';
 import 'node_details.dart';
 
 void main() {
