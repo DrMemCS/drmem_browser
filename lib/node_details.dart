@@ -17,17 +17,18 @@ class _NodeInfo extends StatefulWidget {
 // we need to make two GraphQL requests to the node.
 
 class _State extends State<_NodeInfo> {
+  final EdgeInsets headerInsets = const EdgeInsets.only(top: 20.0, bottom: 8.0);
+  final EdgeInsets all8 = const EdgeInsets.all(8.0);
+
   Widget header(BuildContext context, String label) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20.0, bottom: 8.0),
+      padding: headerInsets,
       child: Text(label, style: Theme.of(context).textTheme.titleMedium),
     );
   }
 
   Widget infoSection(BuildContext context, String label, Widget? child) {
-    return Column(
-      children: [header(context, label)],
-    );
+    return Column(children: [header(context, label)]);
   }
 
   Widget buildProperty(BuildContext context, String label, String? value) {
@@ -57,7 +58,7 @@ class _State extends State<_NodeInfo> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: all8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -73,7 +74,7 @@ class _State extends State<_NodeInfo> {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: all8,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
