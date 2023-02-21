@@ -68,7 +68,7 @@ class BaseState extends State<BaseWidget> {
               nodeInfo = s;
             });
           })
-        : displayNode(context, nodeInfo!);
+        : displayNode(nodeInfo!);
   }
 
   // Display "parameter page".
