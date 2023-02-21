@@ -31,10 +31,10 @@ class BaseWidget extends StatefulWidget {
   const BaseWidget({Key? key}) : super(key: key);
 
   @override
-  _BaseState createState() => _BaseState();
+  BaseState createState() => BaseState();
 }
 
-class _BaseState extends State<BaseWidget> {
+class BaseState extends State<BaseWidget> {
   Service? nodeInfo;
   int _selectIndex = 0;
 

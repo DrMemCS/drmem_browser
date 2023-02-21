@@ -20,12 +20,12 @@ class DnsChooser extends StatefulWidget {
   const DnsChooser(this.updState, {Key? key}) : super(key: key);
 
   @override
-  _ChooserState createState() => _ChooserState();
+  ChooserState createState() => ChooserState();
 }
 
 // This class holds the state for the DnsChooser.
 
-class _ChooserState extends State<DnsChooser> {
+class ChooserState extends State<DnsChooser> {
   List<Service> _nodes = [];
   Discovery? discovery;
 
