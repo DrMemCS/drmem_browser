@@ -29,21 +29,19 @@ class _ChooserState extends State<DnsChooser> {
   List<Service> _nodes = [];
   Discovery? discovery;
 
-  void serviceUpdate(Service service, ServiceStatus status) {
-    if (status == ServiceStatus.found) {
-      var tmp =
-          _nodes.where((element) => element.name != service.name).toList();
+  // Updates the list of nodes based on the new ServiceStatus. The Service is
+  // initially removed from the list because we occasioanlly get two "found"
+  // reports and the entry would be added twice.
 
+  void serviceUpdate(Service service, ServiceStatus status) {
+    List<Service> tmp =
+        _nodes.where((element) => element.name != service.name).toList();
+
+    if (status == ServiceStatus.found) {
       tmp.add(service);
       tmp.sort((a, b) => a.name!.compareTo(b.name!));
-
-      setState(() => _nodes = tmp);
-    } else {
-      setState(() {
-        _nodes =
-            _nodes.where((element) => element.name != service.name).toList();
-      });
     }
+    setState(() => _nodes = tmp);
   }
 
   // Creates a "tile" that gets displayed in the ListView.
