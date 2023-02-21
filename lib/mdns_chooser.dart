@@ -35,6 +35,20 @@ class ChooserState extends State<DnsChooser> {
   // reports and the entry would be added twice.
 
   void serviceUpdate(Service service, ServiceStatus status) {
+    // If the host name ends with a period (like on MacOS), remove it. Since
+    // `Service` is immutable, we have to make a new instance and copy all
+    // the fields.
+
+    if (service.host!.endsWith(".")) {
+      service = Service(
+          name: service.name,
+          type: service.type,
+          host: service.host!.substring(0, service.host!.length - 1),
+          txt: service.txt,
+          addresses: service.addresses,
+          port: service.port);
+    }
+
     List<Service> tmp =
         _nodes.where((element) => element.name != service.name).toList();
 
