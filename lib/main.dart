@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
+import 'param.dart';
 
 void main() {
   runApp(const DrMemApp());
@@ -71,12 +72,6 @@ class BaseState extends State<BaseWidget> {
         : displayNode(nodeInfo!);
   }
 
-  // Display "parameter page".
-
-  Widget _displayParameters() {
-    return const Text("TODO: Acquire data from DrMem.");
-  }
-
   // This page will be used to edit the Logic in a DrMem instance.
 
   Widget _displayLogic() {
@@ -91,7 +86,7 @@ class BaseState extends State<BaseWidget> {
       child: Center(
           child: _selectIndex == 0
               ? _displayNodes(context)
-              : (_selectIndex == 1 ? _displayParameters() : _displayLogic())),
+              : (_selectIndex == 1 ? displayParameters() : _displayLogic())),
     );
   }
 
