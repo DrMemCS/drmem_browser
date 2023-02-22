@@ -160,6 +160,53 @@ class _State extends State<_NodeInfo> {
   }
 }
 
+// Builds a row of driver information, including the Help button which brings
+// up a window containing the description text for the driver.
+
+Padding buildDrvInfoRow(GAllDriversData_driverInfo info, BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8.0),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Flexible(
+          flex: 8,
+          fit: FlexFit.tight,
+          child: Text(info.name, textAlign: TextAlign.end)),
+      Container(width: 10.0),
+      Flexible(
+          flex: 16,
+          fit: FlexFit.tight,
+          child: Text(info.summary,
+              style: TextStyle(color: Theme.of(context).hintColor))),
+      Container(width: 10.0),
+      IconButton(
+          onPressed: () async {
+            return showDialog(
+              context: context,
+              builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                      color: Theme.of(context).cardColor,
+                      child: Column(
+                        children: [
+                          Expanded(child: Markdown(data: info.description)),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text("Close")),
+                          )
+                        ],
+                      )),
+                );
+              },
+            );
+          },
+          icon: const Icon(Icons.help))
+    ]),
+  );
+}
+
 // Local widget which displays a list of drivers.
 
 class _DriversListView extends StatelessWidget {
@@ -172,50 +219,9 @@ class _DriversListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        clipBehavior: Clip.hardEdge,
-        shrinkWrap: true,
-        itemCount: drivers.length,
-        itemBuilder: (context, index) {
-          return Card(
-            color: Theme.of(context).cardColor,
-            margin: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 8.0),
-            child: ListTile(
-                title: Text(drivers[index].name),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: Text(drivers[index].summary),
-                ),
-                trailing: IconButton(
-                    onPressed: () async {
-                      return showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Card(
-                                color: Theme.of(context).cardColor,
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                        child: Markdown(
-                                            data: drivers[index].description)),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
-                                          child: const Text("Close")),
-                                    )
-                                  ],
-                                )),
-                          );
-                        },
-                      );
-                    },
-                    icon: const Icon(Icons.help))),
-          );
-        });
+    List<Widget> d = drivers.map((e) => buildDrvInfoRow(e, context)).toList();
+
+    return Column(children: d);
   }
 }
 
