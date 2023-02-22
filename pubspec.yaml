@@ -16,8 +16,10 @@ dependencies:
 
   ferry: ^0.14.0+1
   gql_http_link: ^0.4.5
+  ferry_flutter: ^0.8.0+1
 
   cupertino_icons: ^1.0.2
+  flutter_markdown: ^0.6.14
 
 dev_dependencies:
   flutter_lints: ^2.0.1
