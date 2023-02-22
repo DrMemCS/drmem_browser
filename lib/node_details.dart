@@ -59,9 +59,19 @@ class _State extends State<_NodeInfo> {
   // Returns a widget that serves as a section header.
 
   Widget header(BuildContext context, String label) {
+    final ThemeData td = Theme.of(context);
+
     return Padding(
-      padding: headerInsets,
-      child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+      padding:
+          const EdgeInsets.only(top: 16.0, bottom: 4.0, left: 4.0, right: 8.0),
+      child: Container(
+        width: double.infinity,
+        color: td.dialogBackgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Text(label, style: td.textTheme.titleMedium),
+        ),
+      ),
     );
   }
 
