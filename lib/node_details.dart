@@ -62,17 +62,18 @@ class _State extends State<_NodeInfo> {
     final ThemeData td = Theme.of(context);
 
     return Padding(
-      padding:
-          const EdgeInsets.only(top: 16.0, bottom: 4.0, left: 4.0, right: 8.0),
-      child: Container(
-        width: double.infinity,
-        color: td.dialogBackgroundColor,
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Text(label, style: td.textTheme.titleMedium),
-        ),
-      ),
-    );
+        padding: const EdgeInsets.only(
+            top: 16.0, bottom: 4.0, left: 4.0, right: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
+              child: Text(label, style: td.textTheme.titleMedium),
+            )
+          ],
+        ));
   }
 
   // Returns a widget that renders property information. This consists of a
