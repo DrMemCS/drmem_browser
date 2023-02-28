@@ -1,4 +1,6 @@
+import 'package:drmem_browser/model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
@@ -23,7 +25,10 @@ class DrMemApp extends StatelessWidget {
       darkTheme: ThemeData.dark()
           .copyWith(useMaterial3: true, colorScheme: const ColorScheme.dark()),
       themeMode: ThemeMode.system,
-      home: const BaseWidget(),
+      home: BlocProvider(
+        create: (_) => PageModel(),
+        child: const BaseWidget(),
+      ),
     );
   }
 }
