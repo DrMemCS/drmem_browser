@@ -51,7 +51,7 @@ class BaseState extends State<BaseWidget> {
     });
   }
 
-  // Creates the navigation bar.
+  // Creates the navigation bar. Right now it creates three icons to click on.
 
   BottomNavigationBar _buildNavBar() {
     return BottomNavigationBar(
@@ -79,16 +79,18 @@ class BaseState extends State<BaseWidget> {
     return const Text("TODO: Edit logic.");
   }
 
-  // This method determine which widget should be the main body of the display
-  // based on the value of the navbar.
+  Widget _display(BuildContext context) {
+    switch (_selectIndex) {
+      case 1:
+        return displayParameters();
 
-  Widget _buildBody(BuildContext context) {
-    return SafeArea(
-      child: Center(
-          child: _selectIndex == 0
-              ? _displayNodes(context)
-              : (_selectIndex == 1 ? displayParameters() : _displayLogic())),
-    );
+      case 2:
+        return _displayLogic();
+
+      case 0:
+      default:
+        return _displayNodes(context);
+    }
   }
 
   @override
