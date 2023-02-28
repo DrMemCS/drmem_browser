@@ -64,11 +64,7 @@ class BaseState extends State<BaseWidget> {
 
   Widget _displayNodes(BuildContext context) {
     return nodeInfo == null
-        ? DnsChooser((s) {
-            setState(() {
-              nodeInfo = s;
-            });
-          })
+        ? DnsChooser((s) => setState(() => nodeInfo = s))
         : displayNode(nodeInfo!);
   }
 
@@ -93,8 +89,7 @@ class BaseState extends State<BaseWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildBody(context),
-      bottomNavigationBar: _buildNavBar(),
-    );
+        body: SafeArea(child: Center(child: _display(context))),
+        bottomNavigationBar: _buildNavBar());
   }
 }
