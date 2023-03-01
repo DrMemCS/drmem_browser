@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gql_http_link/gql_http_link.dart';
-import 'schema/__generated__/device_info.data.gql.dart';
-import 'schema/__generated__/device_info.req.gql.dart';
+import 'schema/__generated__/driver_info.data.gql.dart';
+import 'schema/__generated__/driver_info.req.gql.dart';
 import 'package:ferry/ferry.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
