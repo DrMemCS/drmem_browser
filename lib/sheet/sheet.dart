@@ -82,12 +82,25 @@ class DeviceRow extends BaseRow {
 
   @override
   Widget buildRowEditor(BuildContext context, int index) {
-    return Text("edit: $name");
+    return _DeviceEditor(index, name);
   }
 
   @override
   Widget buildRowRunner(BuildContext context) {
-    return Text("monitor: $name");
+    return Expanded(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            name,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Theme.of(context).indicatorColor),
+          ),
+          const Text("1.25 gpm")
+        ],
+      ),
+    );
   }
 }
 
@@ -108,6 +121,23 @@ class PlotRow extends BaseRow {
   Widget buildRowRunner(BuildContext context) {
     return const Text("display plot");
   }
+}
+
+InputDecoration getTextFieldDecoration(BuildContext context, String label) {
+  final ThemeData td = Theme.of(context);
+
+  return InputDecoration(
+      alignLabelWithHint: true,
+      contentPadding: const EdgeInsets.all(12.0),
+      hintStyle: td.textTheme.bodyMedium!
+          .copyWith(color: td.colorScheme.onBackground.withOpacity(0.25)),
+      isDense: true,
+      hoverColor: td.colorScheme.secondary.withOpacity(0.25),
+      focusColor: td.colorScheme.primary.withOpacity(0.25),
+      fillColor: td.colorScheme.secondary.withOpacity(0.125),
+      filled: true,
+      hintText: label,
+      border: InputBorder.none);
 }
 
 class _CommentEditor extends StatefulWidget {
@@ -147,10 +177,8 @@ class _CommentEditorState extends State<_CommentEditor> {
             child: TextField(
                 minLines: 1,
                 maxLines: null,
-                decoration: const InputDecoration(
-                    labelText: "Comment (in Markdown)",
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(style: BorderStyle.solid))),
+                decoration:
+                    getTextFieldDecoration(context, "Comment (using Markdown)"),
                 keyboardType: TextInputType.multiline,
                 controller: controller,
                 onChanged: (value) => setState(() => changed = true)),
@@ -164,6 +192,54 @@ class _CommentEditorState extends State<_CommentEditor> {
                     }
                   : null,
               child: const Text("Save"))
+        ],
+      ),
+    );
+  }
+}
+
+class _DeviceEditor extends StatefulWidget {
+  final int idx;
+  final String device;
+
+  const _DeviceEditor(this.idx, this.device, {Key? key}) : super(key: key);
+
+  @override
+  _DeviceEditorState createState() => _DeviceEditorState();
+}
+
+class _DeviceEditorState extends State<_DeviceEditor> {
+  late final TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: widget.device);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        children: [
+          Flexible(
+            fit: FlexFit.loose,
+            child: TextField(
+                minLines: 1,
+                maxLines: 1,
+                decoration: getTextFieldDecoration(context, "Device name"),
+                controller: controller,
+                onChanged: (value) {
+                  context.read<PageModel>().add(
+                      UpdateRow(widget.idx, DeviceRow(controller.text, false)));
+                }),
+          ),
         ],
       ),
     );
