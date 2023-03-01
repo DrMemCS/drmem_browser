@@ -1,0 +1,6 @@
+query GetDevice($name: String!) {
+  deviceInfo(pattern: $name) {
+    settable
+    units
+  }
+}
