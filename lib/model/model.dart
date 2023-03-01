@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'sheet.dart';
+import 'package:drmem_browser/sheet/sheet.dart';
 import 'page_events.dart';
 
 // Defines the page's data model and handles events to modify it.

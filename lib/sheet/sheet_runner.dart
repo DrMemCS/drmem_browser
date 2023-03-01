@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import "model.dart";
+import 'package:drmem_browser/model/model.dart';
 import 'sheet.dart';
 
 // A SheetRunner widget takes the state of a Sheet and renders it. The Sheet's

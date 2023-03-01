@@ -1,8 +1,8 @@
-import 'package:drmem_browser/page_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:drmem_browser/model.dart';
+import 'package:drmem_browser/model/page_events.dart';
+import 'package:drmem_browser/model/model.dart';
 
 // The base class for all row types. A sheet is a list of objects derived
 // from BaseRow.

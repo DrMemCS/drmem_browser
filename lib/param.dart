@@ -1,6 +1,6 @@
-import 'package:drmem_browser/sheet_editor.dart';
-import 'package:drmem_browser/sheet_runner.dart';
 import 'package:flutter/material.dart';
+import 'package:drmem_browser/sheet/sheet_editor.dart';
+import 'package:drmem_browser/sheet/sheet_runner.dart';
 
 // Display "parameter page".
 

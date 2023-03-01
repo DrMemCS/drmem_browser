@@ -1,7 +1,7 @@
-import 'package:drmem_browser/model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nsd/nsd.dart';
+import 'package:drmem_browser/model/model.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
