@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/page_events.dart';
@@ -175,6 +176,7 @@ class _CommentEditorState extends State<_CommentEditor> {
           Flexible(
             fit: FlexFit.loose,
             child: TextField(
+                autocorrect: true,
                 minLines: 1,
                 maxLines: null,
                 decoration:
@@ -210,6 +212,7 @@ class _DeviceEditor extends StatefulWidget {
 
 class _DeviceEditorState extends State<_DeviceEditor> {
   late final TextEditingController controller;
+  final RegExp re = RegExp(r'^[-:\w\d]*$');
 
   @override
   void initState() {
@@ -231,14 +234,18 @@ class _DeviceEditorState extends State<_DeviceEditor> {
           Flexible(
             fit: FlexFit.loose,
             child: TextField(
+                autocorrect: false,
+                inputFormatters: [
+                  TextInputFormatter.withFunction((oldValue, newValue) =>
+                      re.hasMatch(newValue.text) ? newValue : oldValue)
+                ],
                 minLines: 1,
                 maxLines: 1,
                 decoration: getTextFieldDecoration(context, "Device name"),
                 controller: controller,
-                onChanged: (value) {
-                  context.read<PageModel>().add(
-                      UpdateRow(widget.idx, DeviceRow(controller.text, false)));
-                }),
+                onChanged: (value) => context.read<PageModel>().add(
+                      UpdateRow(widget.idx, DeviceRow(controller.text, false)),
+                    )),
           ),
         ],
       ),
