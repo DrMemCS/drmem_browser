@@ -54,7 +54,15 @@ class CommentRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context) {
-    return Expanded(child: MarkdownBody(data: comment, fitContent: true));
+    return Expanded(
+      child: MarkdownBody(
+        data: comment,
+        fitContent: true,
+        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+        styleSheet: MarkdownStyleSheet(
+            p: TextStyle(color: Theme.of(context).disabledColor)),
+      ),
+    );
   }
 }
 
