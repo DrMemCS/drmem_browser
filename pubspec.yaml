@@ -12,14 +12,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  nsd: ">=2.3.0"
-
-  ferry: ^0.14.0+1
-  gql_http_link: ^0.4.5
-  ferry_flutter: ^0.8.0+1
-
   cupertino_icons: ^1.0.2
   flutter_markdown: ^0.6.14
+
+  nsd: ">=2.3.0"
+
+  gql_http_link: ^0.4.5
+  gql_websocket_link: ^0.3.4+1
+  ferry: ^0.14.0+1
+  ferry_flutter: ^0.8.0+1
+
   bloc: ^8.1.1
   flutter_bloc: ^8.1.2
 

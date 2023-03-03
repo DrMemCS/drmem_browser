@@ -312,6 +312,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.5.1"
+  gql_websocket_link:
+    dependency: "direct main"
+    description:
+      name: gql_websocket_link
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.4+1"
   graphs:
     dependency: transitive
     description:

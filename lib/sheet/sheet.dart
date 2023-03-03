@@ -1,6 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:ferry/ferry.dart';
+import "package:gql_websocket_link/gql_websocket_link.dart";
+import 'package:drmem_browser/schema/__generated__/get_device.req.gql.dart';
+import 'package:drmem_browser/schema/__generated__/get_device.data.gql.dart';
+import 'package:drmem_browser/schema/__generated__/get_device.var.gql.dart';
+import 'package:drmem_browser/schema/__generated__/monitor_device.req.gql.dart';
+import 'package:drmem_browser/schema/__generated__/monitor_device.data.gql.dart';
+import 'package:drmem_browser/schema/__generated__/monitor_device.var.gql.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/page_events.dart';
 import 'package:drmem_browser/model/model.dart';
@@ -12,7 +21,7 @@ abstract class BaseRow {
   const BaseRow();
 
   Widget buildRowEditor(BuildContext context, int index);
-  Widget buildRowRunner(BuildContext context);
+  Widget buildRowRunner(BuildContext context, Client client);
   Icon getIcon();
 }
 
@@ -33,7 +42,7 @@ class EmptyRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context) {
+  Widget buildRowRunner(BuildContext context, Client client) {
     return const Expanded(child: Divider());
   }
 }
@@ -54,7 +63,7 @@ class CommentRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context) {
+  Widget buildRowRunner(BuildContext context, Client client) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(6.0),
@@ -87,21 +96,8 @@ class DeviceRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context) {
-    return Expanded(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            name,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).indicatorColor),
-          ),
-          const Text("1.25 gpm")
-        ],
-      ),
-    );
+  Widget buildRowRunner(BuildContext context, Client client) {
+    return _DeviceWidget(client, name);
   }
 }
 
@@ -119,12 +115,12 @@ class PlotRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context) {
+  Widget buildRowRunner(BuildContext context, Client client) {
     return const Text("display plot");
   }
 }
 
-InputDecoration getTextFieldDecoration(BuildContext context, String label) {
+InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
   final ThemeData td = Theme.of(context);
 
   return InputDecoration(
@@ -179,8 +175,8 @@ class _CommentEditorState extends State<_CommentEditor> {
                 autocorrect: true,
                 minLines: 1,
                 maxLines: null,
-                decoration:
-                    getTextFieldDecoration(context, "Comment (using Markdown)"),
+                decoration: _getTextFieldDecoration(
+                    context, "Comment (using Markdown)"),
                 keyboardType: TextInputType.multiline,
                 controller: controller,
                 onChanged: (value) => setState(() => changed = true)),
@@ -194,6 +190,98 @@ class _CommentEditorState extends State<_CommentEditor> {
                     }
                   : null,
               child: const Text("Save"))
+        ],
+      ),
+    );
+  }
+}
+
+class _DeviceWidget extends StatefulWidget {
+  final Client client;
+  final String name;
+
+  const _DeviceWidget(this.client, this.name, {Key? key}) : super(key: key);
+
+  @override
+  _DeviceWidgetState createState() => _DeviceWidgetState();
+}
+
+class _DeviceWidgetState extends State<_DeviceWidget> {
+  StreamSubscription? subMeta;
+  StreamSubscription? subReadings;
+
+  final subClient = Client(
+      link: WebSocketLink(Uri(
+              scheme: "ws",
+              host: "192.168.1.103",
+              port: 3000,
+              path: "/subscribe")
+          .toString()),
+      cache: Cache());
+
+  String? units;
+  double? value;
+
+  void _handleDeviceInfo(
+      OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
+    if (!response.loading) {
+      setState(() => units = response.data?.deviceInfo.first.units);
+    }
+  }
+
+  void _handleReadings(
+      OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
+    if (!response.loading) {
+      if (response.hasErrors) {
+        print("error: $response");
+      } else {
+        setState(() {
+          value = response.data?.monitorDevice.floatValue;
+        });
+      }
+    }
+  }
+  // Set up the GraphQL requests to populate the fields in the Device Row.
+
+  @override
+  void initState() {
+    // Start a GraphQL query to receive information about the device.
+
+    subMeta = widget.client
+        .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
+        .listen(_handleDeviceInfo);
+
+    // This sets up the subscription which receives device updates.
+
+    subReadings = subClient
+        .request(GMonitorDeviceReq((b) => b..vars.device = widget.name))
+        .listen(_handleReadings);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    subMeta?.cancel();
+    subReadings?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              widget.name,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Theme.of(context).indicatorColor),
+            ),
+          ),
+          Text("$value $units")
         ],
       ),
     );
@@ -241,7 +329,7 @@ class _DeviceEditorState extends State<_DeviceEditor> {
                 ],
                 minLines: 1,
                 maxLines: 1,
-                decoration: getTextFieldDecoration(context, "Device name"),
+                decoration: _getTextFieldDecoration(context, "Device name"),
                 controller: controller,
                 onChanged: (value) => context.read<PageModel>().add(
                       UpdateRow(widget.idx, DeviceRow(controller.text, false)),
