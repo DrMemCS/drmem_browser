@@ -213,7 +213,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 
   String? errorText;
   String? units;
-  double? value;
+  GMonitorDeviceData_monitorDevice? value;
 
   void _handleDeviceInfo(
       OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
@@ -237,6 +237,44 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
     }
   }
 
+  Widget _displayReading(BuildContext context) {
+    if (value == null) {
+      return Container();
+    } else {
+      if (value!.boolValue != null) {
+        return Checkbox(
+            visualDensity: VisualDensity.compact,
+            value: value!.boolValue,
+            onChanged: null);
+      }
+
+      if (value!.intValue != null) {
+        return Text("${value!.intValue} ${units ?? '?'}");
+      }
+
+      if (value!.floatValue != null) {
+        return Text("${value!.floatValue} ${units ?? '?'}");
+      }
+
+      if (value!.stringValue != null) {
+        return Text("${value!.stringValue}");
+      }
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Icon(Icons.error,
+                size: 16.0, color: Theme.of(context).errorColor),
+          ),
+          Text("unknown type",
+              style: TextStyle(color: Theme.of(context).errorColor)),
+        ],
+      );
+    }
+  }
+
   void _handleReadings(
       OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
     if (!response.loading) {
@@ -244,7 +282,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         print("error: $response");
       } else {
         setState(() {
-          value = response.data?.monitorDevice.floatValue;
+          value = response.data?.monitorDevice;
         });
       }
     }
@@ -284,7 +322,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
             ),
           ),
           errorText == null
-              ? Text("$value $units")
+              ? _displayReading(context)
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
