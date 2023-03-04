@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:ferry/ferry.dart';
-import "package:gql_websocket_link/gql_websocket_link.dart";
 import 'package:drmem_browser/schema/__generated__/get_device.req.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.data.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.var.gql.dart';
@@ -21,7 +20,7 @@ abstract class BaseRow {
   const BaseRow();
 
   Widget buildRowEditor(BuildContext context, int index);
-  Widget buildRowRunner(BuildContext context, Client client);
+  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient);
   Icon getIcon();
 }
 
@@ -42,7 +41,7 @@ class EmptyRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client client) {
+  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return const Expanded(child: Divider());
   }
 }
@@ -63,7 +62,7 @@ class CommentRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client client) {
+  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(6.0),
@@ -96,8 +95,8 @@ class DeviceRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client client) {
-    return _DeviceWidget(client, name);
+  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+    return _DeviceWidget(qClient, sClient, name);
   }
 }
 
@@ -115,7 +114,7 @@ class PlotRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client client) {
+  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return const Text("display plot");
   }
 }
@@ -197,10 +196,12 @@ class _CommentEditorState extends State<_CommentEditor> {
 }
 
 class _DeviceWidget extends StatefulWidget {
-  final Client client;
+  final Client qClient;
+  final Client sClient;
   final String name;
 
-  const _DeviceWidget(this.client, this.name, {Key? key}) : super(key: key);
+  const _DeviceWidget(this.qClient, this.sClient, this.name, {Key? key})
+      : super(key: key);
 
   @override
   _DeviceWidgetState createState() => _DeviceWidgetState();
@@ -210,22 +211,29 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
   StreamSubscription? subMeta;
   StreamSubscription? subReadings;
 
-  final subClient = Client(
-      link: WebSocketLink(Uri(
-              scheme: "ws",
-              host: "192.168.1.103",
-              port: 3000,
-              path: "/subscribe")
-          .toString()),
-      cache: Cache());
-
+  String? errorText;
   String? units;
   double? value;
 
   void _handleDeviceInfo(
       OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
     if (!response.loading) {
-      setState(() => units = response.data?.deviceInfo.first.units);
+      if (response.hasErrors) {
+        print("error: $response");
+      } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
+        setState(() {
+          errorText = null;
+          units = response.data?.deviceInfo.first.units;
+        });
+
+        // This sets up the subscription which receives device updates.
+
+        subReadings = widget.sClient
+            .request(GMonitorDeviceReq((b) => b..vars.device = widget.name))
+            .listen(_handleReadings);
+      } else {
+        setState(() => errorText = "Device not found.");
+      }
     }
   }
 
@@ -247,15 +255,9 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
   void initState() {
     // Start a GraphQL query to receive information about the device.
 
-    subMeta = widget.client
+    subMeta = widget.qClient
         .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
         .listen(_handleDeviceInfo);
-
-    // This sets up the subscription which receives device updates.
-
-    subReadings = subClient
-        .request(GMonitorDeviceReq((b) => b..vars.device = widget.name))
-        .listen(_handleReadings);
 
     super.initState();
   }
@@ -281,7 +283,20 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
               style: TextStyle(color: Theme.of(context).indicatorColor),
             ),
           ),
-          Text("$value $units")
+          errorText == null
+              ? Text("$value $units")
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(Icons.error,
+                          size: 16.0, color: Theme.of(context).errorColor),
+                    ),
+                    Text(errorText!,
+                        style: TextStyle(color: Theme.of(context).errorColor)),
+                  ],
+                )
         ],
       ),
     );
