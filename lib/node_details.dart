@@ -135,10 +135,12 @@ class _State extends State<_NodeInfo> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildProperty(context, "location",
-                      propToString(widget.node, "location")),
+                  buildProperty(
+                      context, "version", propToString(widget.node, "version")),
                   buildProperty(context, "address",
                       "${widget.node.host}:${widget.node.port}"),
+                  buildProperty(context, "location",
+                      propToString(widget.node, "location")),
                   header(context, "GraphQL Endpoints"),
                   buildProperty(
                       context, "queries", propToString(widget.node, "queries")),
