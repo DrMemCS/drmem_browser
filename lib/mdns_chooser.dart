@@ -35,6 +35,22 @@ class ChooserState extends State<DnsChooser> {
   // reports and the entry would be added twice.
 
   void serviceUpdate(Service service, ServiceStatus status) {
+    // If the node was configured with a preferred address, replace the host
+    // and port fields with the configured one.
+
+    final List<String>? preferred =
+        propToString(service, "pref-addr")?.split(":");
+
+    if (preferred != null && preferred.length == 2) {
+      service = Service(
+          name: service.name,
+          type: service.type,
+          host: preferred[0],
+          txt: service.txt,
+          addresses: service.addresses,
+          port: int.tryParse(preferred[1]) ?? service.port);
+    } else
+
     // If the host name ends with a period (like on MacOS), remove it. Since
     // `Service` is immutable, we have to make a new instance and copy all
     // the fields.
