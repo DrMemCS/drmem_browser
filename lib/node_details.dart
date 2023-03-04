@@ -122,6 +122,10 @@ class _State extends State<_NodeInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final Service info = widget.node;
+    final DateTime? bootTime =
+        DateTime.tryParse(propToString(info, "boot-time") ?? "");
+
     return Padding(
       padding: all8,
       child: Column(
@@ -136,18 +140,20 @@ class _State extends State<_NodeInfo> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildProperty(
-                      context, "version", propToString(widget.node, "version")),
-                  buildProperty(context, "address",
-                      "${widget.node.host}:${widget.node.port}"),
-                  buildProperty(context, "location",
-                      propToString(widget.node, "location")),
+                      context, "version", propToString(info, "version")),
+                  buildProperty(
+                      context, "address", "${info.host}:${info.port}"),
+                  buildProperty(
+                      context, "location", propToString(info, "location")),
+                  buildProperty(context, "boot time",
+                      bootTime?.toLocal().toString() ?? "unknown"),
                   header(context, "GraphQL Endpoints"),
                   buildProperty(
-                      context, "queries", propToString(widget.node, "queries")),
-                  buildProperty(context, "mutations",
-                      propToString(widget.node, "mutations")),
+                      context, "queries", propToString(info, "queries")),
+                  buildProperty(
+                      context, "mutations", propToString(info, "mutations")),
                   buildProperty(context, "subscriptions",
-                      propToString(widget.node, "subscriptions")),
+                      propToString(info, "subscriptions")),
                   header(context, "Drivers"),
                   drivers == null
                       ? const Center(child: CircularProgressIndicator())
