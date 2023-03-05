@@ -127,12 +127,12 @@ InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
       contentPadding: const EdgeInsets.all(12.0),
       hintStyle: td.textTheme.bodyMedium!
           .copyWith(color: td.colorScheme.onBackground.withOpacity(0.25)),
+      hintText: label,
       isDense: true,
       hoverColor: td.colorScheme.secondary.withOpacity(0.25),
       focusColor: td.colorScheme.primary.withOpacity(0.25),
       fillColor: td.colorScheme.secondary.withOpacity(0.125),
       filled: true,
-      hintText: label,
       border: InputBorder.none);
 }
 
@@ -309,7 +309,8 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Container(
+      constraints: const BoxConstraints(minHeight: 24.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -376,6 +377,7 @@ class _DeviceEditorState extends State<_DeviceEditor> {
             fit: FlexFit.loose,
             child: TextField(
                 autocorrect: false,
+                style: Theme.of(context).textTheme.bodyMedium,
                 inputFormatters: [
                   TextInputFormatter.withFunction((oldValue, newValue) =>
                       re.hasMatch(newValue.text) ? newValue : oldValue)

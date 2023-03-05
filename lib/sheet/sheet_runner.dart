@@ -95,9 +95,8 @@ class _SheetRunnerState extends State<SheetRunner> {
               state
                   .map((e) => Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Row(children: [
-                          e.buildRowRunner(context, _queryClient, _subClient)
-                        ]),
+                        child:
+                            e.buildRowRunner(context, _queryClient, _subClient),
                       ))
                   .toList());
     });

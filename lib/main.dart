@@ -16,14 +16,19 @@ class DrMemApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color primeColor = Colors.teal;
+    const TextTheme defTextTheme = TextTheme(
+        bodySmall: TextStyle(fontSize: 14.0),
+        bodyMedium: TextStyle(fontSize: 18.0),
+        bodyLarge: TextStyle(fontSize: 22.0));
 
     return MaterialApp(
       title: 'DrMem Browser',
       theme: ThemeData(
           useMaterial3: true,
+          textTheme: defTextTheme,
           colorScheme: ColorScheme.fromSeed(seedColor: primeColor)),
       darkTheme: ThemeData.dark()
-          .copyWith(useMaterial3: true, colorScheme: const ColorScheme.dark()),
+          .copyWith(useMaterial3: true, textTheme: defTextTheme),
       themeMode: ThemeMode.system,
       home: BlocProvider(
         create: (_) => PageModel(),
