@@ -171,6 +171,7 @@ class _CommentEditorState extends State<_CommentEditor> {
           Flexible(
             fit: FlexFit.loose,
             child: TextField(
+                style: Theme.of(context).textTheme.bodyMedium,
                 autocorrect: true,
                 minLines: 1,
                 maxLines: null,

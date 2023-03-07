@@ -17,9 +17,12 @@ class DrMemApp extends StatelessWidget {
   Widget build(BuildContext context) {
     Color primeColor = Colors.teal;
     const TextTheme defTextTheme = TextTheme(
+        titleSmall: TextStyle(fontSize: 16.0),
+        titleMedium: TextStyle(fontSize: 18.0),
+        titleLarge: TextStyle(fontSize: 24.0),
         bodySmall: TextStyle(fontSize: 14.0),
         bodyMedium: TextStyle(fontSize: 18.0),
-        bodyLarge: TextStyle(fontSize: 22.0));
+        bodyLarge: TextStyle(fontSize: 20.0));
 
     return MaterialApp(
       title: 'DrMem Browser',
