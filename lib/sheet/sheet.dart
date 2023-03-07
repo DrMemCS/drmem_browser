@@ -64,6 +64,7 @@ class CommentRow extends BaseRow {
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 32.0),
       child: Padding(
         padding: const EdgeInsets.all(6.0),
         child: MarkdownBody(
