@@ -270,10 +270,10 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Icon(Icons.error,
-                size: 16.0, color: Theme.of(context).errorColor),
+                size: 16.0, color: Theme.of(context).colorScheme.error),
           ),
           Text("unknown type",
-              style: TextStyle(color: Theme.of(context).errorColor)),
+              style: TextStyle(color: Theme.of(context).colorScheme.error)),
         ],
       );
     }
@@ -335,10 +335,12 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Icon(Icons.error,
-                          size: 16.0, color: Theme.of(context).errorColor),
+                          size: 16.0,
+                          color: Theme.of(context).colorScheme.error),
                     ),
                     Text(errorText!,
-                        style: TextStyle(color: Theme.of(context).errorColor)),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error)),
                   ],
                 )
         ],
