@@ -35,8 +35,6 @@ class ChooserState extends State<DnsChooser> {
   // reports and the entry would be added twice.
 
   void serviceUpdate(Service service, ServiceStatus status) {
-    developer.log("received mDNS announcement", name: "mdns.announce");
-
     // If the node was configured with a preferred address, replace the host
     // and port fields with the configured one.
 
@@ -71,8 +69,13 @@ class ChooserState extends State<DnsChooser> {
         _nodes.where((element) => element.name != service.name).toList();
 
     if (status == ServiceStatus.found) {
+      developer.log("host ${service.name}, port ${service.port}",
+          name: "mdns.announce.add");
       tmp.add(service);
       tmp.sort((a, b) => a.name!.compareTo(b.name!));
+    } else {
+      developer.log("host ${service.name}, port ${service.port}",
+          name: "mdns.announce.remove");
     }
     setState(() => _nodes = tmp);
   }
@@ -117,6 +120,7 @@ class ChooserState extends State<DnsChooser> {
 
       final Future<void> fut = (() async {
         discovery = await startDiscovery('_drmem._tcp');
+        developer.log("started", name: "mdns.connection");
         discovery!.addServiceListener(serviceUpdate);
       })();
 
