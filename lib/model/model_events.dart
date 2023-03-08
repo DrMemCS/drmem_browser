@@ -2,11 +2,11 @@ import 'package:drmem_browser/sheet/sheet.dart';
 
 // This is the base class for all events that update the state of the page.
 
-abstract class PageEvent {}
+abstract class ModelEvent {}
 
 // For this event, we're replacing a row with the one contained in the message.
 
-class UpdateRow extends PageEvent {
+class UpdateRow extends ModelEvent {
   final int index;
   final BaseRow newRow;
 
@@ -15,7 +15,7 @@ class UpdateRow extends PageEvent {
 
 // For this event, we're inserting a row before the row specified by the index.
 
-class InsertBeforeRow extends PageEvent {
+class InsertBeforeRow extends ModelEvent {
   final int index;
   final BaseRow newRow;
 
@@ -24,7 +24,7 @@ class InsertBeforeRow extends PageEvent {
 
 // For this event, we're inserting a row after the row specified by the index.
 
-class InsertAfterRow extends PageEvent {
+class InsertAfterRow extends ModelEvent {
   final int index;
   final BaseRow newRow;
 
@@ -33,7 +33,7 @@ class InsertAfterRow extends PageEvent {
 
 // For this event, we're inserting a row after the row specified by the index.
 
-class DeleteRow extends PageEvent {
+class DeleteRow extends ModelEvent {
   final int index;
 
   DeleteRow(this.index);

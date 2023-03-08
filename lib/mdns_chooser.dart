@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:nsd/nsd.dart'
-    show Discovery, Service, ServiceStatus, startDiscovery;
+import 'package:nsd/nsd.dart';
 
 String? propToString(Service info, String key) {
   final Uint8List? tmp = info.txt?[key];
@@ -31,10 +31,12 @@ class ChooserState extends State<DnsChooser> {
   Discovery? discovery;
 
   // Updates the list of nodes based on the new ServiceStatus. The Service is
-  // initially removed from the list because we occasioanlly get two "found"
+  // initially removed from the list because we occasionally get two "found"
   // reports and the entry would be added twice.
 
   void serviceUpdate(Service service, ServiceStatus status) {
+    developer.log("received mDNS announcement", name: "mdns.announce");
+
     // If the node was configured with a preferred address, replace the host
     // and port fields with the configured one.
 

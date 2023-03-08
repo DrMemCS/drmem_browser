@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:drmem_browser/sheet/sheet.dart';
-import 'page_events.dart';
+import 'model_events.dart';
 
 // Defines the page's data model and handles events to modify it.
 
-class PageModel extends Bloc<PageEvent, List<BaseRow>> {
+class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
   // Dummy default data used for testing. This will be deleted in the final
   // product.
 

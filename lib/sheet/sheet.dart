@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -10,7 +11,7 @@ import 'package:drmem_browser/schema/__generated__/monitor_device.req.gql.dart';
 import 'package:drmem_browser/schema/__generated__/monitor_device.data.gql.dart';
 import 'package:drmem_browser/schema/__generated__/monitor_device.var.gql.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:drmem_browser/model/page_events.dart';
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 
 // The base class for all row types. A sheet is a list of objects derived
@@ -221,7 +222,8 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
       OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
     if (!response.loading) {
       if (response.hasErrors) {
-        print("error: $response");
+        developer.log("error returned",
+            name: "graphql.GetDevice", error: "$response");
       } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
         setState(() {
           errorText = null;
@@ -281,7 +283,8 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
       OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
     if (!response.loading) {
       if (response.hasErrors) {
-        print("error: $response");
+        developer.log("error",
+            name: "graphql.MonitorDevice", error: "$response");
       } else {
         setState(() {
           value = response.data?.monitorDevice;
