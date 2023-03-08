@@ -1,5 +1,5 @@
 name: drmem_browser
-description: A new Flutter project.
+description: Application to interact with the DrMem Control System.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
