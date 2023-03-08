@@ -30,6 +30,15 @@ class ChooserState extends State<DnsChooser> {
   List<Service> _nodes = [];
   Discovery? discovery;
 
+  @override
+  void dispose() {
+    if (discovery != null) {
+      stopDiscovery(discovery!);
+      developer.log("stopped", name: "mdns.connection");
+    }
+    super.dispose();
+  }
+
   // Updates the list of nodes based on the new ServiceStatus. The Service is
   // initially removed from the list because we occasionally get two "found"
   // reports and the entry would be added twice.
