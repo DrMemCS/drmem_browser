@@ -40,5 +40,5 @@ These are the improvements that need to be made, along with a few buggy features
   - [ ] Should support strip plots (numeric device(s) vs. time), logic plots (boolean device(s) vs.time), and X-Y (numeric device(s) vs. numeric device)
 - [ ] Need to verify that all error handling is done correctly (re: GraphQL connections)
 - [ ] Add unit tests
-- [ ] Add a GitHib workflow to build and test before merging pull requests
+- [X] Add a GitHib workflow to build and test before merging pull requests
 - [ ] Finish the third tab, "Logic"
