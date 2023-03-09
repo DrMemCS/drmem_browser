@@ -3,6 +3,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gql_http_link/gql_http_link.dart';
 import 'schema/__generated__/driver_info.data.gql.dart';
 import 'schema/__generated__/driver_info.req.gql.dart';
+import 'schema/__generated__/get_all_devices.data.gql.dart';
+import 'schema/__generated__/get_all_devices.req.gql.dart';
 import 'package:ferry/ferry.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
@@ -27,6 +29,7 @@ class _State extends State<_NodeInfo> {
   final EdgeInsets all8 = const EdgeInsets.all(8.0);
 
   List<GAllDriversData_driverInfo>? drivers;
+  List<GGetAllDevicesData_deviceInfo>? devices;
 
   // Build the URI to the GraphQL query endpoint.
 
@@ -52,6 +55,16 @@ class _State extends State<_NodeInfo> {
 
         tmp.sort((a, b) => a.name.compareTo(b.name));
         setState(() => drivers = tmp);
+      }
+    });
+
+    client.request(GGetAllDevicesReq((b) => b)).listen((response) {
+      if (!response.loading) {
+        final List<GGetAllDevicesData_deviceInfo> tmp =
+            response.data?.deviceInfo.toList() ?? [];
+
+        tmp.sort((a, b) => a.deviceName.compareTo(b.deviceName));
+        setState(() => devices = tmp);
       }
     });
   }
@@ -159,6 +172,9 @@ class _State extends State<_NodeInfo> {
                       ? const Center(child: CircularProgressIndicator())
                       : _DriversListView(drivers: drivers!),
                   header(context, "Devices"),
+                  devices == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : _DevicesListView(devices: devices!),
                 ],
               ),
             ),
@@ -216,6 +232,26 @@ Padding buildDrvInfoRow(GAllDriversData_driverInfo info, BuildContext context) {
   );
 }
 
+Padding buildDevInfoRow(
+    GGetAllDevicesData_deviceInfo info, BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 8.0),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Flexible(
+          flex: 5,
+          fit: FlexFit.tight,
+          child: Text(info.deviceName,
+              style: TextStyle(color: Theme.of(context).indicatorColor))),
+      Flexible(
+          flex: 2,
+          fit: FlexFit.tight,
+          child: Text(info.driver?.name ?? "???",
+              textAlign: TextAlign.end,
+              style: TextStyle(color: Theme.of(context).hintColor))),
+    ]),
+  );
+}
+
 // Local widget which displays a list of drivers.
 
 class _DriversListView extends StatelessWidget {
@@ -234,6 +270,23 @@ class _DriversListView extends StatelessWidget {
   }
 }
 
+// Local widget which displays a list of drivers.
+
+class _DevicesListView extends StatelessWidget {
+  const _DevicesListView({
+    Key? key,
+    required this.devices,
+  }) : super(key: key);
+
+  final List<GGetAllDevicesData_deviceInfo> devices;
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> d = devices.map((e) => buildDevInfoRow(e, context)).toList();
+
+    return Column(children: d);
+  }
+}
 // This public function returns the widget that displays node information.
 
 Widget displayNode(Service node) => _NodeInfo(node);

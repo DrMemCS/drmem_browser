@@ -1,0 +1,10 @@
+query GetAllDevices {
+	deviceInfo {
+    deviceName
+    units
+    settable
+    driver {
+      name
+    }
+  }
+}
