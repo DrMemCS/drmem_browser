@@ -94,6 +94,7 @@ class ChooserState extends State<DnsChooser> {
   Widget buildTile(BuildContext context, int index) {
     final info = _nodes[index];
     final String host = info.host ?? "unknown";
+    final ThemeData td = Theme.of(context);
 
     // Determine the location string, which is displayed as "subtitle" in the
     // tile. The location is provided in the mDNS payload as u8 data so we have
@@ -113,8 +114,15 @@ class ChooserState extends State<DnsChooser> {
             leading: const Icon(Icons.developer_board),
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
-            subtitle: location != null ? Text(location) : null,
-            trailing: Text("$host:${info.port}")),
+            subtitle: location != null
+                ? Text(location,
+                    style: td.textTheme.bodySmall!
+                        .copyWith(color: td.colorScheme.secondary))
+                : null,
+            trailing: Text("$host : ${info.port}",
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: td.textTheme.bodySmall)),
       ),
     );
   }
