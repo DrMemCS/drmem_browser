@@ -33,6 +33,8 @@ class ChooserState extends State<DnsChooser> {
   @override
   void dispose() {
     if (discovery != null) {
+      discovery!.removeServiceListener(serviceUpdate);
+      developer.log("unregistered", name: "mdns.announce");
       stopDiscovery(discovery!);
       developer.log("stopped", name: "mdns.connection");
     }
@@ -139,6 +141,7 @@ class ChooserState extends State<DnsChooser> {
         discovery = await startDiscovery('_drmem._tcp');
         developer.log("started", name: "mdns.connection");
         discovery!.addServiceListener(serviceUpdate);
+        developer.log("registered", name: "mdns.announce");
       })();
 
       // Return a `FutureBuilder` which only displays a progress indicator.
