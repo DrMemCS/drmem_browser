@@ -10,6 +10,7 @@ NOTE: This is a new project and currently doesn't do much. This README will be u
 
 - Listens to mDNS annoucements for instances of DrMem and adds them to a ListView which some information obtained from the annoucement. Selecting an instance will take you to another screen which shows node details.
   - The details page uses GraphQL to query the node as to what drivers are installed.
+- The "Sheets" tab takes you to a page where you can add rows. There are 4 row types: Divider, Comment, Device, and Chart. The first three are implemented.
 
 Before the project can be built, the GraphQL files need to be processed. This can be done with the command:
 
