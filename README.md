@@ -16,3 +16,23 @@ Before the project can be built, the GraphQL files need to be processed. This ca
 ```shell
 $ flutter pub run build_runner build --delete-conflicting-outputs
 ```
+
+## TO-DO List
+
+These are the improvements that need to be made, along with a few buggy features:
+
+- [ ] Display all the devices defined by the node (in the node details page.)
+- [ ] Needs to monitor when it goes in and out of the background. As it transits throw these states, it must:
+  - [ ] Shutdown and restore the mDNS service.
+  - [ ] Shutdown and restore GraphQL subscriptions.
+- [ ] Merge the Edit/Runner Sheet views. By default we're in runner view.
+  - [ ] Floating button to add row.
+  - [ ] Tap and hold will allow one to drag a row to change the position.
+  - [ ] Double tap puts the row in edit mode.
+- [ ] Add controls to add/delete sheets.
+- [ ] Sheets need to be added to persistent storage.
+- [ ] Implement the Plot Row type.
+  - [ ] Displaying plots
+  - [ ] Editing plot configuration
+  - [ ] Should support strip plots (numeric device(s) vs. time), logic plots (boolean device(s) vs.time), and X-Y (numeric device(s) vs. numeric device)
+- [ ] Finish the third tab, "Logic"
