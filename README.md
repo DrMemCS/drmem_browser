@@ -21,6 +21,8 @@ $ flutter pub run build_runner build --delete-conflicting-outputs
 
 These are the improvements that need to be made, along with a few buggy features:
 
+- [ ] Create a "Widget" that defines the GraphQL API. Use the approach done by Bloc in which the `BuildContext` gains a field; in our case, a `drmem` field that has methods that use the GraphQL API.
+  - [ ] This widget should be extracted and packaged so that other developers can make their own Flutter apps that talk to DrMem.
 - [ ] Display all the devices defined by the node (in the node details page.)
 - [ ] Needs to monitor when it goes in and out of the background. As it transits throw these states, it must:
   - [ ] Shutdown and restore the mDNS service.
@@ -35,4 +37,7 @@ These are the improvements that need to be made, along with a few buggy features
   - [ ] Displaying plots
   - [ ] Editing plot configuration
   - [ ] Should support strip plots (numeric device(s) vs. time), logic plots (boolean device(s) vs.time), and X-Y (numeric device(s) vs. numeric device)
+- [ ] Need to verify that all error handling is done correctly (re: GraphQL connections)
+- [ ] Add unit tests
+- [ ] Add a GitHib workflow to build and test before merging pull requests
 - [ ] Finish the third tab, "Logic"
