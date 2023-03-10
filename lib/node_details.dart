@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gql_http_link/gql_http_link.dart';
 import 'schema/__generated__/driver_info.data.gql.dart';
@@ -270,10 +271,18 @@ Padding buildDevInfoRow(
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       SizedBox(
         width: double.infinity,
-        child: Text(info.deviceName,
-            textAlign: TextAlign.start,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).indicatorColor)),
+        child: GestureDetector(
+          onDoubleTap: () {
+            Future.wait(
+                [Clipboard.setData(ClipboardData(text: info.deviceName))]);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Added ${info.deviceName} to clipboard")));
+          },
+          child: Text(info.deviceName,
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Theme.of(context).indicatorColor)),
+        ),
       ),
       Padding(
         padding: const EdgeInsets.only(top: 4.0, left: 20.0, right: 20.0),
