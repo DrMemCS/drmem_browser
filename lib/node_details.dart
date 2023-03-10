@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gql_http_link/gql_http_link.dart';
 import 'schema/__generated__/driver_info.data.gql.dart';
@@ -232,22 +233,69 @@ Padding buildDrvInfoRow(GAllDriversData_driverInfo info, BuildContext context) {
   );
 }
 
+Widget _buildChip(ThemeData td, String content) {
+  return Container(
+    decoration: BoxDecoration(
+        border: Border.all(color: td.hintColor),
+        borderRadius: BorderRadius.circular(8.0),
+        shape: BoxShape.rectangle,
+        color: td.cardColor),
+    child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(content, style: td.textTheme.labelMedium)),
+  );
+}
+
+List<Widget> _buildChips(
+    BuildContext context, GGetAllDevicesData_deviceInfo info) {
+  final ThemeData td = Theme.of(context);
+  final List<Widget> tmp = [
+    _buildChip(td, info.settable ? "settable" : "read-only")
+  ];
+
+  if (info.driver != null) {
+    tmp.add(_buildChip(td, "driver: ${info.driver!.name}"));
+  }
+
+  if (info.units != null) {
+    tmp.add(_buildChip(td, "units: ${info.units}"));
+  }
+
+  return tmp;
+}
+
 Padding buildDevInfoRow(
     GGetAllDevicesData_deviceInfo info, BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 8.0),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Flexible(
-          flex: 5,
-          fit: FlexFit.tight,
+    padding: const EdgeInsets.only(left: 20.0, bottom: 16.0),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      SizedBox(
+        width: double.infinity,
+        child: GestureDetector(
+          onDoubleTap: () {
+            Future.wait(
+                [Clipboard.setData(ClipboardData(text: info.deviceName))]);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Added ${info.deviceName} to clipboard")));
+          },
           child: Text(info.deviceName,
-              style: TextStyle(color: Theme.of(context).indicatorColor))),
-      Flexible(
-          flex: 2,
-          fit: FlexFit.tight,
-          child: Text(info.driver?.name ?? "???",
-              textAlign: TextAlign.end,
-              style: TextStyle(color: Theme.of(context).hintColor))),
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Theme.of(context).indicatorColor)),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: 4.0, left: 20.0, right: 20.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: 10.0,
+            runSpacing: 8.0,
+            alignment: WrapAlignment.end,
+            children: _buildChips(context, info),
+          ),
+        ),
+      )
     ]),
   );
 }
