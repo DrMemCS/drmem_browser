@@ -24,7 +24,7 @@ These are the improvements that need to be made, along with a few buggy features
 
 - [ ] Create a "Widget" that defines the GraphQL API. Use the approach done by Bloc in which the `BuildContext` gains a field; in our case, a `drmem` field that has methods that use the GraphQL API.
   - [ ] This widget should be extracted and packaged so that other developers can make their own Flutter apps that talk to DrMem.
-- [ ] Display all the devices defined by the node (in the node details page.)
+- [X] Display all the devices defined by the node (in the node details page.)
 - [ ] Needs to monitor when it goes in and out of the background. As it transits throw these states, it must:
   - [ ] Shutdown and restore the mDNS service.
   - [ ] Shutdown and restore GraphQL subscriptions.
