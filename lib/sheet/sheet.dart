@@ -138,6 +138,25 @@ InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
       border: InputBorder.none);
 }
 
+// This builds widgets that show an error icon followed by red text
+// indicating an unsupported type was received. This could happen if
+// an older version of the app is reading a new version of DrMem.
+
+Widget _buildErrorWidget(ThemeData td, String msg) {
+  Color errorColor = td.colorScheme.error;
+
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: Icon(Icons.error, size: 16.0, color: errorColor),
+      ),
+      Text(msg, style: TextStyle(color: errorColor))
+    ],
+  );
+}
+
 class _CommentEditor extends StatefulWidget {
   final int idx;
   final String text;
@@ -198,85 +217,38 @@ class _CommentEditorState extends State<_CommentEditor> {
   }
 }
 
-class _DeviceWidget extends StatefulWidget {
-  final Client qClient;
-  final Client sClient;
-  final String name;
+// This widget is responsible for displaying live data. It will start the
+// monitor subscription so that it is the only widget that has to refresh when
+// new data arrives.
 
-  const _DeviceWidget(this.qClient, this.sClient, this.name, {Key? key})
-      : super(key: key);
+class _DataWidget extends StatefulWidget {
+  final Client sClient;
+  final String device;
+  final String? units;
+
+  const _DataWidget(this.device, this.sClient, this.units);
 
   @override
-  _DeviceWidgetState createState() => _DeviceWidgetState();
+  _DataWidgetState createState() => _DataWidgetState();
 }
 
-class _DeviceWidgetState extends State<_DeviceWidget> {
-  StreamSubscription? subMeta;
+class _DataWidgetState extends State<_DataWidget> {
   StreamSubscription? subReadings;
-
-  String? errorText;
-  String? units;
   GMonitorDeviceData_monitorDevice? value;
+  String? errorText;
 
-  void _handleDeviceInfo(
-      OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
-    if (!response.loading) {
-      if (response.hasErrors) {
-        developer.log("error returned",
-            name: "graphql.GetDevice", error: "$response");
-      } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
-        setState(() {
-          errorText = null;
-          units = response.data?.deviceInfo.first.units;
-        });
-
-        // This sets up the subscription which receives device updates.
-
-        subReadings = widget.sClient
-            .request(GMonitorDeviceReq((b) => b..vars.device = widget.name))
-            .listen(_handleReadings);
-      } else {
-        setState(() => errorText = "Device not found.");
-      }
-    }
+  @override
+  void initState() {
+    subReadings = widget.sClient
+        .request(GMonitorDeviceReq((b) => b..vars.device = widget.device))
+        .listen(_handleReadings);
+    super.initState();
   }
 
-  Widget _displayReading(BuildContext context) {
-    if (value == null) {
-      return Container();
-    } else {
-      if (value!.boolValue != null) {
-        return Checkbox(
-            visualDensity: VisualDensity.compact,
-            value: value!.boolValue,
-            onChanged: null);
-      }
-
-      if (value!.intValue != null) {
-        return Text("${value!.intValue} ${units ?? '?'}");
-      }
-
-      if (value!.floatValue != null) {
-        return Text("${value!.floatValue} ${units ?? '?'}");
-      }
-
-      if (value!.stringValue != null) {
-        return Text("${value!.stringValue}");
-      }
-
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Icon(Icons.error,
-                size: 16.0, color: Theme.of(context).colorScheme.error),
-          ),
-          Text("unknown type",
-              style: TextStyle(color: Theme.of(context).colorScheme.error)),
-        ],
-      );
-    }
+  @override
+  void dispose() {
+    subReadings?.cancel();
+    super.dispose();
   }
 
   void _handleReadings(
@@ -292,6 +264,103 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
       }
     }
   }
+
+  // Displays a checkbox widget to display bookean values.
+
+  Widget _displayBoolean(bool value) {
+    return Checkbox(
+      visualDensity: VisualDensity.compact,
+      value: value,
+      onChanged: null,
+    );
+  }
+
+  Widget _displayInteger(int value, String? units) {
+    if (units != null) {
+      return Text("$value $units");
+    } else {
+      return Text("$value");
+    }
+  }
+
+  Widget _displayDouble(double value, String? units) {
+    if (units != null) {
+      return Text("$value $units");
+    } else {
+      return Text("$value");
+    }
+  }
+
+  // Create the appropriate widget based on the type of the incoming data.
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData td = Theme.of(context);
+
+    if (value == null) {
+      return Container();
+    } else {
+      if (value!.boolValue != null) {
+        return _displayBoolean(value!.boolValue!);
+      }
+
+      if (value!.intValue != null) {
+        return _displayInteger(value!.intValue!, widget.units);
+      }
+
+      if (value!.floatValue != null) {
+        return _displayDouble(value!.floatValue!, widget.units);
+      }
+
+      if (value!.stringValue != null) {
+        return Text("${value!.stringValue}");
+      }
+
+      return _buildErrorWidget(td, "Unknown type");
+    }
+  }
+}
+
+class _DeviceWidget extends StatefulWidget {
+  final Client qClient;
+  final Client sClient;
+  final String name;
+
+  const _DeviceWidget(this.qClient, this.sClient, this.name, {Key? key})
+      : super(key: key);
+
+  @override
+  _DeviceWidgetState createState() => _DeviceWidgetState();
+}
+
+class _DeviceWidgetState extends State<_DeviceWidget> {
+  StreamSubscription? subMeta;
+  GGetDeviceData_deviceInfo? info;
+  String? errorText;
+
+  void _handleDeviceInfo(
+      OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
+    developer.log("response: ${response.loading}", name: "graphql.GetDevice");
+    if (!response.loading) {
+      if (response.hasErrors) {
+        developer.log("error returned",
+            name: "graphql.GetDevice", error: "$response");
+      } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
+        setState(() {
+          errorText = null;
+          info = response.data?.deviceInfo.first;
+        });
+      } else {
+        setState(() => errorText = "Device not found.");
+      }
+
+      // Free up resources associated with the request.
+
+      subMeta?.cancel();
+      subMeta = null;
+    }
+  }
+
   // Set up the GraphQL requests to populate the fields in the Device Row.
 
   @override
@@ -308,12 +377,13 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
   @override
   void dispose() {
     subMeta?.cancel();
-    subReadings?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData td = Theme.of(context);
+
     return Container(
       constraints: const BoxConstraints(minHeight: 32.0),
       child: Row(
@@ -324,25 +394,14 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
             child: Text(
               widget.name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Theme.of(context).indicatorColor),
+              style: TextStyle(color: td.indicatorColor),
             ),
           ),
           errorText == null
-              ? _displayReading(context)
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(Icons.error,
-                          size: 16.0,
-                          color: Theme.of(context).colorScheme.error),
-                    ),
-                    Text(errorText!,
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.error)),
-                  ],
-                )
+              ? (info == null
+                  ? Container()
+                  : _DataWidget(widget.name, widget.sClient, info!.units))
+              : _buildErrorWidget(td, errorText!)
         ],
       ),
     );
