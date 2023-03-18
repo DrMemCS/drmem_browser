@@ -313,8 +313,18 @@ class _DriversListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> d = drivers.map((e) => buildDrvInfoRow(e, context)).toList();
+    List<Widget> all = [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
+        child: Text(
+            "This node is configured with these ${drivers.length} drivers.",
+            style: TextStyle(color: Theme.of(context).hintColor)),
+      )
+    ];
 
-    return Column(children: d);
+    all.addAll(d);
+
+    return Column(children: all);
   }
 }
 
@@ -330,9 +340,19 @@ class _DevicesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> d = devices.map((e) => buildDevInfoRow(e, context)).toList();
+    Iterable<Widget> d = devices.map((e) => buildDevInfoRow(e, context));
+    List<Widget> all = [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
+        child: Text(
+            """This node provides ${devices.length} devices. Double tap on a 
+device name to copy it to the clipboard.""",
+            style: TextStyle(color: Theme.of(context).hintColor)),
+      )
+    ];
 
-    return Column(children: d);
+    all.addAll(d);
+    return Column(children: all);
   }
 }
 // This public function returns the widget that displays node information.
