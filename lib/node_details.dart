@@ -345,8 +345,7 @@ class _DevicesListView extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
         child: Text(
-            """This node provides ${devices.length} devices. Double tap on a 
-device name to copy it to the clipboard.""",
+            "This node provides ${devices.length} devices. Double tap on a device name to copy it to the clipboard.",
             style: TextStyle(color: Theme.of(context).hintColor)),
       )
     ];
