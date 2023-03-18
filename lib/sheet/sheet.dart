@@ -265,7 +265,7 @@ class _DataWidgetState extends State<_DataWidget> {
     }
   }
 
-  // Displays a checkbox widget to display bookean values.
+  // Displays a checkbox widget to display bookean value
 
   Widget _displayBoolean(bool value) {
     return Checkbox(
