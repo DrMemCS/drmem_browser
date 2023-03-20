@@ -10,8 +10,8 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
 
   static List<BaseRow> dummyDefaults = <BaseRow>[
     CommentRow("This is a comment.\n\nCan we insert newlines?"),
-    const DeviceRow("demo-timer:output", false),
-    const DeviceRow("demo-timer:enable", true),
+    const DeviceRow("demo-timer:output"),
+    const DeviceRow("demo-timer:enable"),
     const EmptyRow(),
     CommentRow("Here's another comment."),
     const PlotRow(),

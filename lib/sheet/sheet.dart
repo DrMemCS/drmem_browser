@@ -84,9 +84,8 @@ class CommentRow extends BaseRow {
 
 class DeviceRow extends BaseRow {
   final String name;
-  final bool settable;
 
-  const DeviceRow(this.name, this.settable) : super();
+  const DeviceRow(this.name) : super();
 
   @override
   Icon getIcon() => const Icon(Icons.developer_board);

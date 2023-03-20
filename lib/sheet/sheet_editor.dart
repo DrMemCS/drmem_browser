@@ -46,7 +46,7 @@ class SheetEditor extends StatelessWidget {
               onTap: () {
                 context
                     .read<PageModel>()
-                    .add(UpdateRow(index, const DeviceRow("", false)));
+                    .add(UpdateRow(index, const DeviceRow("")));
               }),
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.asChart,
