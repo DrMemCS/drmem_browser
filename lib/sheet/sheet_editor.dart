@@ -38,7 +38,9 @@ class SheetEditor extends StatelessWidget {
               value: RowMenuItems.asComment,
               child: const Text("To Comment"),
               onTap: () {
-                context.read<PageModel>().add(UpdateRow(index, CommentRow("")));
+                context
+                    .read<PageModel>()
+                    .add(UpdateRow(index, const CommentRow("")));
               }),
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.asDevice,

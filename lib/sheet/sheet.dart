@@ -57,7 +57,7 @@ class EmptyRow extends BaseRow {
 class CommentRow extends BaseRow {
   final String comment;
 
-  CommentRow(this.comment) : super();
+  const CommentRow(this.comment) : super();
 
   @override
   Icon getIcon() => const Icon(Icons.chat);
