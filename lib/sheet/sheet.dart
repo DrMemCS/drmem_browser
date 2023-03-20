@@ -43,7 +43,7 @@ class EmptyRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
-    return const Expanded(child: Divider());
+    return const Divider();
   }
 }
 
