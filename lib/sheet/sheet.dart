@@ -365,11 +365,17 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 
   @override
   void initState() {
-    // Start a GraphQL query to receive information about the device.
+    // If a device name was given, start a GraphQL query to receive information
+    // about the device. Otherwise, set the error text and avoid doing the
+    // request/replies.
 
-    subMeta = widget.qClient
-        .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
-        .listen(_handleDeviceInfo);
+    if (widget.name.isNotEmpty) {
+      subMeta = widget.qClient
+          .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
+          .listen(_handleDeviceInfo);
+    } else {
+      errorText = "No device name";
+    }
 
     super.initState();
   }
