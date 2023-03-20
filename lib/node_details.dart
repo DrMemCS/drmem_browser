@@ -93,14 +93,15 @@ class _State extends State<_NodeInfo> {
   // Returns a widget that renders property information. This consists of a
   // dimmed label followed by its value in a highlighted color.
 
-  Widget buildProperty(BuildContext context, String label, String? value) {
+  Widget buildProperty(
+      BuildContext context, String label, int labelFlex, String? value) {
     final ThemeData td = Theme.of(context);
 
     return Row(
       children: [
         Flexible(
           fit: FlexFit.tight,
-          flex: 8,
+          flex: labelFlex,
           child: Text(label,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
@@ -139,6 +140,8 @@ class _State extends State<_NodeInfo> {
     final Service info = widget.node;
     final DateTime? bootTime =
         DateTime.tryParse(propToString(info, "boot-time") ?? "");
+    const int nodePropFlex = 8;
+    const int gqlPropFlex = 14;
 
     return Padding(
       padding: all8,
@@ -153,20 +156,20 @@ class _State extends State<_NodeInfo> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildProperty(
-                      context, "version", propToString(info, "version")),
-                  buildProperty(
-                      context, "address", "${info.host}:${info.port}"),
-                  buildProperty(
-                      context, "location", propToString(info, "location")),
-                  buildProperty(context, "boot time",
+                  buildProperty(context, "version", nodePropFlex,
+                      propToString(info, "version")),
+                  buildProperty(context, "address", nodePropFlex,
+                      "${info.host}:${info.port}"),
+                  buildProperty(context, "location", nodePropFlex,
+                      propToString(info, "location")),
+                  buildProperty(context, "boot time", nodePropFlex,
                       bootTime?.toLocal().toString() ?? "unknown"),
                   header(context, "GraphQL Endpoints"),
-                  buildProperty(
-                      context, "queries", propToString(info, "queries")),
-                  buildProperty(
-                      context, "mutations", propToString(info, "mutations")),
-                  buildProperty(context, "subscriptions",
+                  buildProperty(context, "queries", gqlPropFlex,
+                      propToString(info, "queries")),
+                  buildProperty(context, "mutations", gqlPropFlex,
+                      propToString(info, "mutations")),
+                  buildProperty(context, "subscriptions", gqlPropFlex,
                       propToString(info, "subscriptions")),
                   header(context, "Drivers"),
                   drivers == null
