@@ -23,6 +23,8 @@ abstract class BaseRow {
   Widget buildRowEditor(BuildContext context, int index);
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient);
   Icon getIcon();
+
+  Map<String, dynamic> toJson();
 }
 
 // This type isn't ever saved in a sheet's configuration. It automatically
@@ -45,6 +47,9 @@ class EmptyRow extends BaseRow {
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return const Divider();
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'empty'};
 }
 
 // This row type holds text which allows the user to add comments to the sheet.
@@ -78,6 +83,9 @@ class CommentRow extends BaseRow {
       ),
     );
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'comment', 'content': comment};
 }
 
 // This row type monitors a device.
@@ -99,6 +107,9 @@ class DeviceRow extends BaseRow {
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return _DeviceWidget(qClient, sClient, name);
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'device', 'device': name};
 }
 
 // This row type displays a plot.
@@ -118,6 +129,9 @@ class PlotRow extends BaseRow {
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return const Text("display plot");
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'plot'};
 }
 
 InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
@@ -458,7 +472,7 @@ class _DeviceEditorState extends State<_DeviceEditor> {
                 decoration: _getTextFieldDecoration(context, "Device name"),
                 controller: controller,
                 onChanged: (value) => context.read<PageModel>().add(
-                      UpdateRow(widget.idx, DeviceRow(controller.text, false)),
+                      UpdateRow(widget.idx, DeviceRow(controller.text)),
                     )),
           ),
         ],
