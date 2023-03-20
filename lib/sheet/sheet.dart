@@ -25,6 +25,42 @@ abstract class BaseRow {
   Icon getIcon();
 
   Map<String, dynamic> toJson();
+
+  // Factory method that can take a map from a JSON string and convert to a
+  // derived BaseRow class.
+
+  static BaseRow? fromJson(Map<String, dynamic> map) {
+    switch (map['type']) {
+      case 'empty':
+        return const EmptyRow();
+
+      case 'comment':
+        {
+          String? comment = map['content'];
+
+          if (comment != null) {
+            return CommentRow(comment);
+          }
+          return null;
+        }
+
+      case 'device':
+        {
+          String? device = map['device'];
+
+          if (device != null) {
+            return DeviceRow(device);
+          }
+          return null;
+        }
+
+      case 'plot':
+        return const PlotRow();
+
+      default:
+        return null;
+    }
+  }
 }
 
 // This type isn't ever saved in a sheet's configuration. It automatically
