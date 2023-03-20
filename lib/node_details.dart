@@ -77,14 +77,14 @@ class _State extends State<_NodeInfo> {
 
     return Padding(
         padding: const EdgeInsets.only(
-            top: 16.0, bottom: 4.0, left: 4.0, right: 8.0),
+            top: 16.0, bottom: 8.0, left: 4.0, right: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
             Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
-              child: Text(label, style: td.textTheme.titleMedium),
+              child: Text(label, style: td.textTheme.bodyLarge),
             )
           ],
         ));
