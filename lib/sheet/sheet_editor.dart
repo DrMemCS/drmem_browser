@@ -85,14 +85,13 @@ class SheetEditor extends StatelessWidget {
   }
 
   Widget renderRow(BuildContext context, bool notEmpty, BaseRow e, int idx) {
-    return Padding(
-      key: e.key,
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        buildMenuButton(context, notEmpty, e, idx),
-        e.buildRowEditor(context, idx)
-      ]),
-    );
+    return Row(
+        key: e.key,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildMenuButton(context, notEmpty, e, idx),
+          e.buildRowEditor(context, idx)
+        ]);
   }
 
   @override
@@ -102,7 +101,7 @@ class SheetEditor extends StatelessWidget {
       return ReorderableListView(
           onReorder: (oldIndex, newIndex) =>
               context.read<PageModel>().add(MoveRow(oldIndex, newIndex)),
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
           children: state.isNotEmpty
               ? state.fold([], (acc, e) {
                   acc.add(renderRow(context, true, e, acc.length));
