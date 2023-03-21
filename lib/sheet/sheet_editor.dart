@@ -29,35 +29,27 @@ class SheetEditor extends StatelessWidget {
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.empty,
               child: const Text("Divider"),
-              onTap: () {
-                context
-                    .read<PageModel>()
-                    .add(UpdateRow(index, const EmptyRow()));
-              }),
+              onTap: () => context
+                  .read<PageModel>()
+                  .add(UpdateRow(index, EmptyRow(key: UniqueKey())))),
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.asComment,
               child: const Text("To Comment"),
-              onTap: () {
-                context
-                    .read<PageModel>()
-                    .add(UpdateRow(index, const CommentRow("")));
-              }),
+              onTap: () => context
+                  .read<PageModel>()
+                  .add(UpdateRow(index, CommentRow("", key: UniqueKey())))),
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.asDevice,
               child: const Text("To Device"),
-              onTap: () {
-                context
-                    .read<PageModel>()
-                    .add(UpdateRow(index, const DeviceRow("")));
-              }),
+              onTap: () => context
+                  .read<PageModel>()
+                  .add(UpdateRow(index, DeviceRow("", key: UniqueKey())))),
           PopupMenuItem<RowMenuItems>(
               value: RowMenuItems.asChart,
               child: const Text("To Chart"),
-              onTap: () {
-                context
-                    .read<PageModel>()
-                    .add(UpdateRow(index, const PlotRow()));
-              })
+              onTap: () => context
+                  .read<PageModel>()
+                  .add(UpdateRow(index, PlotRow(key: UniqueKey()))))
         ];
 
         if (notEmpty) {
@@ -68,7 +60,7 @@ class SheetEditor extends StatelessWidget {
                 onTap: () {
                   context
                       .read<PageModel>()
-                      .add(InsertBeforeRow(index, const EmptyRow()));
+                      .add(InsertBeforeRow(index, EmptyRow(key: UniqueKey())));
                 }),
             PopupMenuItem<RowMenuItems>(
                 value: RowMenuItems.addBelow,
@@ -76,7 +68,7 @@ class SheetEditor extends StatelessWidget {
                 onTap: () {
                   context
                       .read<PageModel>()
-                      .add(InsertAfterRow(index, const EmptyRow()));
+                      .add(InsertAfterRow(index, EmptyRow(key: UniqueKey())));
                 }),
             PopupMenuItem<RowMenuItems>(
                 value: RowMenuItems.delete,
@@ -94,6 +86,7 @@ class SheetEditor extends StatelessWidget {
 
   Widget renderRow(BuildContext context, bool notEmpty, BaseRow e, int idx) {
     return Padding(
+      key: e.key,
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         buildMenuButton(context, notEmpty, e, idx),
@@ -109,15 +102,11 @@ class SheetEditor extends StatelessWidget {
       return ListView(
           padding: const EdgeInsets.all(4.0),
           children: state.isNotEmpty
-              ? state
-                  .asMap()
-                  .map((index, value) {
-                    return MapEntry(
-                        index, renderRow(context, true, value, index));
-                  })
-                  .values
-                  .toList()
-              : [renderRow(context, false, const EmptyRow(), 0)]);
+              ? state.fold([], (acc, e) {
+                  acc.add(renderRow(context, true, e, acc.length));
+                  return acc;
+                })
+              : [renderRow(context, false, EmptyRow(key: UniqueKey()), 0)]);
     });
   }
 }

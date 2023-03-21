@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,25 +19,37 @@ void main() {
 
   group("Testing row serialization", () {
     test("... EmptyRow", () {
-      expect(BaseRow.fromJson(const EmptyRow().toJson()), const EmptyRow());
+      final EmptyRow tmp = EmptyRow(key: UniqueKey());
+      final EmptyRow out =
+          BaseRow.fromJson(tmp.toJson(), key: tmp.key) as EmptyRow;
+
+      expect(out.key, tmp.key);
     });
 
     test("... DeviceRow", () {
-      const DeviceRow tmp = DeviceRow("This is a comment.");
-      DeviceRow out = BaseRow.fromJson(tmp.toJson()) as DeviceRow;
+      final DeviceRow tmp = DeviceRow("This is a comment.", key: UniqueKey());
+      final DeviceRow out =
+          BaseRow.fromJson(tmp.toJson(), key: tmp.key) as DeviceRow;
 
       expect(out.name, tmp.name);
+      expect(out.key, tmp.key);
     });
 
     test("... CommentRow", () {
-      const CommentRow tmp = CommentRow("This is a comment.");
-      CommentRow out = BaseRow.fromJson(tmp.toJson()) as CommentRow;
+      final CommentRow tmp = CommentRow("This is a comment.", key: UniqueKey());
+      final CommentRow out =
+          BaseRow.fromJson(tmp.toJson(), key: tmp.key) as CommentRow;
 
       expect(out.comment, tmp.comment);
+      expect(out.key, tmp.key);
     });
 
     test("... PlotRow", () {
-      expect(BaseRow.fromJson(const PlotRow().toJson()), const PlotRow());
+      final PlotRow tmp = PlotRow(key: UniqueKey());
+      final PlotRow out =
+          BaseRow.fromJson(tmp.toJson(), key: tmp.key) as PlotRow;
+
+      expect(out.key, tmp.key);
     });
   });
 }

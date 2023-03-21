@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:drmem_browser/sheet/sheet.dart';
 import 'model_events.dart';
@@ -9,12 +10,13 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
   // product.
 
   static List<BaseRow> dummyDefaults = <BaseRow>[
-    const CommentRow("This is a comment.\n\nCan we insert newlines?"),
-    const DeviceRow("demo-timer:output"),
-    const DeviceRow("demo-timer:enable"),
-    const EmptyRow(),
-    const CommentRow("Here's another comment."),
-    const PlotRow(),
+    CommentRow("This is a comment.\n\nCan we insert newlines?",
+        key: UniqueKey()),
+    DeviceRow("demo-timer:output", key: UniqueKey()),
+    DeviceRow("demo-timer:enable", key: UniqueKey()),
+    EmptyRow(key: UniqueKey()),
+    CommentRow("Here's another comment.", key: UniqueKey()),
+    PlotRow(key: UniqueKey()),
   ];
 
   // Constructor.

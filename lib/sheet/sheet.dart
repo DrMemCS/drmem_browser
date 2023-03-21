@@ -18,7 +18,9 @@ import 'package:drmem_browser/model/model.dart';
 // from BaseRow.
 
 abstract class BaseRow {
-  const BaseRow();
+  final Key key;
+
+  const BaseRow({required this.key});
 
   Widget buildRowEditor(BuildContext context, int index);
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient);
@@ -29,17 +31,17 @@ abstract class BaseRow {
   // Factory method that can take a map from a JSON string and convert to a
   // derived BaseRow class.
 
-  static BaseRow? fromJson(Map<String, dynamic> map) {
+  static BaseRow? fromJson(Map<String, dynamic> map, {Key? key}) {
     switch (map['type']) {
       case 'empty':
-        return const EmptyRow();
+        return EmptyRow(key: key ?? UniqueKey());
 
       case 'comment':
         {
           String? comment = map['content'];
 
           if (comment != null) {
-            return CommentRow(comment);
+            return CommentRow(comment, key: key ?? UniqueKey());
           }
           return null;
         }
@@ -49,13 +51,13 @@ abstract class BaseRow {
           String? device = map['device'];
 
           if (device != null) {
-            return DeviceRow(device);
+            return DeviceRow(device, key: key ?? UniqueKey());
           }
           return null;
         }
 
       case 'plot':
-        return const PlotRow();
+        return PlotRow(key: key ?? UniqueKey());
 
       default:
         return null;
@@ -68,7 +70,7 @@ abstract class BaseRow {
 // placeholder, the user can turn it into one of the other row types.
 
 class EmptyRow extends BaseRow {
-  const EmptyRow() : super();
+  const EmptyRow({required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.menu);
@@ -93,7 +95,7 @@ class EmptyRow extends BaseRow {
 class CommentRow extends BaseRow {
   final String comment;
 
-  const CommentRow(this.comment) : super();
+  const CommentRow(this.comment, {required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.chat);
@@ -129,7 +131,7 @@ class CommentRow extends BaseRow {
 class DeviceRow extends BaseRow {
   final String name;
 
-  const DeviceRow(this.name) : super();
+  const DeviceRow(this.name, {required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.developer_board);
@@ -151,7 +153,7 @@ class DeviceRow extends BaseRow {
 // This row type displays a plot.
 
 class PlotRow extends BaseRow {
-  const PlotRow() : super();
+  const PlotRow({required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.auto_graph);
@@ -255,8 +257,8 @@ class _CommentEditorState extends State<_CommentEditor> {
               onPressed: changed
                   ? () {
                       setState(() => changed = false);
-                      context.read<PageModel>().add(
-                          UpdateRow(widget.idx, CommentRow(controller.text)));
+                      context.read<PageModel>().add(UpdateRow(widget.idx,
+                          CommentRow(controller.text, key: UniqueKey())));
                     }
                   : null,
               child: const Text("Save"))
@@ -507,8 +509,9 @@ class _DeviceEditorState extends State<_DeviceEditor> {
                 maxLines: 1,
                 decoration: _getTextFieldDecoration(context, "Device name"),
                 controller: controller,
-                onChanged: (value) => context.read<PageModel>().add(
-                      UpdateRow(widget.idx, DeviceRow(controller.text)),
+                onSubmitted: (value) => context.read<PageModel>().add(
+                      UpdateRow(widget.idx,
+                          DeviceRow(controller.text, key: UniqueKey())),
                     )),
           ),
         ],
