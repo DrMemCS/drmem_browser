@@ -99,7 +99,9 @@ class SheetEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<PageModel, List<BaseRow>>(
         builder: (BuildContext context, state) {
-      return ListView(
+      return ReorderableListView(
+          onReorder: (oldIndex, newIndex) =>
+              context.read<PageModel>().add(MoveRow(oldIndex, newIndex)),
           padding: const EdgeInsets.all(4.0),
           children: state.isNotEmpty
               ? state.fold([], (acc, e) {

@@ -26,6 +26,18 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
     on<InsertBeforeRow>(_insertBeforeRow);
     on<InsertAfterRow>(_insertAfterRow);
     on<DeleteRow>(_deleteRow);
+    on<MoveRow>(_moveRow);
+  }
+
+  void _moveRow(MoveRow event, Emitter<List<BaseRow>> emit) {
+    var newState = state.toList();
+
+    final newIndex =
+        event.oldIndex < event.newIndex ? event.newIndex - 1 : event.newIndex;
+    final BaseRow element = newState.removeAt(event.oldIndex);
+
+    newState.insert(newIndex, element);
+    emit(newState);
   }
 
   // This event is received when a child widget wants to change the type of a
