@@ -72,12 +72,19 @@ class _SheetEditorState extends State<SheetEditor> {
   // Creates a button that performs an action.
 
   Widget buildActionButton(BuildContext context,
-          void Function() Function(BuildContext) cb, IconData id) =>
-      FilledButton.icon(
-        onPressed: cb(context),
-        icon: const Icon(Icons.add),
-        label: Icon(id),
-      );
+      void Function() Function(BuildContext) cb, IconData id) {
+    final ThemeData td = Theme.of(context);
+
+    return FilledButton.icon(
+      style: ButtonStyle(
+        backgroundColor: MaterialStatePropertyAll<Color>(
+            td.colorScheme.secondary.withOpacity(0.5)),
+      ),
+      onPressed: cb(context),
+      icon: const Icon(Icons.add),
+      label: Icon(id),
+    );
+  }
 
   // The main building method.
 
