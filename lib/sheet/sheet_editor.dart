@@ -4,110 +4,121 @@ import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'sheet.dart';
 
-enum RowMenuItems {
-  empty,
-  asComment,
-  asDevice,
-  asChart,
-  addAbove,
-  addBelow,
-  delete
-}
+// Displays the sheet's contents as an editor. No data collection occurs while
+// editing.
 
-class SheetEditor extends StatelessWidget {
+class SheetEditor extends StatefulWidget {
   const SheetEditor({Key? key}) : super(key: key);
 
-  Widget buildMenuButton(
-      BuildContext context, bool notEmpty, BaseRow br, int index) {
-    return PopupMenuButton<RowMenuItems>(
-      icon: br.getIcon(),
-      initialValue: RowMenuItems.empty,
-      // Callback that sets the selected popup menu item.
-      onSelected: (RowMenuItems item) {},
-      itemBuilder: (BuildContext context) {
-        List<PopupMenuEntry<RowMenuItems>> common = [
-          PopupMenuItem<RowMenuItems>(
-              value: RowMenuItems.empty,
-              child: const Text("Divider"),
-              onTap: () => context
-                  .read<PageModel>()
-                  .add(UpdateRow(index, EmptyRow(key: UniqueKey())))),
-          PopupMenuItem<RowMenuItems>(
-              value: RowMenuItems.asComment,
-              child: const Text("To Comment"),
-              onTap: () => context
-                  .read<PageModel>()
-                  .add(UpdateRow(index, CommentRow("", key: UniqueKey())))),
-          PopupMenuItem<RowMenuItems>(
-              value: RowMenuItems.asDevice,
-              child: const Text("To Device"),
-              onTap: () => context
-                  .read<PageModel>()
-                  .add(UpdateRow(index, DeviceRow("", key: UniqueKey())))),
-          PopupMenuItem<RowMenuItems>(
-              value: RowMenuItems.asChart,
-              child: const Text("To Chart"),
-              onTap: () => context
-                  .read<PageModel>()
-                  .add(UpdateRow(index, PlotRow(key: UniqueKey()))))
-        ];
+  @override
+  State<SheetEditor> createState() => _SheetEditorState();
+}
 
-        if (notEmpty) {
-          common.addAll([
-            PopupMenuItem<RowMenuItems>(
-                value: RowMenuItems.addAbove,
-                child: const Text("Add row above"),
-                onTap: () {
-                  context
-                      .read<PageModel>()
-                      .add(InsertBeforeRow(index, EmptyRow(key: UniqueKey())));
-                }),
-            PopupMenuItem<RowMenuItems>(
-                value: RowMenuItems.addBelow,
-                child: const Text("Add row below"),
-                onTap: () {
-                  context
-                      .read<PageModel>()
-                      .add(InsertAfterRow(index, EmptyRow(key: UniqueKey())));
-                }),
-            PopupMenuItem<RowMenuItems>(
-                value: RowMenuItems.delete,
-                child: const Text("Delete current row"),
-                onTap: () {
-                  context.read<PageModel>().add(DeleteRow(index));
-                })
-          ]);
-        }
+// Manages the state of the sheet editor.
 
-        return common;
-      },
-    );
-  }
+class _SheetEditorState extends State<SheetEditor> {
+  // Builds a row of the sheet. Although the `BaseRow` class does most of the
+  // heavy lifting, this function wraps the row editor with the proper spacing
+  // and trash icon.
 
-  Widget renderRow(BuildContext context, bool notEmpty, BaseRow e, int idx) {
-    return Row(
+  Widget renderRow(BuildContext context, bool notEmpty, BaseRow e, int idx,
+          bool movable) =>
+      Padding(
         key: e.key,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildMenuButton(context, notEmpty, e, idx),
-          e.buildRowEditor(context, idx)
-        ]);
+        padding: EdgeInsets.fromLTRB(4.0, 4.0, movable ? 32.0 : 4.0, 4.0),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              e.buildRowEditor(context, idx),
+              IconButton(
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () =>
+                      context.read<PageModel>().add(DeleteRow(idx)),
+                  icon: const Icon(Icons.delete))
+            ]),
+      );
+
+  // Returns a function that appends a divider row to the sheet.
+
+  void Function() mkAddDividerRow(BuildContext context) {
+    return () =>
+        context.read<PageModel>().add(AppendRow(EmptyRow(key: UniqueKey())));
   }
+
+  // Returns a function that appends a device row to the sheet.
+
+  void Function() mkAddDeviceRow(BuildContext context) {
+    return () => context
+        .read<PageModel>()
+        .add(AppendRow(DeviceRow("", key: UniqueKey())));
+  }
+
+  // Returns a function that appends a plot row to the sheet.
+
+  void Function() mkAddPlotRow(BuildContext context) {
+    return () =>
+        context.read<PageModel>().add(AppendRow(PlotRow(key: UniqueKey())));
+  }
+
+  // Returns a function that appends a comment row to the sheet.
+
+  void Function() mkAddCommentRow(BuildContext context) {
+    return () => context
+        .read<PageModel>()
+        .add(AppendRow(CommentRow("", key: UniqueKey())));
+  }
+
+  // Creates a button that performs an action.
+
+  Widget buildActionButton(BuildContext context,
+          void Function() Function(BuildContext) cb, IconData id) =>
+      FilledButton.icon(
+        onPressed: cb(context),
+        icon: const Icon(Icons.add),
+        label: Icon(id),
+      );
+
+  // The main building method.
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PageModel, List<BaseRow>>(
         builder: (BuildContext context, state) {
-      return ReorderableListView(
-          onReorder: (oldIndex, newIndex) =>
-              context.read<PageModel>().add(MoveRow(oldIndex, newIndex)),
-          padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
-          children: state.isNotEmpty
-              ? state.fold([], (acc, e) {
-                  acc.add(renderRow(context, true, e, acc.length));
+      final bool movable = state.length > 1;
+
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: ReorderableListView(
+                onReorder: (oldIndex, newIndex) =>
+                    context.read<PageModel>().add(MoveRow(oldIndex, newIndex)),
+                buildDefaultDragHandles: movable,
+                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                children: state.fold([], (acc, e) {
+                  acc.add(renderRow(context, true, e, acc.length, movable));
                   return acc;
-                })
-              : [renderRow(context, false, EmptyRow(key: UniqueKey()), 0)]);
+                })),
+          ),
+          Container(
+            color: Theme.of(context).cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildActionButton(
+                        context, mkAddDeviceRow, Icons.developer_board),
+                    buildActionButton(context, mkAddPlotRow, Icons.auto_graph),
+                    buildActionButton(context, mkAddCommentRow, Icons.chat),
+                    buildActionButton(context, mkAddDividerRow,
+                        Icons.indeterminate_check_box_outlined),
+                  ]),
+            ),
+          )
+        ],
+      );
     });
   }
 }

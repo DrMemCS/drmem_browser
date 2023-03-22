@@ -23,8 +23,7 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
 
   PageModel() : super([]) {
     on<UpdateRow>(_updateRow);
-    on<InsertBeforeRow>(_insertBeforeRow);
-    on<InsertAfterRow>(_insertAfterRow);
+    on<AppendRow>(_appendRow);
     on<DeleteRow>(_deleteRow);
     on<MoveRow>(_moveRow);
   }
@@ -37,6 +36,13 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
     final BaseRow element = newState.removeAt(event.oldIndex);
 
     newState.insert(newIndex, element);
+    emit(newState);
+  }
+
+  void _appendRow(AppendRow event, Emitter<List<BaseRow>> emit) {
+    var newState = state.toList();
+
+    newState.add(event.newRow);
     emit(newState);
   }
 
@@ -58,36 +64,6 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
 
     else if (event.index == 0 && state.isEmpty) {
       emit([event.newRow]);
-    }
-  }
-
-  // This handles the event that inserts a new row. The sender will specify the
-  // relative node to use. The UI will prevent this message from being sent if
-  // the list is empty.
-
-  void _insertBeforeRow(InsertBeforeRow event, Emitter<List<BaseRow>> emit) {
-    // If the index is in range, insert the new row before it.
-
-    if (event.index >= 0 && event.index < state.length) {
-      var newState = state.toList();
-
-      newState.insert(event.index, event.newRow);
-      emit(newState);
-    }
-  }
-
-  // This handles the event that inserts a new row after another. The sender
-  // will specify the relative node to use. The UI will prevent this message
-  // from being sent if the list is empty.
-
-  void _insertAfterRow(InsertAfterRow event, Emitter<List<BaseRow>> emit) {
-    // If the index is in range, insert the new row before it.
-
-    if (event.index >= 0 && event.index < state.length) {
-      var newState = state.toList();
-
-      newState.insert(event.index + 1, event.newRow);
-      emit(newState);
     }
   }
 

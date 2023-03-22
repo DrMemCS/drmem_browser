@@ -15,30 +15,18 @@ class UpdateRow extends ModelEvent {
   const UpdateRow(this.index, this.newRow);
 }
 
-// For this event, we're inserting a row before the row specified by the index.
-
-class InsertBeforeRow extends ModelEvent {
-  final int index;
-  final BaseRow newRow;
-
-  const InsertBeforeRow(this.index, this.newRow);
-}
-
-// For this event, we're inserting a row after the row specified by the index.
-
-class InsertAfterRow extends ModelEvent {
-  final int index;
-  final BaseRow newRow;
-
-  const InsertAfterRow(this.index, this.newRow);
-}
-
 // For this event, we're inserting a row after the row specified by the index.
 
 class DeleteRow extends ModelEvent {
   final int index;
 
   const DeleteRow(this.index);
+}
+
+class AppendRow extends ModelEvent {
+  final BaseRow newRow;
+
+  const AppendRow(this.newRow);
 }
 
 class MoveRow extends ModelEvent {
