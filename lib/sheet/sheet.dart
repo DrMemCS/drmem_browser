@@ -7,12 +7,10 @@ import 'package:ferry/ferry.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.req.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.data.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.var.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.req.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.data.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.var.gql.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
+import 'widgets/data_widget.dart';
 
 // The base class for all row types. A sheet is a list of objects derived
 // from BaseRow.
@@ -189,25 +187,6 @@ InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
       border: InputBorder.none);
 }
 
-// This builds widgets that show an error icon followed by red text
-// indicating an unsupported type was received. This could happen if
-// an older version of the app is reading a new version of DrMem.
-
-Widget _buildErrorWidget(ThemeData td, String msg) {
-  Color errorColor = td.colorScheme.error;
-
-  return Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: Icon(Icons.error, size: 16.0, color: errorColor),
-      ),
-      Text(msg, style: TextStyle(color: errorColor))
-    ],
-  );
-}
-
 class _CommentEditor extends StatefulWidget {
   final int idx;
   final String text;
@@ -265,110 +244,6 @@ class _CommentEditorState extends State<_CommentEditor> {
         ],
       ),
     );
-  }
-}
-
-// This widget is responsible for displaying live data. It will start the
-// monitor subscription so that it is the only widget that has to refresh when
-// new data arrives.
-
-class _DataWidget extends StatefulWidget {
-  final Client sClient;
-  final String device;
-  final String? units;
-
-  const _DataWidget(this.device, this.sClient, this.units);
-
-  @override
-  _DataWidgetState createState() => _DataWidgetState();
-}
-
-class _DataWidgetState extends State<_DataWidget> {
-  StreamSubscription? subReadings;
-  GMonitorDeviceData_monitorDevice? value;
-  String? errorText;
-
-  @override
-  void initState() {
-    subReadings = widget.sClient
-        .request(GMonitorDeviceReq((b) => b..vars.device = widget.device))
-        .listen(_handleReadings);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    subReadings?.cancel();
-    super.dispose();
-  }
-
-  void _handleReadings(
-      OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
-    if (!response.loading) {
-      if (response.hasErrors) {
-        developer.log("error",
-            name: "graphql.MonitorDevice", error: "$response");
-      } else {
-        setState(() {
-          value = response.data?.monitorDevice;
-        });
-      }
-    }
-  }
-
-  // Displays a checkbox widget to display bookean value
-
-  Widget _displayBoolean(bool value) {
-    return Checkbox(
-      visualDensity: VisualDensity.compact,
-      value: value,
-      onChanged: null,
-    );
-  }
-
-  Widget _displayInteger(int value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
-  Widget _displayDouble(double value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
-  // Create the appropriate widget based on the type of the incoming data.
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeData td = Theme.of(context);
-
-    if (value == null) {
-      return Container();
-    } else {
-      if (value!.boolValue != null) {
-        return _displayBoolean(value!.boolValue!);
-      }
-
-      if (value!.intValue != null) {
-        return _displayInteger(value!.intValue!, widget.units);
-      }
-
-      if (value!.floatValue != null) {
-        return _displayDouble(value!.floatValue!, widget.units);
-      }
-
-      if (value!.stringValue != null) {
-        return Text("${value!.stringValue}");
-      }
-
-      return _buildErrorWidget(td, "Unknown type");
-    }
   }
 }
 
@@ -457,8 +332,8 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
           errorText == null
               ? (info == null
                   ? Container()
-                  : _DataWidget(widget.name, widget.sClient, info!.units))
-              : _buildErrorWidget(td, errorText!)
+                  : DataWidget(widget.name, widget.sClient, info!.units))
+              : buildErrorWidget(td, errorText!)
         ],
       ),
     );
