@@ -54,21 +54,27 @@ Here's an informal list of features to be added. If you're interested in helping
 
 - [X] Add a GitHib workflow to build and test before merging pull requests
 - [X] Display all the devices defined by the node (in the node details page.)
+- [ ] Add an app icon
 - [ ] Sheets need to be added to persistent storage.
-- [ ] Add controls to add/delete sheets.
 - [ ] Implement the Plot Row type.
   - [ ] Displaying plots
   - [ ] Editing plot configuration
   - [ ] Should support strip plots (numeric device(s) vs. time), logic plots (boolean device(s) vs.time), and X-Y (numeric device(s) vs. numeric device)
 - [ ] Must be able to set the value of settable devices.
 - [ ] Add unit tests
-- [ ] Merge the Edit/Runner Sheet views. By default we're in runner view.
-  - [ ] Floating button to add row.
-  - [ ] Tap and hold will allow one to drag a row to change the position.
-  - [ ] Double tap puts the row in edit mode.
+- [ ] Finish Sheet Editor
+  - [ ] Add controls to add/delete sheets
+  - [X] Add panel with buttons to append new rows
+  - [X] Allow rows to be reordered
+  - [X] Add "Delete" icon to delete a row
+  - [ ] Finish editor widgets for all row types
+    - [X] Dividers
+    - [ ] Devices
+    - [ ] Comments
+    - [ ] Plots
 - [ ] Create a "Widget" that implements the GraphQL API. Use the approach done by Bloc in which the `BuildContext` gains a field; in our case, a `drmem` field that has methods that use the GraphQL API.
   - [ ] This widget should be extracted and packaged so that other developers can make their own Flutter apps that talk to DrMem.
-  - [ ] Needs to monitor when it goes in and out of the background. As it transits throw these states, it must:
+  - [ ] Needs to monitor when it goes in and out of the background. As it transits through these states, it must:
     - [ ] Shutdown and restore the mDNS service.
     - [ ] Shutdown and restore GraphQL subscriptions.
   - [ ] Need to verify that all error handling is done correctly (re: GraphQL connections)
