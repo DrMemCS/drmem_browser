@@ -69,7 +69,9 @@ class _SheetEditorState extends State<SheetEditor> {
         .add(AppendRow(CommentRow("", key: UniqueKey())));
   }
 
-  // Creates a button that performs an action.
+  // Creates a button that performs an action. The action is defined by a
+  // call to the `cb` argument, which should return a function performing
+  // the action.
 
   Widget buildActionButton(BuildContext context,
       void Function() Function(BuildContext) cb, IconData id) {
