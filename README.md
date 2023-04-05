@@ -54,7 +54,7 @@ Here's an informal list of features to be added. If you're interested in helping
 
 - [X] Add a GitHib workflow to build and test before merging pull requests
 - [X] Display all the devices defined by the node (in the node details page.)
-- [ ] Add an app icon
+- [X] Add an app icon
 - [ ] Sheets need to be added to persistent storage.
 - [ ] Implement the Plot Row type.
   - [ ] Displaying plots
