@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:drmem_browser/sheet/sheet.dart';
 import 'model_events.dart';
@@ -9,21 +10,40 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
   // product.
 
   static List<BaseRow> dummyDefaults = <BaseRow>[
-    CommentRow("This is a comment.\n\nCan we insert newlines?"),
-    const DeviceRow("demo-timer:output", false),
-    const DeviceRow("demo-timer:enable", true),
-    const EmptyRow(),
-    CommentRow("Here's another comment."),
-    const PlotRow(),
+    CommentRow("This is a comment.\n\nCan we insert newlines?",
+        key: UniqueKey()),
+    DeviceRow("demo-timer:output", key: UniqueKey()),
+    DeviceRow("demo-timer:enable", key: UniqueKey()),
+    EmptyRow(key: UniqueKey()),
+    CommentRow("Here's another comment.", key: UniqueKey()),
+    PlotRow(key: UniqueKey()),
   ];
 
   // Constructor.
 
   PageModel() : super([]) {
     on<UpdateRow>(_updateRow);
-    on<InsertBeforeRow>(_insertBeforeRow);
-    on<InsertAfterRow>(_insertAfterRow);
+    on<AppendRow>(_appendRow);
     on<DeleteRow>(_deleteRow);
+    on<MoveRow>(_moveRow);
+  }
+
+  void _moveRow(MoveRow event, Emitter<List<BaseRow>> emit) {
+    var newState = state.toList();
+
+    final newIndex =
+        event.oldIndex < event.newIndex ? event.newIndex - 1 : event.newIndex;
+    final BaseRow element = newState.removeAt(event.oldIndex);
+
+    newState.insert(newIndex, element);
+    emit(newState);
+  }
+
+  void _appendRow(AppendRow event, Emitter<List<BaseRow>> emit) {
+    var newState = state.toList();
+
+    newState.add(event.newRow);
+    emit(newState);
   }
 
   // This event is received when a child widget wants to change the type of a
@@ -44,36 +64,6 @@ class PageModel extends Bloc<ModelEvent, List<BaseRow>> {
 
     else if (event.index == 0 && state.isEmpty) {
       emit([event.newRow]);
-    }
-  }
-
-  // This handles the event that inserts a new row. The sender will specify the
-  // relative node to use. The UI will prevent this message from being sent if
-  // the list is empty.
-
-  void _insertBeforeRow(InsertBeforeRow event, Emitter<List<BaseRow>> emit) {
-    // If the index is in range, insert the new row before it.
-
-    if (event.index >= 0 && event.index < state.length) {
-      var newState = state.toList();
-
-      newState.insert(event.index, event.newRow);
-      emit(newState);
-    }
-  }
-
-  // This handles the event that inserts a new row after another. The sender
-  // will specify the relative node to use. The UI will prevent this message
-  // from being sent if the list is empty.
-
-  void _insertAfterRow(InsertAfterRow event, Emitter<List<BaseRow>> emit) {
-    // If the index is in range, insert the new row before it.
-
-    if (event.index >= 0 && event.index < state.length) {
-      var newState = state.toList();
-
-      newState.insert(event.index + 1, event.newRow);
-      emit(newState);
     }
   }
 

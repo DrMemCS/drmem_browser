@@ -77,14 +77,14 @@ class _State extends State<_NodeInfo> {
 
     return Padding(
         padding: const EdgeInsets.only(
-            top: 16.0, bottom: 4.0, left: 4.0, right: 8.0),
+            top: 16.0, bottom: 8.0, left: 4.0, right: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
             Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
-              child: Text(label, style: td.textTheme.titleMedium),
+              child: Text(label, style: td.textTheme.bodyLarge),
             )
           ],
         ));
@@ -93,14 +93,15 @@ class _State extends State<_NodeInfo> {
   // Returns a widget that renders property information. This consists of a
   // dimmed label followed by its value in a highlighted color.
 
-  Widget buildProperty(BuildContext context, String label, String? value) {
+  Widget buildProperty(
+      BuildContext context, String label, int labelFlex, String? value) {
     final ThemeData td = Theme.of(context);
 
     return Row(
       children: [
         Flexible(
           fit: FlexFit.tight,
-          flex: 8,
+          flex: labelFlex,
           child: Text(label,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
@@ -139,6 +140,8 @@ class _State extends State<_NodeInfo> {
     final Service info = widget.node;
     final DateTime? bootTime =
         DateTime.tryParse(propToString(info, "boot-time") ?? "");
+    const int nodePropFlex = 8;
+    const int gqlPropFlex = 14;
 
     return Padding(
       padding: all8,
@@ -153,20 +156,20 @@ class _State extends State<_NodeInfo> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildProperty(
-                      context, "version", propToString(info, "version")),
-                  buildProperty(
-                      context, "address", "${info.host}:${info.port}"),
-                  buildProperty(
-                      context, "location", propToString(info, "location")),
-                  buildProperty(context, "boot time",
+                  buildProperty(context, "version", nodePropFlex,
+                      propToString(info, "version")),
+                  buildProperty(context, "address", nodePropFlex,
+                      "${info.host}:${info.port}"),
+                  buildProperty(context, "location", nodePropFlex,
+                      propToString(info, "location")),
+                  buildProperty(context, "boot time", nodePropFlex,
                       bootTime?.toLocal().toString() ?? "unknown"),
                   header(context, "GraphQL Endpoints"),
-                  buildProperty(
-                      context, "queries", propToString(info, "queries")),
-                  buildProperty(
-                      context, "mutations", propToString(info, "mutations")),
-                  buildProperty(context, "subscriptions",
+                  buildProperty(context, "queries", gqlPropFlex,
+                      propToString(info, "queries")),
+                  buildProperty(context, "mutations", gqlPropFlex,
+                      propToString(info, "mutations")),
+                  buildProperty(context, "subscriptions", gqlPropFlex,
                       propToString(info, "subscriptions")),
                   header(context, "Drivers"),
                   drivers == null
@@ -313,8 +316,18 @@ class _DriversListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> d = drivers.map((e) => buildDrvInfoRow(e, context)).toList();
+    List<Widget> all = [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
+        child: Text(
+            "This node is configured with these ${drivers.length} drivers.",
+            style: TextStyle(color: Theme.of(context).hintColor)),
+      )
+    ];
 
-    return Column(children: d);
+    all.addAll(d);
+
+    return Column(children: all);
   }
 }
 
@@ -330,9 +343,18 @@ class _DevicesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> d = devices.map((e) => buildDevInfoRow(e, context)).toList();
+    Iterable<Widget> d = devices.map((e) => buildDevInfoRow(e, context));
+    List<Widget> all = [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
+        child: Text(
+            "This node provides ${devices.length} devices. Double tap on a device name to copy it to the clipboard.",
+            style: TextStyle(color: Theme.of(context).hintColor)),
+      )
+    ];
 
-    return Column(children: d);
+    all.addAll(d);
+    return Column(children: all);
   }
 }
 // This public function returns the widget that displays node information.

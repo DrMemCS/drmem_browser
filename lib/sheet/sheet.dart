@@ -7,22 +7,60 @@ import 'package:ferry/ferry.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.req.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.data.gql.dart';
 import 'package:drmem_browser/schema/__generated__/get_device.var.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.req.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.data.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.var.gql.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
+import 'widgets/data_widget.dart';
 
 // The base class for all row types. A sheet is a list of objects derived
 // from BaseRow.
 
 abstract class BaseRow {
-  const BaseRow();
+  final Key key;
+
+  const BaseRow({required this.key});
 
   Widget buildRowEditor(BuildContext context, int index);
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient);
   Icon getIcon();
+
+  Map<String, dynamic> toJson();
+
+  // Factory method that can take a map from a JSON string and convert to a
+  // derived BaseRow class.
+
+  static BaseRow? fromJson(Map<String, dynamic> map, {Key? key}) {
+    switch (map['type']) {
+      case 'empty':
+        return EmptyRow(key: key ?? UniqueKey());
+
+      case 'comment':
+        {
+          String? comment = map['content'];
+
+          if (comment != null) {
+            return CommentRow(comment, key: key ?? UniqueKey());
+          }
+          return null;
+        }
+
+      case 'device':
+        {
+          String? device = map['device'];
+
+          if (device != null) {
+            return DeviceRow(device, key: key ?? UniqueKey());
+          }
+          return null;
+        }
+
+      case 'plot':
+        return PlotRow(key: key ?? UniqueKey());
+
+      default:
+        return null;
+    }
+  }
 }
 
 // This type isn't ever saved in a sheet's configuration. It automatically
@@ -30,7 +68,7 @@ abstract class BaseRow {
 // placeholder, the user can turn it into one of the other row types.
 
 class EmptyRow extends BaseRow {
-  const EmptyRow() : super();
+  const EmptyRow({required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.menu);
@@ -43,8 +81,11 @@ class EmptyRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
-    return const Expanded(child: Divider());
+    return const Divider();
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'empty'};
 }
 
 // This row type holds text which allows the user to add comments to the sheet.
@@ -52,7 +93,7 @@ class EmptyRow extends BaseRow {
 class CommentRow extends BaseRow {
   final String comment;
 
-  CommentRow(this.comment) : super();
+  const CommentRow(this.comment, {required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.chat);
@@ -78,15 +119,17 @@ class CommentRow extends BaseRow {
       ),
     );
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'comment', 'content': comment};
 }
 
 // This row type monitors a device.
 
 class DeviceRow extends BaseRow {
   final String name;
-  final bool settable;
 
-  const DeviceRow(this.name, this.settable) : super();
+  const DeviceRow(this.name, {required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.developer_board);
@@ -100,12 +143,15 @@ class DeviceRow extends BaseRow {
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return _DeviceWidget(qClient, sClient, name);
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'device', 'device': name};
 }
 
 // This row type displays a plot.
 
 class PlotRow extends BaseRow {
-  const PlotRow() : super();
+  const PlotRow({required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.auto_graph);
@@ -119,6 +165,9 @@ class PlotRow extends BaseRow {
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
     return const Text("display plot");
   }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'plot'};
 }
 
 InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
@@ -136,25 +185,6 @@ InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
       fillColor: td.colorScheme.secondary.withOpacity(0.125),
       filled: true,
       border: InputBorder.none);
-}
-
-// This builds widgets that show an error icon followed by red text
-// indicating an unsupported type was received. This could happen if
-// an older version of the app is reading a new version of DrMem.
-
-Widget _buildErrorWidget(ThemeData td, String msg) {
-  Color errorColor = td.colorScheme.error;
-
-  return Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: Icon(Icons.error, size: 16.0, color: errorColor),
-      ),
-      Text(msg, style: TextStyle(color: errorColor))
-    ],
-  );
 }
 
 class _CommentEditor extends StatefulWidget {
@@ -206,118 +236,14 @@ class _CommentEditorState extends State<_CommentEditor> {
               onPressed: changed
                   ? () {
                       setState(() => changed = false);
-                      context.read<PageModel>().add(
-                          UpdateRow(widget.idx, CommentRow(controller.text)));
+                      context.read<PageModel>().add(UpdateRow(widget.idx,
+                          CommentRow(controller.text, key: UniqueKey())));
                     }
                   : null,
               child: const Text("Save"))
         ],
       ),
     );
-  }
-}
-
-// This widget is responsible for displaying live data. It will start the
-// monitor subscription so that it is the only widget that has to refresh when
-// new data arrives.
-
-class _DataWidget extends StatefulWidget {
-  final Client sClient;
-  final String device;
-  final String? units;
-
-  const _DataWidget(this.device, this.sClient, this.units);
-
-  @override
-  _DataWidgetState createState() => _DataWidgetState();
-}
-
-class _DataWidgetState extends State<_DataWidget> {
-  StreamSubscription? subReadings;
-  GMonitorDeviceData_monitorDevice? value;
-  String? errorText;
-
-  @override
-  void initState() {
-    subReadings = widget.sClient
-        .request(GMonitorDeviceReq((b) => b..vars.device = widget.device))
-        .listen(_handleReadings);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    subReadings?.cancel();
-    super.dispose();
-  }
-
-  void _handleReadings(
-      OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
-    if (!response.loading) {
-      if (response.hasErrors) {
-        developer.log("error",
-            name: "graphql.MonitorDevice", error: "$response");
-      } else {
-        setState(() {
-          value = response.data?.monitorDevice;
-        });
-      }
-    }
-  }
-
-  // Displays a checkbox widget to display bookean values.
-
-  Widget _displayBoolean(bool value) {
-    return Checkbox(
-      visualDensity: VisualDensity.compact,
-      value: value,
-      onChanged: null,
-    );
-  }
-
-  Widget _displayInteger(int value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
-  Widget _displayDouble(double value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
-  // Create the appropriate widget based on the type of the incoming data.
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeData td = Theme.of(context);
-
-    if (value == null) {
-      return Container();
-    } else {
-      if (value!.boolValue != null) {
-        return _displayBoolean(value!.boolValue!);
-      }
-
-      if (value!.intValue != null) {
-        return _displayInteger(value!.intValue!, widget.units);
-      }
-
-      if (value!.floatValue != null) {
-        return _displayDouble(value!.floatValue!, widget.units);
-      }
-
-      if (value!.stringValue != null) {
-        return Text("${value!.stringValue}");
-      }
-
-      return _buildErrorWidget(td, "Unknown type");
-    }
   }
 }
 
@@ -365,11 +291,17 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 
   @override
   void initState() {
-    // Start a GraphQL query to receive information about the device.
+    // If a device name was given, start a GraphQL query to receive information
+    // about the device. Otherwise, set the error text and avoid doing the
+    // request/replies.
 
-    subMeta = widget.qClient
-        .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
-        .listen(_handleDeviceInfo);
+    if (widget.name.isNotEmpty) {
+      subMeta = widget.qClient
+          .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
+          .listen(_handleDeviceInfo);
+    } else {
+      errorText = "No device name";
+    }
 
     super.initState();
   }
@@ -400,8 +332,8 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
           errorText == null
               ? (info == null
                   ? Container()
-                  : _DataWidget(widget.name, widget.sClient, info!.units))
-              : _buildErrorWidget(td, errorText!)
+                  : DataWidget(widget.name, widget.sClient, info!.units))
+              : buildErrorWidget(td, errorText!)
         ],
       ),
     );
@@ -452,8 +384,9 @@ class _DeviceEditorState extends State<_DeviceEditor> {
                 maxLines: 1,
                 decoration: _getTextFieldDecoration(context, "Device name"),
                 controller: controller,
-                onChanged: (value) => context.read<PageModel>().add(
-                      UpdateRow(widget.idx, DeviceRow(controller.text, false)),
+                onSubmitted: (value) => context.read<PageModel>().add(
+                      UpdateRow(widget.idx,
+                          DeviceRow(controller.text, key: UniqueKey())),
                     )),
           ),
         ],
