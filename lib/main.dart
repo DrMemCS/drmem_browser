@@ -84,7 +84,7 @@ class BaseState extends State<BaseWidget> {
   // This page will be used to edit the Logic in a DrMem instance.
 
   Widget _displayLogic() {
-    return const Text("TODO: Edit logic.");
+    return const Center(child: Text("TODO: Edit logic."));
   }
 
   Widget _display(BuildContext context) {
@@ -104,7 +104,7 @@ class BaseState extends State<BaseWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(child: Center(child: _display(context))),
+        body: SafeArea(child: _display(context)),
         bottomNavigationBar: _buildNavBar());
   }
 }
