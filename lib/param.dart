@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:drmem_browser/model/model.dart';
 
 // Display "parameter page".
 
@@ -19,30 +21,40 @@ class _SheetsState extends State<_ParamPage> {
   // Creates the AppBar with actions buttons that affect the current sheet.
 
   AppBar buildAppBar(BuildContext context) {
-    return AppBar(actions: <Widget>[
-      IconButton(
-          tooltip: "Add new sheet",
-          onPressed: !editMode
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('TODO: Add a new, empty sheet.')));
-                }
-              : null,
-          icon: const Icon(Icons.my_library_add_rounded)),
-      IconButton(
-          tooltip: "Delete sheet",
-          onPressed: !editMode
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('TODO: Delete current sheet.')));
-                }
-              : null,
-          icon: const Icon(Icons.delete_forever)),
-      IconButton(
-          tooltip: "Edit sheet",
-          onPressed: () => setState(() => editMode = !editMode),
-          icon: const Icon(Icons.edit)),
-    ]);
+    final List<Widget> actions = editMode
+        ? [
+            IconButton(
+                tooltip: "Add new sheet",
+                onPressed: !editMode
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('TODO: Add a new, empty sheet.')));
+                      }
+                    : null,
+                icon: const Icon(Icons.my_library_add_rounded)),
+            IconButton(
+                tooltip: "Delete sheet",
+                onPressed: !editMode
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('TODO: Delete current sheet.')));
+                      }
+                    : null,
+                icon: const Icon(Icons.delete_forever)),
+          ]
+        : [];
+
+    actions.add(IconButton(
+        tooltip: "Edit sheet",
+        onPressed: () => setState(() => editMode = !editMode),
+        icon: const Icon(Icons.edit)));
+
+    return AppBar(
+        actions: actions,
+        title: Text(context.read<Model>().state.selectedSheet));
   }
 
   @override
