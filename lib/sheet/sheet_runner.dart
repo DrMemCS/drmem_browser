@@ -48,7 +48,7 @@ class _SheetRunnerState extends State<SheetRunner> {
                 scheme: "http",
                 host: "192.168.1.103",
                 port: 3000,
-                path: "/query")
+                path: "/drmem/q")
             .toString()),
         cache: Cache());
 
@@ -62,7 +62,7 @@ class _SheetRunnerState extends State<SheetRunner> {
               scheme: "ws",
               host: "192.168.1.103",
               port: 3000,
-              path: "/subscribe",
+              path: "/drmem/s",
             ).toString(),
             reconnectInterval: const Duration(seconds: 1)),
         cache: Cache());
