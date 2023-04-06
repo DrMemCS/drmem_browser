@@ -236,7 +236,7 @@ class _CommentEditorState extends State<_CommentEditor> {
               onPressed: changed
                   ? () {
                       setState(() => changed = false);
-                      context.read<PageModel>().add(UpdateRow(widget.idx,
+                      context.read<Model>().add(UpdateRow(widget.idx,
                           CommentRow(controller.text, key: UniqueKey())));
                     }
                   : null,
@@ -384,7 +384,7 @@ class _DeviceEditorState extends State<_DeviceEditor> {
                 maxLines: 1,
                 decoration: _getTextFieldDecoration(context, "Device name"),
                 controller: controller,
-                onSubmitted: (value) => context.read<PageModel>().add(
+                onSubmitted: (value) => context.read<Model>().add(
                       UpdateRow(widget.idx,
                           DeviceRow(controller.text, key: UniqueKey())),
                     )),

@@ -4,7 +4,6 @@ import 'package:gql_http_link/gql_http_link.dart';
 import "package:gql_websocket_link/gql_websocket_link.dart";
 import 'package:ferry/ferry.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'sheet.dart';
 
 // A SheetRunner widget takes the state of a Sheet and renders it. The Sheet's
 // state is a list of BaseRow types. These rows are organized using a Column
@@ -86,13 +85,13 @@ class _SheetRunnerState extends State<SheetRunner> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PageModel, List<BaseRow>>(builder: (context, state) {
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
       return ListView(
           padding: const EdgeInsets.all(4.0),
           children:
               // Loop through the rows and convert them to their Widget form.
 
-              state
+              state.selected.rows
                   .map((e) => Padding(
                         key: e.key,
                         padding: const EdgeInsets.only(bottom: 4.0),

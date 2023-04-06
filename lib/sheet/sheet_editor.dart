@@ -33,8 +33,7 @@ class _SheetEditorState extends State<SheetEditor> {
               e.buildRowEditor(context, idx),
               IconButton(
                   visualDensity: VisualDensity.compact,
-                  onPressed: () =>
-                      context.read<PageModel>().add(DeleteRow(idx)),
+                  onPressed: () => context.read<Model>().add(DeleteRow(idx)),
                   icon: const Icon(Icons.delete))
             ]),
       );
@@ -43,30 +42,28 @@ class _SheetEditorState extends State<SheetEditor> {
 
   void Function() mkAddDividerRow(BuildContext context) {
     return () =>
-        context.read<PageModel>().add(AppendRow(EmptyRow(key: UniqueKey())));
+        context.read<Model>().add(AppendRow(EmptyRow(key: UniqueKey())));
   }
 
   // Returns a function that appends a device row to the sheet.
 
   void Function() mkAddDeviceRow(BuildContext context) {
-    return () => context
-        .read<PageModel>()
-        .add(AppendRow(DeviceRow("", key: UniqueKey())));
+    return () =>
+        context.read<Model>().add(AppendRow(DeviceRow("", key: UniqueKey())));
   }
 
   // Returns a function that appends a plot row to the sheet.
 
   void Function() mkAddPlotRow(BuildContext context) {
     return () =>
-        context.read<PageModel>().add(AppendRow(PlotRow(key: UniqueKey())));
+        context.read<Model>().add(AppendRow(PlotRow(key: UniqueKey())));
   }
 
   // Returns a function that appends a comment row to the sheet.
 
   void Function() mkAddCommentRow(BuildContext context) {
-    return () => context
-        .read<PageModel>()
-        .add(AppendRow(CommentRow("", key: UniqueKey())));
+    return () =>
+        context.read<Model>().add(AppendRow(CommentRow("", key: UniqueKey())));
   }
 
   // Creates a button that performs an action. The action is defined by a
@@ -92,9 +89,8 @@ class _SheetEditorState extends State<SheetEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PageModel, List<BaseRow>>(
-        builder: (BuildContext context, state) {
-      final bool movable = state.length > 1;
+    return BlocBuilder<Model, AppState>(builder: (BuildContext context, state) {
+      final bool movable = state.selected.rows.length > 1;
 
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,10 +98,10 @@ class _SheetEditorState extends State<SheetEditor> {
           Expanded(
             child: ReorderableListView(
                 onReorder: (oldIndex, newIndex) =>
-                    context.read<PageModel>().add(MoveRow(oldIndex, newIndex)),
+                    context.read<Model>().add(MoveRow(oldIndex, newIndex)),
                 buildDefaultDragHandles: movable,
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
-                children: state.fold([], (acc, e) {
+                children: state.selected.rows.fold([], (acc, e) {
                   acc.add(renderRow(context, true, e, acc.length, movable));
                   return acc;
                 })),

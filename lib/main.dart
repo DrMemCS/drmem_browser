@@ -34,7 +34,7 @@ class DrMemApp extends StatelessWidget {
           .copyWith(useMaterial3: true, textTheme: defTextTheme),
       themeMode: ThemeMode.system,
       home: BlocProvider(
-        create: (_) => PageModel(),
+        create: (_) => Model(),
         child: const BaseWidget(),
       ),
     );
