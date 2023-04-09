@@ -69,7 +69,6 @@ class BaseState extends State<BaseWidget> {
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
               icon: Icon(Icons.web_stories), label: "Sheets"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Logic"),
         ]);
   }
 
@@ -81,19 +80,10 @@ class BaseState extends State<BaseWidget> {
         : displayNode(nodeInfo!);
   }
 
-  // This page will be used to edit the Logic in a DrMem instance.
-
-  Widget _displayLogic() {
-    return const Center(child: Text("TODO: Edit logic."));
-  }
-
   Widget _display(BuildContext context) {
     switch (_selectIndex) {
       case 1:
         return displayParameters();
-
-      case 2:
-        return _displayLogic();
 
       case 0:
       default:
