@@ -156,7 +156,17 @@ class ChooserState extends State<DnsChooser> {
       // display a ListView containing the contents of the list.
 
       return _nodes.isEmpty
-          ? const CircularProgressIndicator()
+          ? Center(
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text("Listening for nodes ..."),
+                ),
+                CircularProgressIndicator(),
+              ],
+            ))
           : Padding(
               padding: const EdgeInsets.all(4.0),
               child: ListView.builder(
