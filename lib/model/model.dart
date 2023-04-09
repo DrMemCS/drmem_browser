@@ -51,6 +51,41 @@ class AppState {
 
   AppState(this.selectedSheet, this._sheets);
 
+  AppState.withMyData()
+      : _sheets = {},
+        selectedSheet = "" {
+    var pc = PageConfig();
+
+    pc.appendRow(DeviceRow("sump:state", label: "Active", key: UniqueKey()));
+    pc.appendRow(DeviceRow("sump:duty", label: "Duty Cycle", key: UniqueKey()));
+    pc.appendRow(DeviceRow("sump:in-flow", label: "In-Flow", key: UniqueKey()));
+    pc.appendRow(
+        DeviceRow("sump:duration", label: "Off-Time", key: UniqueKey()));
+    pc.appendRow(EmptyRow(key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:precip-rate",
+        label: "Rainfall Rate", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:precip-total",
+        label: "Rainfall Total", key: UniqueKey()));
+
+    _sheets["Sump Status"] = pc;
+
+    pc = PageConfig();
+
+    pc.appendRow(DeviceRow("weather:temperature", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:dewpoint", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:wind-chill", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:solar-rad", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:precip-rate", key: UniqueKey()));
+    pc.appendRow(DeviceRow("weather:precip-total", key: UniqueKey()));
+
+    _sheets["Weather Info"] = pc;
+
+    selectedSheet = "Sump Status";
+  }
+
+  List<String> get sheetNames =>
+      _sheets.isNotEmpty ? _sheets.keys.toList() : ["Untitled"];
+
   // Returns the page that's currently selected. If `selectedSheet` refers to a
   // non-existent entry, return an empty sheet.
 
@@ -60,7 +95,7 @@ class AppState {
 // Defines the page's data model and handles events to modify it.
 
 class Model extends Bloc<ModelEvent, AppState> {
-  Model() : super(AppState("Untitled", {})) {
+  Model() : super(AppState.withMyData()) {
     on<AppendRow>(_appendRow);
     on<DeleteRow>(_deleteRow);
     on<UpdateRow>(_updateRow);
