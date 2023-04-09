@@ -1,3 +1,4 @@
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:flutter/material.dart';
 import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
@@ -20,7 +21,7 @@ class _SheetsState extends State<_ParamPage> {
 
   // Creates the AppBar with actions buttons that affect the current sheet.
 
-  AppBar buildAppBar(BuildContext context) {
+  Widget buildAppBar(BuildContext context) {
     final List<Widget> actions = editMode
         ? [
             IconButton(
@@ -50,11 +51,29 @@ class _SheetsState extends State<_ParamPage> {
     actions.add(IconButton(
         tooltip: "Edit sheet",
         onPressed: () => setState(() => editMode = !editMode),
-        icon: const Icon(Icons.edit)));
+        icon: const Icon(Icons.settings)));
 
-    return AppBar(
-        actions: actions,
-        title: Text(context.read<Model>().state.selectedSheet));
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
+      AppState state = context.read<Model>().state;
+      List<String> items = state.sheetNames;
+
+      return AppBar(
+          actions: actions,
+          title: SizedBox(
+            width: double.infinity,
+            child: DropdownButton<String>(
+              value: state.selectedSheet,
+              items: items.map((String e) {
+                return DropdownMenuItem(value: e, child: Text(e));
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<Model>().add(SelectSheet(value));
+                }
+              },
+            ),
+          ));
+    });
   }
 
   @override

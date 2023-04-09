@@ -65,6 +65,7 @@ class Model extends Bloc<ModelEvent, AppState> {
     on<DeleteRow>(_deleteRow);
     on<UpdateRow>(_updateRow);
     on<MoveRow>(_moveRow);
+    on<SelectSheet>(_selectSheet);
   }
 
   // Adds a new row to the end of the currently selected sheet.
@@ -117,5 +118,11 @@ class Model extends Bloc<ModelEvent, AppState> {
     } else {
       developer.log("tried to move a row in a non-existent sheet");
     }
+  }
+
+  void _selectSheet(SelectSheet event, Emitter<AppState> emit) {
+    AppState newState = AppState(event.name, state._sheets);
+
+    emit(newState);
   }
 }

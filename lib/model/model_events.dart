@@ -35,3 +35,9 @@ class MoveRow extends ModelEvent {
 
   const MoveRow(this.oldIndex, this.newIndex);
 }
+
+class SelectSheet extends ModelEvent {
+  final String name;
+
+  const SelectSheet(this.name);
+}
