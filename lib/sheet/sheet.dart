@@ -128,8 +128,9 @@ class CommentRow extends BaseRow {
 
 class DeviceRow extends BaseRow {
   final String name;
+  final String? label;
 
-  const DeviceRow(this.name, {required super.key});
+  const DeviceRow(this.name, {this.label, required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.developer_board);
@@ -141,7 +142,7 @@ class DeviceRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
-    return _DeviceWidget(qClient, sClient, name);
+    return _DeviceWidget(qClient, sClient, label, name);
   }
 
   @override
@@ -250,9 +251,11 @@ class _CommentEditorState extends State<_CommentEditor> {
 class _DeviceWidget extends StatefulWidget {
   final Client qClient;
   final Client sClient;
+  final String? label;
   final String name;
 
-  const _DeviceWidget(this.qClient, this.sClient, this.name, {Key? key})
+  const _DeviceWidget(this.qClient, this.sClient, this.label, this.name,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -324,7 +327,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         children: [
           Expanded(
             child: Text(
-              widget.name,
+              widget.label ?? widget.name,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.indicatorColor),
             ),
