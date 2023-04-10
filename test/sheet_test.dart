@@ -13,6 +13,7 @@ void main() {
     });
     test("... bad device field type", () {
       expect(BaseRow.fromJson({'type': 'device'}), null);
+      expect(BaseRow.fromJson({'type': 'device', 'label': true}), null);
       expect(BaseRow.fromJson({'type': 'device', 'junk': true}), null);
     });
   });
@@ -27,12 +28,36 @@ void main() {
     });
 
     test("... DeviceRow", () {
-      final DeviceRow tmp = DeviceRow("This is a comment.", key: UniqueKey());
-      final DeviceRow out =
-          BaseRow.fromJson(tmp.toJson(), key: tmp.key) as DeviceRow;
+      // Test serialization of a device row which doesn't have a label.
 
-      expect(out.name, tmp.name);
-      expect(out.key, tmp.key);
+      {
+        final DeviceRow tmp = DeviceRow("device:state", key: UniqueKey());
+        final json = tmp.toJson();
+
+        // Make sure that, when the label is null, we don't emit anything for
+        // that field.
+
+        expect(json.containsKey("label"), false);
+
+        final DeviceRow out = BaseRow.fromJson(json, key: tmp.key) as DeviceRow;
+
+        expect(out.name, tmp.name);
+        expect(out.label, null);
+        expect(out.key, tmp.key);
+      }
+
+      // Test serialization of a device row which has a label.
+
+      {
+        final DeviceRow tmp =
+            DeviceRow("device:state", label: "tag", key: UniqueKey());
+        final DeviceRow out =
+            BaseRow.fromJson(tmp.toJson(), key: tmp.key) as DeviceRow;
+
+        expect(out.name, tmp.name);
+        expect(out.label, tmp.label);
+        expect(out.key, tmp.key);
+      }
     });
 
     test("... CommentRow", () {

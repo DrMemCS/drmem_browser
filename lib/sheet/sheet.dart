@@ -49,7 +49,8 @@ abstract class BaseRow {
           String? device = map['device'];
 
           if (device != null) {
-            return DeviceRow(device, key: key ?? UniqueKey());
+            return DeviceRow(device,
+                label: map['label'], key: key ?? UniqueKey());
           }
           return null;
         }
@@ -137,7 +138,7 @@ class DeviceRow extends BaseRow {
 
   @override
   Widget buildRowEditor(BuildContext context, int index) {
-    return _DeviceEditor(index, name);
+    return _DeviceEditor(index, name, label: label);
   }
 
   @override
@@ -146,7 +147,14 @@ class DeviceRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'device', 'device': name};
+  Map<String, dynamic> toJson() {
+    var tmp = {'type': 'device', 'device': name};
+
+    if (label != null) {
+      tmp['label'] = label!;
+    }
+    return tmp;
+  }
 }
 
 // This row type displays a plot.
@@ -344,28 +352,33 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 }
 
 class _DeviceEditor extends StatefulWidget {
-  final int idx;
-  final String device;
+  final int _idx;
+  final String _device;
+  final String _label;
 
-  const _DeviceEditor(this.idx, this.device, {Key? key}) : super(key: key);
+  const _DeviceEditor(this._idx, this._device, {String? label})
+      : _label = label ?? "";
 
   @override
   _DeviceEditorState createState() => _DeviceEditorState();
 }
 
 class _DeviceEditorState extends State<_DeviceEditor> {
-  late final TextEditingController controller;
+  late final TextEditingController ctrlDevice;
+  late final TextEditingController ctrlLabel;
   final RegExp re = RegExp(r'^[-:\w\d]*$');
 
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(text: widget.device);
+    ctrlDevice = TextEditingController(text: widget._device);
+    ctrlLabel = TextEditingController(text: widget._label);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    ctrlDevice.dispose();
+    ctrlLabel.dispose();
     super.dispose();
   }
 
@@ -376,20 +389,44 @@ class _DeviceEditorState extends State<_DeviceEditor> {
         children: [
           Flexible(
             fit: FlexFit.loose,
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: TextField(
+                  autocorrect: false,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  inputFormatters: [
+                    TextInputFormatter.withFunction((oldValue, newValue) =>
+                        re.hasMatch(newValue.text) ? newValue : oldValue)
+                  ],
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: _getTextFieldDecoration(context, "Device name"),
+                  controller: ctrlDevice,
+                  onSubmitted: (value) => context.read<Model>().add(
+                        UpdateRow(
+                            widget._idx,
+                            DeviceRow(ctrlDevice.text,
+                                label: ctrlLabel.text, key: UniqueKey())),
+                      )),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.loose,
+            flex: 1,
             child: TextField(
                 autocorrect: false,
                 style: Theme.of(context).textTheme.bodyMedium,
-                inputFormatters: [
-                  TextInputFormatter.withFunction((oldValue, newValue) =>
-                      re.hasMatch(newValue.text) ? newValue : oldValue)
-                ],
                 minLines: 1,
                 maxLines: 1,
-                decoration: _getTextFieldDecoration(context, "Device name"),
-                controller: controller,
+                decoration:
+                    _getTextFieldDecoration(context, "Label (optional)"),
+                controller: ctrlLabel,
                 onSubmitted: (value) => context.read<Model>().add(
-                      UpdateRow(widget.idx,
-                          DeviceRow(controller.text, key: UniqueKey())),
+                      UpdateRow(
+                          widget._idx,
+                          DeviceRow(ctrlDevice.text,
+                              label: ctrlLabel.text, key: UniqueKey())),
                     )),
           ),
         ],
