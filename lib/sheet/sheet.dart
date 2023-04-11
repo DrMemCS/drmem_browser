@@ -281,7 +281,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
     if (!response.loading) {
       if (response.hasErrors) {
         developer.log("error returned",
-            name: "graphql.GetDevice", error: "$response");
+            name: "graphql.GetDevice", error: "${response.graphqlErrors}");
       } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
         setState(() {
           errorText = null;
