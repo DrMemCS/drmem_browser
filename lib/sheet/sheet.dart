@@ -370,9 +370,9 @@ class _DeviceEditorState extends State<_DeviceEditor> {
 
   @override
   void initState() {
-    super.initState();
     ctrlDevice = TextEditingController(text: widget._device);
     ctrlLabel = TextEditingController(text: widget._label);
+    super.initState();
   }
 
   @override
