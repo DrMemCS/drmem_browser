@@ -18,43 +18,68 @@ class _ParamPage extends StatefulWidget {
 
 class _SheetsState extends State<_ParamPage> {
   bool editMode = false;
+  final TextEditingController ctrlEditName = TextEditingController();
+
+  @override
+  void dispose() {
+    ctrlEditName.dispose();
+    super.dispose();
+  }
+
+  Widget getEditorAppBar() {
+    final List<Widget> actions = [
+      IconButton(
+          tooltip: "Add new sheet",
+          onPressed: !editMode
+              ? () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('TODO: Add a new, empty sheet.')));
+                }
+              : null,
+          icon: const Icon(Icons.my_library_add_rounded)),
+      IconButton(
+          tooltip: "Delete sheet",
+          onPressed: !editMode
+              ? () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('TODO: Delete current sheet.')));
+                }
+              : null,
+          icon: const Icon(Icons.delete_forever)),
+      IconButton(
+          tooltip: "Edit sheet",
+          onPressed: () => setState(() => editMode = !editMode),
+          icon: const Icon(Icons.settings))
+    ];
+
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
+      ctrlEditName.text = state.selectedSheet;
+
+      return AppBar(
+          actions: actions,
+          title: SizedBox(
+            width: double.infinity,
+            child: TextField(
+              controller: ctrlEditName,
+              onSubmitted: (value) {
+                context.read<Model>().add(RenameSelectedSheet(value));
+              },
+            ),
+          ));
+    });
+  }
 
   // Creates the AppBar with actions buttons that affect the current sheet.
 
-  Widget buildAppBar(BuildContext context) {
-    final List<Widget> actions = editMode
-        ? [
-            IconButton(
-                tooltip: "Add new sheet",
-                onPressed: !editMode
-                    ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('TODO: Add a new, empty sheet.')));
-                      }
-                    : null,
-                icon: const Icon(Icons.my_library_add_rounded)),
-            IconButton(
-                tooltip: "Delete sheet",
-                onPressed: !editMode
-                    ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('TODO: Delete current sheet.')));
-                      }
-                    : null,
-                icon: const Icon(Icons.delete_forever)),
-          ]
-        : [];
-
-    actions.add(IconButton(
-        tooltip: "Edit sheet",
-        onPressed: () => setState(() => editMode = !editMode),
-        icon: const Icon(Icons.settings)));
+  Widget getRunnerAppBar() {
+    final List<Widget> actions = [
+      IconButton(
+          tooltip: "Edit sheet",
+          onPressed: () => setState(() => editMode = !editMode),
+          icon: const Icon(Icons.settings))
+    ];
 
     return BlocBuilder<Model, AppState>(builder: (context, state) {
-      AppState state = context.read<Model>().state;
       List<String> items = state.sheetNames;
 
       return AppBar(
@@ -62,6 +87,7 @@ class _SheetsState extends State<_ParamPage> {
           title: SizedBox(
             width: double.infinity,
             child: DropdownButton<String>(
+              underline: Container(),
               value: state.selectedSheet,
               items: items.map((String e) {
                 return DropdownMenuItem(value: e, child: Text(e));
@@ -79,7 +105,7 @@ class _SheetsState extends State<_ParamPage> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      buildAppBar(context),
+      editMode ? getEditorAppBar() : getRunnerAppBar(),
       Expanded(child: editMode ? const SheetEditor() : const SheetRunner())
     ]);
   }

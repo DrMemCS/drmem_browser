@@ -101,6 +101,7 @@ class Model extends Bloc<ModelEvent, AppState> {
     on<UpdateRow>(_updateRow);
     on<MoveRow>(_moveRow);
     on<SelectSheet>(_selectSheet);
+    on<RenameSelectedSheet>(_renameSelectedSheet);
   }
 
   // Adds a new row to the end of the currently selected sheet.
@@ -159,5 +160,25 @@ class Model extends Bloc<ModelEvent, AppState> {
     AppState newState = AppState(event.name, state._sheets);
 
     emit(newState);
+  }
+
+  void _renameSelectedSheet(RenameSelectedSheet event, Emitter<AppState> emit) {
+    AppState newState = AppState(state.selectedSheet, state._sheets);
+
+    // If the new name doesn't exist, then we can proceed. If it does exist,
+    // we ignore the request.
+    //
+    // TODO: We should report the error.
+
+    if (!newState._sheets.containsKey(event.newName)) {
+      PageConfig conf =
+          newState._sheets.remove(newState.selectedSheet) ?? PageConfig();
+
+      newState.selectedSheet = event.newName;
+      newState._sheets[event.newName] = conf;
+      emit(newState);
+    } else {
+      developer.log("can't rename sheet ... ${event.newName} already exists");
+    }
   }
 }
