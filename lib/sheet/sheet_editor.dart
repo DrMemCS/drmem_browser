@@ -104,7 +104,7 @@ class _SheetEditorState extends State<SheetEditor> {
                 onReorder: (oldIndex, newIndex) =>
                     context.read<Model>().add(MoveRow(oldIndex, newIndex)),
                 buildDefaultDragHandles: false,
-                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                padding: const EdgeInsets.all(4.0),
                 children: state.selected.rows.fold([], (acc, e) {
                   acc.add(renderRow(context, true, e, acc.length, movable));
                   return acc;
