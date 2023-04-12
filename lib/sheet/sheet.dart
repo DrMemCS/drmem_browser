@@ -109,7 +109,7 @@ class CommentRow extends BaseRow {
     return Container(
       constraints: const BoxConstraints(minHeight: 32.0),
       child: Padding(
-        padding: const EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(4.0),
         child: MarkdownBody(
           data: comment,
           fitContent: true,
