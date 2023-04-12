@@ -87,14 +87,14 @@ class _SheetRunnerState extends State<SheetRunner> {
   Widget build(BuildContext context) {
     return BlocBuilder<Model, AppState>(builder: (context, state) {
       return ListView(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
           children:
               // Loop through the rows and convert them to their Widget form.
 
               state.selected.rows
                   .map((e) => Padding(
                         key: e.key,
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding: const EdgeInsets.only(bottom: 2.0),
                         child:
                             e.buildRowRunner(context, _queryClient, _subClient),
                       ))
