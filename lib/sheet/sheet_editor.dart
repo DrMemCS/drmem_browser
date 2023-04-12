@@ -25,7 +25,7 @@ class _SheetEditorState extends State<SheetEditor> {
           bool movable) =>
       Padding(
         key: e.key,
-        padding: EdgeInsets.fromLTRB(4.0, 4.0, movable ? 32.0 : 4.0, 4.0),
+        padding: const EdgeInsets.all(4.0),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -34,7 +34,11 @@ class _SheetEditorState extends State<SheetEditor> {
               IconButton(
                   visualDensity: VisualDensity.compact,
                   onPressed: () => context.read<Model>().add(DeleteRow(idx)),
-                  icon: const Icon(Icons.delete))
+                  icon: const Icon(Icons.delete)),
+              movable
+                  ? ReorderableDragStartListener(
+                      index: idx, child: const Icon(Icons.drag_handle))
+                  : Container()
             ]),
       );
 
@@ -99,7 +103,7 @@ class _SheetEditorState extends State<SheetEditor> {
             child: ReorderableListView(
                 onReorder: (oldIndex, newIndex) =>
                     context.read<Model>().add(MoveRow(oldIndex, newIndex)),
-                buildDefaultDragHandles: movable,
+                buildDefaultDragHandles: false,
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 children: state.selected.rows.fold([], (acc, e) {
                   acc.add(renderRow(context, true, e, acc.length, movable));
