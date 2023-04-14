@@ -49,7 +49,8 @@ abstract class BaseRow {
           String? device = map['device'];
 
           if (device != null) {
-            return DeviceRow(device, key: key ?? UniqueKey());
+            return DeviceRow(device,
+                label: map['label'], key: key ?? UniqueKey());
           }
           return null;
         }
@@ -105,16 +106,18 @@ class CommentRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+    final ThemeData td = Theme.of(context);
+
     return Container(
       constraints: const BoxConstraints(minHeight: 32.0),
       child: Padding(
-        padding: const EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(4.0),
         child: MarkdownBody(
           data: comment,
           fitContent: true,
           styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-          styleSheet: MarkdownStyleSheet(
-              p: TextStyle(color: Theme.of(context).disabledColor)),
+          styleSheet:
+              MarkdownStyleSheet(p: TextStyle(color: td.colorScheme.tertiary)),
         ),
       ),
     );
@@ -128,24 +131,32 @@ class CommentRow extends BaseRow {
 
 class DeviceRow extends BaseRow {
   final String name;
+  final String? label;
 
-  const DeviceRow(this.name, {required super.key});
+  const DeviceRow(this.name, {this.label, required super.key});
 
   @override
   Icon getIcon() => const Icon(Icons.developer_board);
 
   @override
   Widget buildRowEditor(BuildContext context, int index) {
-    return _DeviceEditor(index, name);
+    return _DeviceEditor(index, name, label: label);
   }
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
-    return _DeviceWidget(qClient, sClient, name);
+    return _DeviceWidget(qClient, sClient, label, name);
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'device', 'device': name};
+  Map<String, dynamic> toJson() {
+    var tmp = {'type': 'device', 'device': name};
+
+    if (label != null) {
+      tmp['label'] = label!;
+    }
+    return tmp;
+  }
 }
 
 // This row type displays a plot.
@@ -236,7 +247,7 @@ class _CommentEditorState extends State<_CommentEditor> {
               onPressed: changed
                   ? () {
                       setState(() => changed = false);
-                      context.read<PageModel>().add(UpdateRow(widget.idx,
+                      context.read<Model>().add(UpdateRow(widget.idx,
                           CommentRow(controller.text, key: UniqueKey())));
                     }
                   : null,
@@ -250,9 +261,11 @@ class _CommentEditorState extends State<_CommentEditor> {
 class _DeviceWidget extends StatefulWidget {
   final Client qClient;
   final Client sClient;
+  final String? label;
   final String name;
 
-  const _DeviceWidget(this.qClient, this.sClient, this.name, {Key? key})
+  const _DeviceWidget(this.qClient, this.sClient, this.label, this.name,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -270,7 +283,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
     if (!response.loading) {
       if (response.hasErrors) {
         developer.log("error returned",
-            name: "graphql.GetDevice", error: "$response");
+            name: "graphql.GetDevice", error: "${response.graphqlErrors}");
       } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
         setState(() {
           errorText = null;
@@ -324,9 +337,9 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         children: [
           Expanded(
             child: Text(
-              widget.name,
+              widget.label ?? widget.name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: td.indicatorColor),
+              style: TextStyle(color: td.colorScheme.primary),
             ),
           ),
           errorText == null
@@ -341,28 +354,33 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
 }
 
 class _DeviceEditor extends StatefulWidget {
-  final int idx;
-  final String device;
+  final int _idx;
+  final String _device;
+  final String _label;
 
-  const _DeviceEditor(this.idx, this.device, {Key? key}) : super(key: key);
+  const _DeviceEditor(this._idx, this._device, {String? label})
+      : _label = label ?? "";
 
   @override
   _DeviceEditorState createState() => _DeviceEditorState();
 }
 
 class _DeviceEditorState extends State<_DeviceEditor> {
-  late final TextEditingController controller;
+  late final TextEditingController ctrlDevice;
+  late final TextEditingController ctrlLabel;
   final RegExp re = RegExp(r'^[-:\w\d]*$');
 
   @override
   void initState() {
+    ctrlDevice = TextEditingController(text: widget._device);
+    ctrlLabel = TextEditingController(text: widget._label);
     super.initState();
-    controller = TextEditingController(text: widget.device);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    ctrlDevice.dispose();
+    ctrlLabel.dispose();
     super.dispose();
   }
 
@@ -373,20 +391,44 @@ class _DeviceEditorState extends State<_DeviceEditor> {
         children: [
           Flexible(
             fit: FlexFit.loose,
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: TextField(
+                  autocorrect: false,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  inputFormatters: [
+                    TextInputFormatter.withFunction((oldValue, newValue) =>
+                        re.hasMatch(newValue.text) ? newValue : oldValue)
+                  ],
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: _getTextFieldDecoration(context, "Device name"),
+                  controller: ctrlDevice,
+                  onSubmitted: (value) => context.read<Model>().add(
+                        UpdateRow(
+                            widget._idx,
+                            DeviceRow(value,
+                                label: ctrlLabel.text, key: UniqueKey())),
+                      )),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.loose,
+            flex: 1,
             child: TextField(
                 autocorrect: false,
                 style: Theme.of(context).textTheme.bodyMedium,
-                inputFormatters: [
-                  TextInputFormatter.withFunction((oldValue, newValue) =>
-                      re.hasMatch(newValue.text) ? newValue : oldValue)
-                ],
                 minLines: 1,
                 maxLines: 1,
-                decoration: _getTextFieldDecoration(context, "Device name"),
-                controller: controller,
-                onSubmitted: (value) => context.read<PageModel>().add(
-                      UpdateRow(widget.idx,
-                          DeviceRow(controller.text, key: UniqueKey())),
+                decoration:
+                    _getTextFieldDecoration(context, "Label (optional)"),
+                controller: ctrlLabel,
+                onSubmitted: (value) => context.read<Model>().add(
+                      UpdateRow(
+                          widget._idx,
+                          DeviceRow(ctrlDevice.text,
+                              label: value, key: UniqueKey())),
                     )),
           ),
         ],

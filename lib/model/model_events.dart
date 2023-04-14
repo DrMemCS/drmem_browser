@@ -35,3 +35,15 @@ class MoveRow extends ModelEvent {
 
   const MoveRow(this.oldIndex, this.newIndex);
 }
+
+class SelectSheet extends ModelEvent {
+  final String name;
+
+  const SelectSheet(this.name);
+}
+
+class RenameSelectedSheet extends ModelEvent {
+  final String newName;
+
+  const RenameSelectedSheet(this.newName);
+}

@@ -113,13 +113,14 @@ class ChooserState extends State<DnsChooser> {
         elevation: 2.0,
         child: ListTile(
             key: Key(host),
-            leading: const Icon(Icons.developer_board),
-            title: Text(info.name ?? "**Unknown**"),
+            leading: Icon(Icons.developer_board, color: td.colorScheme.primary),
+            title: Text(info.name ?? "**Unknown**",
+                style: td.textTheme.titleLarge),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null
                 ? Text(location,
                     style: td.textTheme.bodySmall!
-                        .copyWith(color: td.colorScheme.secondary))
+                        .copyWith(color: td.colorScheme.tertiary))
                 : null,
             trailing: Text("$host : ${info.port}",
                 softWrap: true,
@@ -156,7 +157,17 @@ class ChooserState extends State<DnsChooser> {
       // display a ListView containing the contents of the list.
 
       return _nodes.isEmpty
-          ? const CircularProgressIndicator()
+          ? Center(
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text("Listening for nodes ..."),
+                ),
+                CircularProgressIndicator(),
+              ],
+            ))
           : Padding(
               padding: const EdgeInsets.all(4.0),
               child: ListView.builder(

@@ -69,8 +69,8 @@ Here's an informal list of features to be added. If you're interested in helping
   - [X] Add "Delete" icon to delete a row
   - [ ] Finish editor widgets for all row types
     - [X] Dividers
-    - [ ] Devices
-    - [ ] Comments
+    - [X] Devices
+    - [X] Comments
     - [ ] Plots
 - [ ] Create a "Widget" that implements the GraphQL API. Use the approach done by Bloc in which the `BuildContext` gains a field; in our case, a `drmem` field that has methods that use the GraphQL API.
   - [ ] This widget should be extracted and packaged so that other developers can make their own Flutter apps that talk to DrMem.
@@ -78,6 +78,5 @@ Here's an informal list of features to be added. If you're interested in helping
     - [ ] Shutdown and restore the mDNS service.
     - [ ] Shutdown and restore GraphQL subscriptions.
   - [ ] Need to verify that all error handling is done correctly (re: GraphQL connections)
-- [ ] Finish the third tab, "Logic". This is a nebulous feature -- I'm not even sure what it's supposed to do since "Logic" support isn't yet in DrMem (v0.2.0).
 
 [^1]: This isn't entirely true. It uses a library that provides mDNS support and not all platforms are supported by it.

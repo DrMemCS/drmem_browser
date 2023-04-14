@@ -1,6 +1,9 @@
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:flutter/material.dart';
 import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:drmem_browser/model/model.dart';
 
 // Display "parameter page".
 
@@ -15,11 +18,16 @@ class _ParamPage extends StatefulWidget {
 
 class _SheetsState extends State<_ParamPage> {
   bool editMode = false;
+  final TextEditingController ctrlEditName = TextEditingController();
 
-  // Creates the AppBar with actions buttons that affect the current sheet.
+  @override
+  void dispose() {
+    ctrlEditName.dispose();
+    super.dispose();
+  }
 
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(actions: <Widget>[
+  Widget getEditorAppBar() {
+    final List<Widget> actions = [
       IconButton(
           tooltip: "Add new sheet",
           onPressed: !editMode
@@ -41,14 +49,63 @@ class _SheetsState extends State<_ParamPage> {
       IconButton(
           tooltip: "Edit sheet",
           onPressed: () => setState(() => editMode = !editMode),
-          icon: const Icon(Icons.edit)),
-    ]);
+          icon: const Icon(Icons.settings))
+    ];
+
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
+      ctrlEditName.text = state.selectedSheet;
+
+      return AppBar(
+          actions: actions,
+          title: SizedBox(
+            width: double.infinity,
+            child: TextField(
+              controller: ctrlEditName,
+              onSubmitted: (value) {
+                context.read<Model>().add(RenameSelectedSheet(value));
+              },
+            ),
+          ));
+    });
+  }
+
+  // Creates the AppBar with actions buttons that affect the current sheet.
+
+  Widget getRunnerAppBar() {
+    final List<Widget> actions = [
+      IconButton(
+          tooltip: "Edit sheet",
+          onPressed: () => setState(() => editMode = !editMode),
+          icon: const Icon(Icons.settings))
+    ];
+
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
+      List<String> items = state.sheetNames;
+
+      return AppBar(
+          actions: actions,
+          title: SizedBox(
+            width: double.infinity,
+            child: DropdownButton<String>(
+              underline: Container(),
+              value: state.selectedSheet,
+              items: items.map((String e) {
+                return DropdownMenuItem(value: e, child: Text(e));
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<Model>().add(SelectSheet(value));
+                }
+              },
+            ),
+          ));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      buildAppBar(context),
+      editMode ? getEditorAppBar() : getRunnerAppBar(),
       Expanded(child: editMode ? const SheetEditor() : const SheetRunner())
     ]);
   }

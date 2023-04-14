@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nsd/nsd.dart';
 import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/theme/theme.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
@@ -15,26 +16,13 @@ class DrMemApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color primeColor = Colors.teal;
-    const TextTheme defTextTheme = TextTheme(
-        titleSmall: TextStyle(fontSize: 16.0),
-        titleMedium: TextStyle(fontSize: 18.0),
-        titleLarge: TextStyle(fontSize: 24.0),
-        bodySmall: TextStyle(fontSize: 14.0),
-        bodyMedium: TextStyle(fontSize: 18.0),
-        bodyLarge: TextStyle(fontSize: 20.0));
-
     return MaterialApp(
       title: 'DrMem Browser',
-      theme: ThemeData(
-          useMaterial3: true,
-          textTheme: defTextTheme,
-          colorScheme: ColorScheme.fromSeed(seedColor: primeColor)),
-      darkTheme: ThemeData.dark()
-          .copyWith(useMaterial3: true, textTheme: defTextTheme),
-      themeMode: ThemeMode.system,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
       home: BlocProvider(
-        create: (_) => PageModel(),
+        create: (_) => Model(),
         child: const BaseWidget(),
       ),
     );
@@ -69,7 +57,6 @@ class BaseState extends State<BaseWidget> {
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
               icon: Icon(Icons.web_stories), label: "Sheets"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Logic"),
         ]);
   }
 
@@ -81,19 +68,10 @@ class BaseState extends State<BaseWidget> {
         : displayNode(nodeInfo!);
   }
 
-  // This page will be used to edit the Logic in a DrMem instance.
-
-  Widget _displayLogic() {
-    return const Text("TODO: Edit logic.");
-  }
-
   Widget _display(BuildContext context) {
     switch (_selectIndex) {
       case 1:
         return displayParameters();
-
-      case 2:
-        return _displayLogic();
 
       case 0:
       default:
@@ -104,7 +82,7 @@ class BaseState extends State<BaseWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(child: Center(child: _display(context))),
+        body: SafeArea(child: _display(context)),
         bottomNavigationBar: _buildNavBar());
   }
 }

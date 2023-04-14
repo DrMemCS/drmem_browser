@@ -4,7 +4,6 @@ import 'package:gql_http_link/gql_http_link.dart';
 import "package:gql_websocket_link/gql_websocket_link.dart";
 import 'package:ferry/ferry.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'sheet.dart';
 
 // A SheetRunner widget takes the state of a Sheet and renders it. The Sheet's
 // state is a list of BaseRow types. These rows are organized using a Column
@@ -49,7 +48,7 @@ class _SheetRunnerState extends State<SheetRunner> {
                 scheme: "http",
                 host: "192.168.1.103",
                 port: 3000,
-                path: "/query")
+                path: "/drmem/q")
             .toString()),
         cache: Cache());
 
@@ -63,7 +62,7 @@ class _SheetRunnerState extends State<SheetRunner> {
               scheme: "ws",
               host: "192.168.1.103",
               port: 3000,
-              path: "/subscribe",
+              path: "/drmem/s",
             ).toString(),
             reconnectInterval: const Duration(seconds: 1)),
         cache: Cache());
@@ -86,16 +85,16 @@ class _SheetRunnerState extends State<SheetRunner> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PageModel, List<BaseRow>>(builder: (context, state) {
+    return BlocBuilder<Model, AppState>(builder: (context, state) {
       return ListView(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
           children:
               // Loop through the rows and convert them to their Widget form.
 
-              state
+              state.selected.rows
                   .map((e) => Padding(
                         key: e.key,
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding: const EdgeInsets.only(bottom: 2.0),
                         child:
                             e.buildRowRunner(context, _queryClient, _subClient),
                       ))
