@@ -64,7 +64,10 @@ class _SheetRunnerState extends State<SheetRunner> {
               port: 3000,
               path: "/drmem/s",
             ).toString(),
-            reconnectInterval: const Duration(seconds: 1)),
+            reconnectInterval: const Duration(seconds: 1),
+            initialPayload: {
+              "headers": {"sec-websocket-protocol": "graphql-ws"}
+            }),
         cache: Cache());
 
     super.initState();
