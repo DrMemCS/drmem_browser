@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nsd/nsd.dart';
 import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/theme/theme.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
@@ -15,24 +16,11 @@ class DrMemApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color primeColor = Colors.teal;
-    const TextTheme defTextTheme = TextTheme(
-        titleSmall: TextStyle(fontSize: 16.0),
-        titleMedium: TextStyle(fontSize: 18.0),
-        titleLarge: TextStyle(fontSize: 24.0),
-        bodySmall: TextStyle(fontSize: 14.0),
-        bodyMedium: TextStyle(fontSize: 18.0),
-        bodyLarge: TextStyle(fontSize: 20.0));
-
     return MaterialApp(
       title: 'DrMem Browser',
-      theme: ThemeData(
-          useMaterial3: true,
-          textTheme: defTextTheme,
-          colorScheme: ColorScheme.fromSeed(seedColor: primeColor)),
-      darkTheme: ThemeData.dark()
-          .copyWith(useMaterial3: true, textTheme: defTextTheme),
-      themeMode: ThemeMode.system,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
       home: BlocProvider(
         create: (_) => Model(),
         child: const BaseWidget(),

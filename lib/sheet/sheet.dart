@@ -106,6 +106,8 @@ class CommentRow extends BaseRow {
 
   @override
   Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+    final ThemeData td = Theme.of(context);
+
     return Container(
       constraints: const BoxConstraints(minHeight: 32.0),
       child: Padding(
@@ -114,8 +116,8 @@ class CommentRow extends BaseRow {
           data: comment,
           fitContent: true,
           styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-          styleSheet: MarkdownStyleSheet(
-              p: TextStyle(color: Theme.of(context).disabledColor)),
+          styleSheet:
+              MarkdownStyleSheet(p: TextStyle(color: td.colorScheme.tertiary)),
         ),
       ),
     );
@@ -337,7 +339,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
             child: Text(
               widget.label ?? widget.name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: td.indicatorColor),
+              style: TextStyle(color: td.colorScheme.primary),
             ),
           ),
           errorText == null

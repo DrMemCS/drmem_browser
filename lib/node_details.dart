@@ -102,18 +102,20 @@ class _State extends State<_NodeInfo> {
         Flexible(
           fit: FlexFit.tight,
           flex: labelFlex,
-          child: Text(label,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: TextStyle(color: td.hintColor)),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: Text(label,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: TextStyle(color: td.hintColor)),
+          ),
         ),
-        Container(width: 10.0),
         Flexible(
             fit: FlexFit.tight,
             flex: 20,
             child: Text(value ?? "unknown",
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: td.indicatorColor)))
+                style: TextStyle(color: td.colorScheme.primary)))
       ],
     );
   }
@@ -193,21 +195,25 @@ class _State extends State<_NodeInfo> {
 // up a window containing the description text for the driver.
 
 Padding buildDrvInfoRow(GAllDriversData_driverInfo info, BuildContext context) {
+  final ThemeData td = Theme.of(context);
+
   return Padding(
     padding: const EdgeInsets.only(bottom: 8.0),
     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Flexible(
           flex: 8,
           fit: FlexFit.tight,
-          child: Text(info.name, textAlign: TextAlign.end)),
+          child: Text(info.name,
+              textAlign: TextAlign.end,
+              style: TextStyle(color: td.colorScheme.primary))),
       Container(width: 10.0),
       Flexible(
           flex: 16,
           fit: FlexFit.tight,
-          child: Text(info.summary,
-              style: TextStyle(color: Theme.of(context).hintColor))),
+          child: Text(info.summary, style: TextStyle(color: td.hintColor))),
       Container(width: 10.0),
       IconButton(
+          color: td.colorScheme.secondary,
           onPressed: () async {
             return showDialog(
               context: context,
@@ -284,7 +290,7 @@ Padding buildDevInfoRow(
           child: Text(info.deviceName,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Theme.of(context).indicatorColor)),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary)),
         ),
       ),
       Padding(

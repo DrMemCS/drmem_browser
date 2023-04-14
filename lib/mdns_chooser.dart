@@ -113,13 +113,13 @@ class ChooserState extends State<DnsChooser> {
         elevation: 2.0,
         child: ListTile(
             key: Key(host),
-            leading: const Icon(Icons.developer_board),
+            leading: Icon(Icons.developer_board, color: td.colorScheme.primary),
             title: Text(info.name ?? "**Unknown**"),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null
                 ? Text(location,
                     style: td.textTheme.bodySmall!
-                        .copyWith(color: td.colorScheme.secondary))
+                        .copyWith(color: td.colorScheme.tertiary))
                 : null,
             trailing: Text("$host : ${info.port}",
                 softWrap: true,
