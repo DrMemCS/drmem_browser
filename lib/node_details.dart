@@ -248,7 +248,7 @@ Widget _buildChip(ThemeData td, String content) {
         border: Border.all(color: td.hintColor),
         borderRadius: BorderRadius.circular(8.0),
         shape: BoxShape.rectangle,
-        color: td.cardColor),
+        color: td.disabledColor),
     child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Text(content, style: td.textTheme.labelMedium)),

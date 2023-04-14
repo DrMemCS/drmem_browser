@@ -114,7 +114,8 @@ class ChooserState extends State<DnsChooser> {
         child: ListTile(
             key: Key(host),
             leading: Icon(Icons.developer_board, color: td.colorScheme.primary),
-            title: Text(info.name ?? "**Unknown**"),
+            title: Text(info.name ?? "**Unknown**",
+                style: td.textTheme.titleLarge),
             contentPadding: const EdgeInsets.all(8.0),
             subtitle: location != null
                 ? Text(location,
