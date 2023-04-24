@@ -3,6 +3,23 @@ query GetAllDevices {
     deviceName
     units
     settable
+    history {
+      totalPoints
+      firstPoint {
+        stamp
+        boolValue
+        intValue
+        floatValue
+        stringValue
+      }
+      lastPoint {
+        stamp
+        boolValue
+        intValue
+        floatValue
+        stringValue
+      }
+    }
     driver {
       name
     }

@@ -38,6 +38,18 @@ type Config {
   deviceInfo(pattern: String, settable: Boolean): [DeviceInfo!]!
 }
 
+# Information about the history related to the device. Note that this
+# information is a snapshot and that it could become invalid immediately
+# after receiving it (depending on how often the device is updated.)
+type DeviceHistory {
+  # The total number of points in the history.
+  totalPoints: Int!
+  # If the device has history, this is the oldest point that is stored.
+  firstPoint: Reading
+  # If the device has history, this is the latest point.
+  lastPoint: Reading
+}
+
 # Information about a registered device in the running version of `drmemd`.
 type DeviceInfo {
   # The name of the device.
@@ -48,6 +60,9 @@ type DeviceInfo {
 
   # Indicates whether the device is read-only or can be controlled.
   settable: Boolean!
+
+  # Contains information about the history saved for the device.
+  history: DeviceHistory!
 
   # Information about the driver that implements this device.
   driver: DriverInfo
