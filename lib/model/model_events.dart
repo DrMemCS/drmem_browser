@@ -47,3 +47,7 @@ class RenameSelectedSheet extends ModelEvent {
 
   const RenameSelectedSheet(this.newName);
 }
+
+class AddSheet extends ModelEvent {
+  const AddSheet();
+}

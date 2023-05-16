@@ -102,6 +102,7 @@ class Model extends Bloc<ModelEvent, AppState> {
     on<MoveRow>(_moveRow);
     on<SelectSheet>(_selectSheet);
     on<RenameSelectedSheet>(_renameSelectedSheet);
+    on<AddSheet>(_addSheet);
   }
 
   // Adds a new row to the end of the currently selected sheet.
@@ -180,5 +181,15 @@ class Model extends Bloc<ModelEvent, AppState> {
     } else {
       developer.log("can't rename sheet ... ${event.newName} already exists");
     }
+  }
+
+  // Adds a new, empty sheet to the application state. The title will be of
+  // the form "Untitled#", where the number will be determined based on the
+  // availability.
+
+  void _addSheet(AddSheet event, Emitter<AppState> emit) {
+    state.selectedSheet = state.nextUntitled();
+    state._sheets[state.selectedSheet] = PageConfig();
+    emit(state);
   }
 }
