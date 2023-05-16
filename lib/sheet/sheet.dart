@@ -87,6 +87,14 @@ class EmptyRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'empty'};
+
+  @override
+  int get hashCode => 0;
+
+  @override
+  bool operator ==(Object other) {
+    return other is EmptyRow;
+  }
 }
 
 // This row type holds text which allows the user to add comments to the sheet.
@@ -125,6 +133,14 @@ class CommentRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'comment', 'content': comment};
+
+  @override
+  int get hashCode => 1 + comment.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is CommentRow && comment == other.comment;
+  }
 }
 
 // This row type monitors a device.
@@ -157,6 +173,14 @@ class DeviceRow extends BaseRow {
     }
     return tmp;
   }
+
+  @override
+  int get hashCode => 2 + name.hashCode + label.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeviceRow && name == other.name && label == other.label;
+  }
 }
 
 // This row type displays a plot.
@@ -179,6 +203,14 @@ class PlotRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'plot'};
+
+  @override
+  int get hashCode => 3;
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlotRow;
+  }
 }
 
 InputDecoration _getTextFieldDecoration(BuildContext context, String label) {

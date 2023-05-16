@@ -18,6 +18,95 @@ void main() {
     });
   });
 
+  group("testing equality", () {
+    test("... EmptyRow", () {
+      final rowA = EmptyRow(key: UniqueKey());
+      final rowB = EmptyRow(key: UniqueKey());
+      final rowC = PlotRow(key: UniqueKey());
+
+      expect(rowA == rowA, true);
+      expect(rowA == rowB, true);
+      expect(rowA == rowC, false);
+    });
+
+    test("... CommentRow", () {
+      final rowA = CommentRow("Hello", key: UniqueKey());
+      final rowB = CommentRow("Hello", key: UniqueKey());
+      final rowC = CommentRow("Good-bye", key: UniqueKey());
+      final rowD = EmptyRow(key: UniqueKey());
+
+      expect(rowA == rowA, true);
+      expect(rowA == rowB, true);
+      expect(rowA == rowC, false);
+      expect(rowA == rowD, false);
+    });
+
+    test("... DeviceRow", () {
+      final rowA = DeviceRow("device", key: UniqueKey());
+      final rowA2 = DeviceRow("device", key: UniqueKey());
+      final rowB = DeviceRow("device", label: "label", key: UniqueKey());
+      final rowB2 = DeviceRow("device", label: "label", key: UniqueKey());
+      final rowC = DeviceRow("device", label: "label2", key: UniqueKey());
+      final rowC2 = DeviceRow("device", label: "label2", key: UniqueKey());
+      final rowD = DeviceRow("device2", key: UniqueKey());
+      final rowD2 = DeviceRow("device2", key: UniqueKey());
+      final rowE = DeviceRow("device2", label: "label", key: UniqueKey());
+      final rowE2 = DeviceRow("device2", label: "label", key: UniqueKey());
+      final rowF = DeviceRow("device2", label: "label2", key: UniqueKey());
+      final rowF2 = DeviceRow("device2", label: "label2", key: UniqueKey());
+      final rowG = EmptyRow(key: UniqueKey());
+
+      expect(rowA == rowA, true);
+      expect(rowA == rowA2, true);
+      expect(rowA == rowB, false);
+      expect(rowA == rowC, false);
+      expect(rowA == rowD, false);
+      expect(rowA == rowE, false);
+      expect(rowA == rowF, false);
+      expect(rowA == rowG, false);
+
+      expect(rowB == rowB, true);
+      expect(rowB == rowB2, true);
+      expect(rowB == rowC, false);
+      expect(rowB == rowD, false);
+      expect(rowB == rowE, false);
+      expect(rowB == rowF, false);
+      expect(rowB == rowG, false);
+
+      expect(rowC == rowC, true);
+      expect(rowC == rowC2, true);
+      expect(rowC == rowD, false);
+      expect(rowC == rowE, false);
+      expect(rowC == rowF, false);
+      expect(rowC == rowG, false);
+
+      expect(rowD == rowD, true);
+      expect(rowD == rowD2, true);
+      expect(rowD == rowE, false);
+      expect(rowD == rowF, false);
+      expect(rowD == rowG, false);
+
+      expect(rowE == rowE, true);
+      expect(rowE == rowE2, true);
+      expect(rowE == rowF, false);
+      expect(rowE == rowG, false);
+
+      expect(rowF == rowF, true);
+      expect(rowF == rowF2, true);
+      expect(rowF == rowG, false);
+    });
+
+    test("... PlotRow", () {
+      final rowA = PlotRow(key: UniqueKey());
+      final rowB = PlotRow(key: UniqueKey());
+      final rowC = EmptyRow(key: UniqueKey());
+
+      expect(rowA == rowA, true);
+      expect(rowA == rowB, true);
+      expect(rowA == rowC, false);
+    });
+  });
+
   group("Testing row serialization", () {
     test("... EmptyRow", () {
       final EmptyRow tmp = EmptyRow(key: UniqueKey());
