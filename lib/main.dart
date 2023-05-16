@@ -21,6 +21,10 @@ class DrMemApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
+
+      // Provides the app model. This needs to be near the top of the widget
+      // tree so that all subpages have access to the model data.
+
       home: BlocProvider(
         create: (_) => Model(),
         child: const BaseWidget(),
