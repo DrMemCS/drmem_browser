@@ -30,32 +30,17 @@ abstract class BaseRow {
   // derived BaseRow class.
 
   static BaseRow? fromJson(Map<String, dynamic> map, {Key? key}) {
-    switch (map['type']) {
-      case 'empty':
+    switch (map) {
+      case {'type': "empty"}:
         return EmptyRow(key: key ?? UniqueKey());
 
-      case 'comment':
-        {
-          String? comment = map['content'];
+      case {'type': "comment", 'content': String comment}:
+        return CommentRow(comment, key: key ?? UniqueKey());
 
-          if (comment != null) {
-            return CommentRow(comment, key: key ?? UniqueKey());
-          }
-          return null;
-        }
+      case {'type': "device", 'device': String device}:
+        return DeviceRow(device, label: map['label'], key: key ?? UniqueKey());
 
-      case 'device':
-        {
-          String? device = map['device'];
-
-          if (device != null) {
-            return DeviceRow(device,
-                label: map['label'], key: key ?? UniqueKey());
-          }
-          return null;
-        }
-
-      case 'plot':
+      case {'type': "plot"}:
         return PlotRow(key: key ?? UniqueKey());
 
       default:
