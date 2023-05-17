@@ -153,7 +153,7 @@ class DeviceRow extends BaseRow {
   Map<String, dynamic> toJson() {
     var tmp = {'type': "device", 'device': name};
 
-    if (label != null) {
+    if (label != null && label!.isNotEmpty) {
       tmp['label'] = label!;
     }
     return tmp;
@@ -287,6 +287,8 @@ class _DeviceWidget extends StatefulWidget {
 
   @override
   _DeviceWidgetState createState() => _DeviceWidgetState();
+
+  String get text => label != null && label!.isNotEmpty ? label! : name;
 }
 
 class _DeviceWidgetState extends State<_DeviceWidget> {
@@ -354,7 +356,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         children: [
           Expanded(
             child: Text(
-              widget.label ?? widget.name,
+              widget.text,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.colorScheme.primary),
             ),
