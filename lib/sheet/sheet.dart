@@ -71,7 +71,7 @@ class EmptyRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'empty'};
+  Map<String, dynamic> toJson() => {'type': "empty"};
 
   @override
   int get hashCode => 0;
@@ -117,7 +117,7 @@ class CommentRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'comment', 'content': comment};
+  Map<String, dynamic> toJson() => {'type': "comment", 'content': comment};
 
   @override
   int get hashCode => 1 + comment.hashCode;
@@ -151,7 +151,7 @@ class DeviceRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() {
-    var tmp = {'type': 'device', 'device': name};
+    var tmp = {'type': "device", 'device': name};
 
     if (label != null) {
       tmp['label'] = label!;
@@ -187,7 +187,7 @@ class PlotRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'plot'};
+  Map<String, dynamic> toJson() => {'type': "plot"};
 
   @override
   int get hashCode => 3;
