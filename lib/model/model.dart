@@ -7,35 +7,56 @@ import 'model_events.dart';
 // Holds the configuration for one sheet of parameters.
 
 class PageConfig {
-  final List<BaseRow> _content = [];
+  List<BaseRow> content;
 
-  List<BaseRow> get rows => _content;
+  PageConfig({List<BaseRow>? content}) : content = content ?? [];
 
-  void appendRow(BaseRow row) => _content.add(row);
+  // Serializes a PageConfig to a JSON object. The JSON object consists of one
+  // field containing an array of serialized rows.
+
+  Map<String, dynamic>? toJson() =>
+      {'rows': content.map((e) => e.toJson()).toList()};
+
+  // Deserializes a JSON object into a PageConfig.
+
+  static PageConfig fromJson(Map<String, dynamic> json) {
+    final rows = json['rows'] as List<Map<String, dynamic>>?;
+
+    if (rows != null) {
+      return PageConfig(
+          content: rows.map((e) => BaseRow.fromJson(e)).nonNulls.toList());
+    } else {
+      return PageConfig();
+    }
+  }
+
+  List<BaseRow> get rows => content;
+
+  void appendRow(BaseRow row) => content.add(row);
 
   void moveRow(int oIdx, int nIdx) {
     if (oIdx >= 0 &&
-        oIdx < _content.length &&
+        oIdx < content.length &&
         nIdx >= 0 &&
-        nIdx < _content.length) {
+        nIdx < content.length) {
       final newIndex = oIdx < nIdx ? nIdx - 1 : nIdx;
-      final BaseRow element = _content.removeAt(oIdx);
+      final BaseRow element = content.removeAt(oIdx);
 
-      _content.insert(newIndex, element);
+      content.insert(newIndex, element);
     }
   }
 
   void removeRow(int index) {
-    if (index >= 0 && index < _content.length) {
-      _content.removeAt(index);
+    if (index >= 0 && index < content.length) {
+      content.removeAt(index);
     }
   }
 
   void updateRow(int index, BaseRow row) {
-    if (index >= 0 && index < _content.length) {
-      _content[index] = row;
+    if (index >= 0 && index < content.length) {
+      content[index] = row;
     } else {
-      _content.add(row);
+      content.add(row);
     }
   }
 }
