@@ -108,76 +108,63 @@ class Model extends Bloc<ModelEvent, AppState> {
   // Adds a new row to the end of the currently selected sheet.
 
   void _appendRow(AppendRow event, Emitter<AppState> emit) {
-    AppState newState = AppState(state.selectedSheet, state._sheets);
-    PageConfig pc = newState._sheets[newState.selectedSheet] ?? PageConfig();
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
-    pc.appendRow(event.newRow);
-    newState._sheets[newState.selectedSheet] = pc;
-    emit(newState);
+    tmp._sheets[tmp.selectedSheet]!.appendRow(event.newRow);
+    developer.log("new state: ${tmp.selected.content}");
+    emit(tmp);
   }
 
   // Removes the row specified by the index from the currently selected sheet.
 
   void _deleteRow(DeleteRow event, Emitter<AppState> emit) {
-    AppState newState = AppState(state.selectedSheet, state._sheets);
-    PageConfig? pc = newState._sheets[newState.selectedSheet];
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
-    if (pc != null) {
-      pc.removeRow(event.index);
-      emit(newState);
-    } else {
-      developer.log("tried to delete a row in a non-existent sheet");
-    }
+    tmp._sheets[tmp.selectedSheet]!.removeRow(event.index);
+    emit(tmp);
   }
 
   // This event is received when a child widget wants to change the type of a
   // row. This also needs to handle the case when the list of rows is empty.
 
   void _updateRow(UpdateRow event, Emitter<AppState> emit) {
-    AppState newState = AppState(state.selectedSheet, state._sheets);
-    PageConfig? pc = newState._sheets[newState.selectedSheet];
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
-    if (pc != null) {
-      pc.updateRow(event.index, event.newRow);
-      emit(newState);
-    } else {
-      developer.log("tried to update a row in a non-existent sheet");
-    }
+    tmp._sheets[tmp.selectedSheet]!.updateRow(event.index, event.newRow);
+    emit(tmp);
   }
 
   void _moveRow(MoveRow event, Emitter<AppState> emit) {
-    AppState newState = AppState(state.selectedSheet, state._sheets);
-    PageConfig? pc = newState._sheets[newState.selectedSheet];
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
-    if (pc != null) {
-      pc.moveRow(event.oldIndex, event.newIndex);
-      emit(newState);
-    } else {
-      developer.log("tried to move a row in a non-existent sheet");
-    }
+    tmp._sheets[tmp.selectedSheet]!.moveRow(event.oldIndex, event.newIndex);
+    emit(tmp);
   }
 
   void _selectSheet(SelectSheet event, Emitter<AppState> emit) {
-    AppState newState = AppState(event.name, state._sheets);
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
-    emit(newState);
+    if (!tmp._sheets.containsKey(event.name)) {
+      tmp._sheets[event.name] = PageConfig();
+    }
+    tmp.selectedSheet = event.name;
+    emit(tmp);
   }
 
   void _renameSelectedSheet(RenameSelectedSheet event, Emitter<AppState> emit) {
-    AppState newState = AppState(state.selectedSheet, state._sheets);
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
 
     // If the new name doesn't exist, then we can proceed. If it does exist,
     // we ignore the request.
     //
     // TODO: We should report the error.
 
-    if (!newState._sheets.containsKey(event.newName)) {
-      PageConfig conf =
-          newState._sheets.remove(newState.selectedSheet) ?? PageConfig();
+    if (!tmp._sheets.containsKey(event.newName)) {
+      PageConfig conf = tmp._sheets.remove(tmp.selectedSheet)!;
 
-      newState.selectedSheet = event.newName;
-      newState._sheets[event.newName] = conf;
-      emit(newState);
+      tmp.selectedSheet = event.newName;
+      tmp._sheets[event.newName] = conf;
+      emit(tmp);
     } else {
       developer.log("can't rename sheet ... ${event.newName} already exists");
     }
@@ -188,8 +175,10 @@ class Model extends Bloc<ModelEvent, AppState> {
   // availability.
 
   void _addSheet(AddSheet event, Emitter<AppState> emit) {
-    state.selectedSheet = state.nextUntitled();
-    state._sheets[state.selectedSheet] = PageConfig();
-    emit(state);
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
+
+    tmp.selectedSheet = tmp.nextUntitled();
+    tmp._sheets[tmp.selectedSheet] = PageConfig();
+    emit(tmp);
   }
 }
