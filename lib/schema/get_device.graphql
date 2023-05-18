@@ -2,5 +2,22 @@ query GetDevice($name: String!) {
   deviceInfo(pattern: $name) {
     settable
     units
+    history {
+      totalPoints
+      firstPoint {
+        stamp
+        boolValue
+        intValue
+        floatValue
+        stringValue
+      }
+      lastPoint {
+        stamp
+        boolValue
+        intValue
+        floatValue
+        stringValue
+      }
+    }
   }
 }

@@ -151,16 +151,26 @@ class ChooserState extends State<DnsChooser> {
 
       return FutureBuilder(
           future: fut,
-          builder: (ctxt, snap) => const CircularProgressIndicator());
+          builder: (ctxt, snap) => const Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text("Setting up mDNS ..."),
+                  ),
+                  CircularProgressIndicator(),
+                ],
+              )));
     } else {
       // If the list of nodes is empty, return a progress indicator. Otherwise,
       // display a ListView containing the contents of the list.
 
       return _nodes.isEmpty
-          ? Center(
+          ? const Center(
               child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text("Listening for nodes ..."),

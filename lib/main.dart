@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:nsd/nsd.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
@@ -7,7 +9,11 @@ import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: await getApplicationDocumentsDirectory());
+
   runApp(const DrMemApp());
 }
 
@@ -21,6 +27,10 @@ class DrMemApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
+
+      // Provides the app model. This needs to be near the top of the widget
+      // tree so that all subpages have access to the model data.
+
       home: BlocProvider(
         create: (_) => Model(),
         child: const BaseWidget(),

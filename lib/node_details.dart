@@ -255,6 +255,16 @@ Widget _buildChip(ThemeData td, String content) {
   );
 }
 
+String makeDateChipContent(String label, DateTime dt) {
+  final year = dt.year.toString().padLeft(4, '0');
+  final month = dt.month.toString().padLeft(2, '0');
+  final day = dt.day.toString().padLeft(2, '0');
+  final hour = dt.hour.toString().padLeft(2, '0');
+  final minute = dt.minute.toString().padLeft(2, '0');
+
+  return "$label: $year-$month-$day, $hour:$minute";
+}
+
 List<Widget> _buildChips(
     BuildContext context, GGetAllDevicesData_deviceInfo info) {
   final ThemeData td = Theme.of(context);
@@ -268,6 +278,32 @@ List<Widget> _buildChips(
 
   if (info.units != null) {
     tmp.add(_buildChip(td, "units: ${info.units}"));
+  }
+
+  tmp.add(_buildChip(td, "points: ${info.history.totalPoints}"));
+
+  if (info.history.firstPoint != null) {
+    try {
+      final sTime =
+          DateTime.parse(info.history.firstPoint!.stamp.value).toLocal();
+
+      tmp.add(_buildChip(td, makeDateChipContent("oldest", sTime)));
+    } catch (e) {
+      // Ignore exceptions when parsing bad dates. We don't want the app to
+      // crash. Instead we'll just not display the chip.
+    }
+  }
+
+  if (info.history.lastPoint != null) {
+    try {
+      final eTime =
+          DateTime.parse(info.history.lastPoint!.stamp.value).toLocal();
+
+      tmp.add(_buildChip(td, makeDateChipContent("last", eTime)));
+    } catch (e) {
+      // Ignore exceptions when parsing bad dates. We don't want the app to
+      // crash. Instead we'll just not display the chip.
+    }
   }
 
   return tmp;

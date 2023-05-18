@@ -30,32 +30,17 @@ abstract class BaseRow {
   // derived BaseRow class.
 
   static BaseRow? fromJson(Map<String, dynamic> map, {Key? key}) {
-    switch (map['type']) {
-      case 'empty':
+    switch (map) {
+      case {'type': "empty"}:
         return EmptyRow(key: key ?? UniqueKey());
 
-      case 'comment':
-        {
-          String? comment = map['content'];
+      case {'type': "comment", 'content': String comment}:
+        return CommentRow(comment, key: key ?? UniqueKey());
 
-          if (comment != null) {
-            return CommentRow(comment, key: key ?? UniqueKey());
-          }
-          return null;
-        }
+      case {'type': "device", 'device': String device}:
+        return DeviceRow(device, label: map['label'], key: key ?? UniqueKey());
 
-      case 'device':
-        {
-          String? device = map['device'];
-
-          if (device != null) {
-            return DeviceRow(device,
-                label: map['label'], key: key ?? UniqueKey());
-          }
-          return null;
-        }
-
-      case 'plot':
+      case {'type': "plot"}:
         return PlotRow(key: key ?? UniqueKey());
 
       default:
@@ -86,7 +71,15 @@ class EmptyRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'empty'};
+  Map<String, dynamic> toJson() => {'type': "empty"};
+
+  @override
+  int get hashCode => 0;
+
+  @override
+  bool operator ==(Object other) {
+    return other is EmptyRow;
+  }
 }
 
 // This row type holds text which allows the user to add comments to the sheet.
@@ -124,7 +117,15 @@ class CommentRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'comment', 'content': comment};
+  Map<String, dynamic> toJson() => {'type': "comment", 'content': comment};
+
+  @override
+  int get hashCode => 1 + comment.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is CommentRow && comment == other.comment;
+  }
 }
 
 // This row type monitors a device.
@@ -150,12 +151,20 @@ class DeviceRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() {
-    var tmp = {'type': 'device', 'device': name};
+    var tmp = {'type': "device", 'device': name};
 
-    if (label != null) {
+    if (label != null && label!.isNotEmpty) {
       tmp['label'] = label!;
     }
     return tmp;
+  }
+
+  @override
+  int get hashCode => 2 + name.hashCode + label.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeviceRow && name == other.name && label == other.label;
   }
 }
 
@@ -178,7 +187,15 @@ class PlotRow extends BaseRow {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'plot'};
+  Map<String, dynamic> toJson() => {'type': "plot"};
+
+  @override
+  int get hashCode => 3;
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlotRow;
+  }
 }
 
 InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
@@ -270,6 +287,8 @@ class _DeviceWidget extends StatefulWidget {
 
   @override
   _DeviceWidgetState createState() => _DeviceWidgetState();
+
+  String get text => label != null && label!.isNotEmpty ? label! : name;
 }
 
 class _DeviceWidgetState extends State<_DeviceWidget> {
@@ -337,7 +356,7 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         children: [
           Expanded(
             child: Text(
-              widget.label ?? widget.name,
+              widget.text,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.colorScheme.primary),
             ),
