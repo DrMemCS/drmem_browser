@@ -36,12 +36,10 @@ class _SheetsState extends State<_ParamPage> {
       IconButton(
           key: const Key("DelSheet"),
           tooltip: "Delete sheet",
-          onPressed: !editMode
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('TODO: Delete current sheet.')));
-                }
-              : null,
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('TODO: Delete current sheet.')));
+          },
           icon: const Icon(Icons.delete_forever)),
       IconButton(
           key: const Key("EditSheet"),
