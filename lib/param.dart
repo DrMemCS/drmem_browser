@@ -29,6 +29,7 @@ class _SheetsState extends State<_ParamPage> {
   Widget getEditorAppBar() {
     final List<Widget> actions = [
       IconButton(
+          key: const Key("AddSheet"),
           tooltip: "Add new sheet",
           onPressed: !editMode
               ? () {
@@ -38,6 +39,7 @@ class _SheetsState extends State<_ParamPage> {
               : null,
           icon: const Icon(Icons.my_library_add_rounded)),
       IconButton(
+          key: const Key("DelSheet"),
           tooltip: "Delete sheet",
           onPressed: !editMode
               ? () {
@@ -47,6 +49,7 @@ class _SheetsState extends State<_ParamPage> {
               : null,
           icon: const Icon(Icons.delete_forever)),
       IconButton(
+          key: const Key("EditSheet"),
           tooltip: "Edit sheet",
           onPressed: () => setState(() => editMode = !editMode),
           icon: const Icon(Icons.settings))
@@ -74,6 +77,7 @@ class _SheetsState extends State<_ParamPage> {
   Widget getRunnerAppBar() {
     final List<Widget> actions = [
       IconButton(
+          key: const Key("EditSheet"),
           tooltip: "Edit sheet",
           onPressed: () => setState(() => editMode = !editMode),
           icon: const Icon(Icons.settings))
