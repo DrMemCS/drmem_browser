@@ -63,7 +63,8 @@ Here's an informal list of features to be added. If you're interested in helping
 - [ ] Must be able to set the value of settable devices.
 - [ ] Add unit tests
 - [ ] Finish Sheet Editor
-  - [ ] Add controls to add/delete sheets
+  - [X] Add controls to add sheets
+  - [ ] Add controls to delete sheets
   - [X] Add panel with buttons to append new rows
   - [X] Allow rows to be reordered
   - [X] Add "Delete" icon to delete a row

@@ -31,12 +31,7 @@ class _SheetsState extends State<_ParamPage> {
       IconButton(
           key: const Key("AddSheet"),
           tooltip: "Add new sheet",
-          onPressed: !editMode
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('TODO: Add a new, empty sheet.')));
-                }
-              : null,
+          onPressed: () => context.read<Model>().add(const AddSheet()),
           icon: const Icon(Icons.my_library_add_rounded)),
       IconButton(
           key: const Key("DelSheet"),
