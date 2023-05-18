@@ -137,6 +137,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     on<SelectSheet>(_selectSheet);
     on<RenameSelectedSheet>(_renameSelectedSheet);
     on<AddSheet>(_addSheet);
+    on<DeleteSheet>(_delSheet);
   }
 
   @override
@@ -241,6 +242,27 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
 
     tmp.selectedSheet = tmp.nextUntitled();
     tmp._sheets[tmp.selectedSheet] = PageConfig();
+    emit(tmp);
+  }
+
+  void _delSheet(DeleteSheet event, Emitter<AppState> emit) {
+    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
+
+    // Remove the current sheet. XXX: The user should be prompted before
+    // deleting the sheet.
+
+    tmp._sheets.remove(tmp.selectedSheet);
+
+    // If we still have sheets, then pick the first key for the new selected
+    // sheet. If the last sheet was deleted, determine the next, "Untitled"
+    // name and create a blank page associated with it.
+
+    if (tmp._sheets.isNotEmpty) {
+      tmp.selectedSheet = tmp._sheets.keys.first;
+    } else {
+      tmp.selectedSheet = tmp.nextUntitled();
+      tmp._sheets[tmp.selectedSheet] = PageConfig();
+    }
     emit(tmp);
   }
 }

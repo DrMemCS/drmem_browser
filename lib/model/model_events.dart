@@ -51,3 +51,7 @@ class RenameSelectedSheet extends ModelEvent {
 class AddSheet extends ModelEvent {
   const AddSheet();
 }
+
+class DeleteSheet extends ModelEvent {
+  const DeleteSheet();
+}
