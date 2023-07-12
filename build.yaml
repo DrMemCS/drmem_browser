@@ -4,8 +4,8 @@ targets:
       ferry_generator|serializer_builder:
         enabled: true
         options:
-          schema: drmem_browser|lib/schema/drmem.graphql
+          schema: drmem_browser|lib/pkg/drmem_provider/schema/drmem.graphql
       ferry_generator|graphql_builder:
         enabled: true
         options:
-          schema: drmem_browser|lib/schema/drmem.graphql
+          schema: drmem_browser|lib/pkg/drmem_provider/schema/drmem.graphql

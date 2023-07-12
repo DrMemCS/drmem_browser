@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import 'package:ferry/ferry.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.req.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.data.gql.dart';
-import 'package:drmem_browser/schema/__generated__/monitor_device.var.gql.dart';
+import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.req.gql.dart';
+import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.data.gql.dart';
+import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.var.gql.dart';
 
 // This builds widgets that show an error icon followed by red text
 // indicating an unsupported type was received. This could happen if
