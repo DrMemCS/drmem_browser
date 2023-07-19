@@ -1,5 +1,5 @@
-subscription MonitorDevice($device: String!) {
-  monitorDevice(device: $device) {
+subscription MonitorDevice($device: String!, $range: DateRange) {
+  monitorDevice(device: $device, range: $range) {
     stamp
     boolValue
     intValue

@@ -89,9 +89,14 @@ type Reading {
   stringValue: String
 }
 
+input DateRange {
+  start: DateTimeUtc
+  end: DateTimeUtc
+}
+
 type Subscription {
   # Sets up a connection to receive all updates to a device. The GraphQL request must provide the name of a device. This method returns a stream which generates a reply each time a device's value changes.
-  monitorDevice(device: String!): Reading!
+  monitorDevice(device: String!, range: DateRange): Reading!
 }
 
 # This group of queries perform modifications to devices.
