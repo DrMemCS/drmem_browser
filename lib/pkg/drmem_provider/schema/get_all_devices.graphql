@@ -1,8 +1,8 @@
 query GetAllDevices {
 	deviceInfo {
     deviceName
-    units
     settable
+    units
     history {
       totalPoints
       firstPoint {
