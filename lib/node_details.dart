@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:gql_http_link/gql_http_link.dart';
-import 'pkg/drmem_provider/schema/__generated__/driver_info.data.gql.dart';
-import 'pkg/drmem_provider/schema/__generated__/driver_info.req.gql.dart';
-import 'pkg/drmem_provider/schema/__generated__/get_all_devices.data.gql.dart';
-import 'pkg/drmem_provider/schema/__generated__/get_all_devices.req.gql.dart';
-import 'package:ferry/ferry.dart';
+import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
 
@@ -28,47 +23,6 @@ class _State extends State<_NodeInfo> {
   final EdgeInsets headerInsets =
       const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0);
   final EdgeInsets all8 = const EdgeInsets.all(8.0);
-
-  List<GAllDriversData_driverInfo>? drivers;
-  List<GGetAllDevicesData_deviceInfo>? devices;
-
-  // Build the URI to the GraphQL query endpoint.
-
-  late final queryLink = HttpLink(Uri(
-          scheme: "http",
-          host: widget.node.host,
-          port: widget.node.port,
-          path: propToString(widget.node, "queries"))
-      .toString());
-
-  final cache = Cache();
-
-  late final client = Client(link: queryLink, cache: cache);
-
-  @override
-  void initState() {
-    super.initState();
-
-    client.request(GAllDriversReq((b) => b)).listen((response) {
-      if (!response.loading) {
-        final List<GAllDriversData_driverInfo> tmp =
-            response.data?.driverInfo.toList() ?? [];
-
-        tmp.sort((a, b) => a.name.compareTo(b.name));
-        setState(() => drivers = tmp);
-      }
-    });
-
-    client.request(GGetAllDevicesReq((b) => b)).listen((response) {
-      if (!response.loading) {
-        final List<GGetAllDevicesData_deviceInfo> tmp =
-            response.data?.deviceInfo.toList() ?? [];
-
-        tmp.sort((a, b) => a.deviceName.compareTo(b.deviceName));
-        setState(() => devices = tmp);
-      }
-    });
-  }
 
   // Returns a widget that serves as a section header.
 
@@ -139,6 +93,8 @@ class _State extends State<_NodeInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final DrMem drmem = DrMem.of(context);
+
     final Service info = widget.node;
     final DateTime? bootTime =
         DateTime.tryParse(propToString(info, "boot-time") ?? "");
@@ -174,13 +130,33 @@ class _State extends State<_NodeInfo> {
                   buildProperty(context, "subscriptions", gqlPropFlex,
                       propToString(info, "subscriptions")),
                   header(context, "Drivers"),
-                  drivers == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : _DriversListView(drivers: drivers!),
+                  FutureBuilder(
+                    future: drmem.getDriverInfo("rpi4"),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return _DriversListView(drivers: snapshot.data!);
+                      } else if (snapshot.hasError) {
+                        return const Icon(Icons.error_outline,
+                            color: Colors.red);
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
                   header(context, "Devices"),
-                  devices == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : _DevicesListView(devices: devices!),
+                  FutureBuilder(
+                    future: drmem.getDeviceInfo("rpi4", device: "*"),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return _DevicesListView(devices: snapshot.data!);
+                      } else if (snapshot.hasError) {
+                        return const Icon(Icons.error_outline,
+                            color: Colors.red);
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -194,7 +170,7 @@ class _State extends State<_NodeInfo> {
 // Builds a row of driver information, including the Help button which brings
 // up a window containing the description text for the driver.
 
-Padding buildDrvInfoRow(GAllDriversData_driverInfo info, BuildContext context) {
+Padding buildDrvInfoRow(DriverInfo info, BuildContext context) {
   final ThemeData td = Theme.of(context);
 
   return Padding(
@@ -265,52 +241,37 @@ String makeDateChipContent(String label, DateTime dt) {
   return "$label: $year-$month-$day, $hour:$minute";
 }
 
-List<Widget> _buildChips(
-    BuildContext context, GGetAllDevicesData_deviceInfo info) {
+List<Widget> _buildChips(BuildContext context, DevInfo info) {
   final ThemeData td = Theme.of(context);
   final List<Widget> tmp = [
     _buildChip(td, info.settable ? "settable" : "read-only")
   ];
 
-  if (info.driver != null) {
-    tmp.add(_buildChip(td, "driver: ${info.driver!.name}"));
-  }
+  // TODO: Add this back in.
+  //
+  // if (info.driver != null) {
+  //   tmp.add(_buildChip(td, "driver: ${info.driver.name}"));
+  // }
 
   if (info.units != null) {
     tmp.add(_buildChip(td, "units: ${info.units}"));
   }
 
-  tmp.add(_buildChip(td, "points: ${info.history.totalPoints}"));
+  // If there's a "history" record with this device, add chips that display
+  // this information.
 
-  if (info.history.firstPoint != null) {
-    try {
-      final sTime =
-          DateTime.parse(info.history.firstPoint!.stamp.value).toLocal();
-
-      tmp.add(_buildChip(td, makeDateChipContent("oldest", sTime)));
-    } catch (e) {
-      // Ignore exceptions when parsing bad dates. We don't want the app to
-      // crash. Instead we'll just not display the chip.
-    }
-  }
-
-  if (info.history.lastPoint != null) {
-    try {
-      final eTime =
-          DateTime.parse(info.history.lastPoint!.stamp.value).toLocal();
-
-      tmp.add(_buildChip(td, makeDateChipContent("last", eTime)));
-    } catch (e) {
-      // Ignore exceptions when parsing bad dates. We don't want the app to
-      // crash. Instead we'll just not display the chip.
-    }
+  if (info.history != null) {
+    tmp.add(_buildChip(td, "points: ${info.history!.totalPoints}"));
+    tmp.add(_buildChip(
+        td, makeDateChipContent("oldest", info.history!.oldest.stamp)));
+    tmp.add(_buildChip(
+        td, makeDateChipContent("last", info.history!.newest.stamp)));
   }
 
   return tmp;
 }
 
-Padding buildDevInfoRow(
-    GGetAllDevicesData_deviceInfo info, BuildContext context) {
+Padding buildDevInfoRow(DevInfo info, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.only(left: 20.0, bottom: 16.0),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -318,12 +279,11 @@ Padding buildDevInfoRow(
         width: double.infinity,
         child: GestureDetector(
           onDoubleTap: () {
-            Future.wait(
-                [Clipboard.setData(ClipboardData(text: info.deviceName))]);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Added ${info.deviceName} to clipboard")));
+            Future.wait([Clipboard.setData(ClipboardData(text: info.name))]);
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Added ${info.name} to clipboard")));
           },
-          child: Text(info.deviceName,
+          child: Text(info.name,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).colorScheme.primary)),
@@ -348,12 +308,9 @@ Padding buildDevInfoRow(
 // Local widget which displays a list of drivers.
 
 class _DriversListView extends StatelessWidget {
-  const _DriversListView({
-    Key? key,
-    required this.drivers,
-  }) : super(key: key);
+  final List<DriverInfo> drivers;
 
-  final List<GAllDriversData_driverInfo> drivers;
+  const _DriversListView({Key? key, required this.drivers}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -376,12 +333,9 @@ class _DriversListView extends StatelessWidget {
 // Local widget which displays a list of drivers.
 
 class _DevicesListView extends StatelessWidget {
-  const _DevicesListView({
-    Key? key,
-    required this.devices,
-  }) : super(key: key);
+  final List<DevInfo> devices;
 
-  final List<GGetAllDevicesData_deviceInfo> devices;
+  const _DevicesListView({Key? key, required this.devices}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

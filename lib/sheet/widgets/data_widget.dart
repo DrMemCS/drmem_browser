@@ -1,10 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
-import 'package:ferry/ferry.dart';
-import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.req.gql.dart';
-import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.data.gql.dart';
-import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.var.gql.dart';
+import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 
 // This builds widgets that show an error icon followed by red text
 // indicating an unsupported type was received. This could happen if
@@ -29,67 +24,11 @@ Widget buildErrorWidget(ThemeData td, String msg) {
 // monitor subscription so that it is the only widget that has to refresh when
 // new data arrives.
 
-class DataWidget extends StatefulWidget {
-  final Client sClient;
+class DataWidget extends StatelessWidget {
   final String device;
   final String? units;
 
-  const DataWidget(this.device, this.sClient, this.units, {super.key});
-
-  @override
-  DataWidgetState createState() => DataWidgetState();
-}
-
-// Manages the state of the `DataWidget`. This widget needs to handle every
-// data type supported by DrMem devices. It adjusts the representation based
-// on the data type returned by the device.
-
-class DataWidgetState extends State<DataWidget> {
-  StreamSubscription? subReadings;
-  GMonitorDeviceData_monitorDevice? value;
-  String? errorText;
-
-  // When this widget is mounted to the tree, we start up the GraphQL
-  // subscription.
-
-  @override
-  void initState() {
-    subReadings = widget.sClient
-        .request(GMonitorDeviceReq((b) => b..vars.device = widget.device))
-        .listen(_handleReadings);
-    super.initState();
-  }
-
-  // Before the widget is entirely destroyed, cancel the GraphQL stream.
-
-  @override
-  void dispose() {
-    subReadings?.cancel();
-    super.dispose();
-  }
-
-  // When a new value arrives on the stream, save it to our state (which will
-  // redraw the widget.)
-
-  void _handleReadings(
-      OperationResponse<GMonitorDeviceData, GMonitorDeviceVars> response) {
-    // The GraphQL streams seem to return messages that track states of the
-    // connection. We're only interested in new data so we ignore the other
-    // messages.
-
-    if (!response.loading) {
-      // Report errors or update our state with new data.
-
-      if (response.hasErrors) {
-        developer.log("error",
-            name: "graphql.MonitorDevice", error: "$response");
-      } else {
-        setState(() {
-          value = response.data?.monitorDevice;
-        });
-      }
-    }
-  }
+  const DataWidget(this.device, this.units, {super.key});
 
   // Displays a checkbox widget to display boolean value
 
@@ -127,28 +66,32 @@ class DataWidgetState extends State<DataWidget> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData td = Theme.of(context);
+    final DrMem drmem = DrMem.of(context);
 
-    if (value == null) {
-      return Container();
-    } else {
-      if (value!.boolValue != null) {
-        return _displayBoolean(value!.boolValue!);
-      }
+    return StreamBuilder(
+      stream: drmem.monitorDevice("rpi4", device),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final data = snapshot.data!.value;
 
-      if (value!.intValue != null) {
-        return _displayInteger(value!.intValue!, widget.units);
-      }
+          if (data is DevBool) {
+            return _displayBoolean(data.value);
+          }
 
-      if (value!.floatValue != null) {
-        return _displayDouble(value!.floatValue!, widget.units);
-      }
+          if (data is DevInt) {
+            return _displayInteger(data.value, units);
+          }
 
-      if (value!.stringValue != null) {
-        return Text("${value!.stringValue}");
-      }
+          if (data is DevFlt) {
+            return _displayDouble(data.value, units);
+          }
 
-      return buildErrorWidget(td, "Unknown type");
-    }
+          if (data is DevStr) {
+            return Text(data.value);
+          }
+        }
+        return Container();
+      },
+    );
   }
 }

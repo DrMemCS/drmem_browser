@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gql_http_link/gql_http_link.dart';
-import "package:gql_websocket_link/gql_websocket_link.dart";
-import 'package:ferry/ferry.dart';
 import 'package:drmem_browser/model/model.dart';
 
 // A SheetRunner widget takes the state of a Sheet and renders it. The Sheet's
@@ -26,59 +23,11 @@ class SheetRunner extends StatefulWidget {
 // are collecting data from DrMem.
 
 class _SheetRunnerState extends State<SheetRunner> {
-  // This is a GraphQL endpoint that can be used to make queries and
-  // mutations. It gets passed to each row so they can use GraphQL to
-  // update their content.
-
-  late final Client _queryClient;
-
-  // This is a GraphQL endpoint that is used to make subscriptions. It gets
-  // passed to each row so they can, primarily, obtain device readings.
-
-  late final Client _subClient;
+  @override
+  void initState() => super.initState();
 
   @override
-  void initState() {
-    // TODO: The URI is hardcoded to my personal RPi. We need to allow
-    // sheets to pick which device on which node, so there should be N
-    // GraphQL clients if your network has N nodes.
-
-    _queryClient = Client(
-        link: HttpLink(Uri(
-                scheme: "http",
-                host: "192.168.1.103",
-                port: 3000,
-                path: "/drmem/q")
-            .toString()),
-        cache: Cache());
-
-    // TODO: The URI is hardcoded to my personal RPi. We need to allow
-    // sheets to pick which device on which node, so there should be N
-    // GraphQL clients if your network has N nodes.
-
-    _subClient = Client(
-        link: WebSocketLink(
-            Uri(
-              scheme: "ws",
-              host: "192.168.1.103",
-              port: 3000,
-              path: "/drmem/s",
-            ).toString(),
-            reconnectInterval: const Duration(seconds: 1),
-            initialPayload: {
-              "headers": {"sec-websocket-protocol": "graphql-ws"}
-            }),
-        cache: Cache());
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _queryClient.dispose();
-    _subClient.dispose();
-  }
+  void dispose() => super.dispose();
 
   // Render the sheet. This consists of building a ListView containing all
   // the rows defined for the sheet. We build all the rows and insert them
@@ -98,8 +47,7 @@ class _SheetRunnerState extends State<SheetRunner> {
                   .map((e) => Padding(
                         key: e.key,
                         padding: const EdgeInsets.only(bottom: 2.0),
-                        child:
-                            e.buildRowRunner(context, _queryClient, _subClient),
+                        child: e.buildRowRunner(context),
                       ))
                   .toList());
     });

@@ -3,14 +3,22 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:nsd/nsd.dart';
+import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
 
+// The entry point for the application.
 Future<void> main() async {
+  // Make sure everything is initialized before starting up our persistent
+  // storage.
+
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize (and load) data associated with the persistent store.
+
   HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: await getApplicationDocumentsDirectory());
 
@@ -33,7 +41,7 @@ class DrMemApp extends StatelessWidget {
 
       home: BlocProvider(
         create: (_) => Model(),
-        child: const BaseWidget(),
+        child: DrMem(child: const BaseWidget()),
       ),
     );
   }
@@ -91,6 +99,10 @@ class BaseState extends State<BaseWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final DrMem drmem = DrMem.of(context);
+
+    drmem.addNode("rpi4", "192.168.1.103", 3000, "/drmem/q", "/drmem/s");
+
     return Scaffold(
         body: SafeArea(child: _display(context)),
         bottomNavigationBar: _buildNavBar());
