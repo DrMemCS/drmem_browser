@@ -27,7 +27,9 @@ extension on DevValue {
   // determines which subclass the object actually is to generate the
   // appropriate widget.
 
-  Widget build(BuildContext context, String? units) {
+  Widget build(BuildContext context, bool settable, String? units) {
+    final Color color = settable ? Colors.cyan : Colors.grey;
+    final TextStyle style = TextStyle(color: color);
     final data = this;
 
     // Booleans display a checkbox.
@@ -43,26 +45,26 @@ extension on DevValue {
     // Integers display their value with an optional units designation.
 
     if (data is DevInt) {
-      return Text(units != null ? "${data.value} $units" : "${data.value}");
+      return Text(units != null ? "${data.value} $units" : "${data.value}",
+          style: style);
     }
 
     // Doubles display their value with an optional units designation.
 
     if (data is DevFlt) {
-      return Text(units != null ? "${data.value} $units" : "${data.value}");
+      return Text(units != null ? "${data.value} $units" : "${data.value}",
+          style: style);
     }
 
     // Strings are displayed as strings.
 
     if (data is DevStr) {
-      return Text(data.value);
+      return Text(data.value, style: style);
     }
 
     // If we don't recognize the type, display an error message.
 
-    final ThemeData td = Theme.of(context);
-
-    return buildErrorWidget(td, "unknown data type");
+    return buildErrorWidget(Theme.of(context), "unknown data type");
   }
 }
 
@@ -72,9 +74,10 @@ extension on DevValue {
 
 class DataWidget extends StatelessWidget {
   final String device;
+  final bool settable;
   final String? units;
 
-  const DataWidget(this.device, this.units, {super.key});
+  const DataWidget(this.device, this.settable, this.units, {super.key});
 
   // Create the appropriate widget based on the type of the incoming data.
 
@@ -85,7 +88,7 @@ class DataWidget extends StatelessWidget {
     return StreamBuilder(
         stream: drmem.monitorDevice("rpi4", device),
         builder: (context, snapshot) => snapshot.hasData
-            ? snapshot.data!.value.build(context, units)
+            ? snapshot.data!.value.build(context, settable, units)
             : Container());
   }
 }

@@ -305,7 +305,9 @@ class _DeviceWidget extends StatelessWidget {
                   final data = snapshot.data!;
 
                   if (data.isNotEmpty) {
-                    return DataWidget(name, data.first.units);
+                    final info = data.first;
+
+                    return DataWidget(name, info.settable, info.units);
                   } else {
                     return buildErrorWidget(td, "device not found");
                   }
