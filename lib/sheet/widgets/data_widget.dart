@@ -20,6 +20,52 @@ Widget buildErrorWidget(ThemeData td, String msg) {
   );
 }
 
+// Define an extension on the `DevValue` hierarchy.
+
+extension on DevValue {
+  // This extension builds a Widget that displays values of the given type. It
+  // determines which subclass the object actually is to generate the
+  // appropriate widget.
+
+  Widget build(BuildContext context, String? units) {
+    final data = this;
+
+    // Booleans display a checkbox.
+
+    if (data is DevBool) {
+      return Checkbox(
+        visualDensity: VisualDensity.compact,
+        value: data.value,
+        onChanged: null,
+      );
+    }
+
+    // Integers display their value with an optional units designation.
+
+    if (data is DevInt) {
+      return Text(units != null ? "${data.value} $units" : "${data.value}");
+    }
+
+    // Doubles display their value with an optional units designation.
+
+    if (data is DevFlt) {
+      return Text(units != null ? "${data.value} $units" : "${data.value}");
+    }
+
+    // Strings are displayed as strings.
+
+    if (data is DevStr) {
+      return Text(data.value);
+    }
+
+    // If we don't recognize the type, display an error message.
+
+    final ThemeData td = Theme.of(context);
+
+    return buildErrorWidget(td, "unknown data type");
+  }
+}
+
 // This widget is responsible for displaying live data. It will start the
 // monitor subscription so that it is the only widget that has to refresh when
 // new data arrives.
@@ -30,38 +76,6 @@ class DataWidget extends StatelessWidget {
 
   const DataWidget(this.device, this.units, {super.key});
 
-  // Displays a checkbox widget to display boolean value
-
-  Widget _displayBoolean(bool value) {
-    return Checkbox(
-      visualDensity: VisualDensity.compact,
-      value: value,
-      onChanged: null,
-    );
-  }
-
-  // For integers, display them as text (along with the units -- if there
-  // are any.)
-
-  Widget _displayInteger(int value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
-  // For floating point, display them as text (along with the units -- if
-  // there are any.)
-
-  Widget _displayDouble(double value, String? units) {
-    if (units != null) {
-      return Text("$value $units");
-    } else {
-      return Text("$value");
-    }
-  }
-
   // Create the appropriate widget based on the type of the incoming data.
 
   @override
@@ -69,29 +83,9 @@ class DataWidget extends StatelessWidget {
     final DrMem drmem = DrMem.of(context);
 
     return StreamBuilder(
-      stream: drmem.monitorDevice("rpi4", device),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final data = snapshot.data!.value;
-
-          if (data is DevBool) {
-            return _displayBoolean(data.value);
-          }
-
-          if (data is DevInt) {
-            return _displayInteger(data.value, units);
-          }
-
-          if (data is DevFlt) {
-            return _displayDouble(data.value, units);
-          }
-
-          if (data is DevStr) {
-            return Text(data.value);
-          }
-        }
-        return Container();
-      },
-    );
+        stream: drmem.monitorDevice("rpi4", device),
+        builder: (context, snapshot) => snapshot.hasData
+            ? snapshot.data!.value.build(context, units)
+            : Container());
   }
 }
