@@ -35,11 +35,9 @@ extension on DevValue {
     // Booleans display a checkbox.
 
     if (data is DevBool) {
-      return Checkbox(
-        visualDensity: VisualDensity.compact,
-        value: data.value,
-        onChanged: null,
-      );
+      return Icon(
+          data.value ? Icons.radio_button_checked : Icons.radio_button_off,
+          color: color);
     }
 
     // Integers display their value with an optional units designation.
