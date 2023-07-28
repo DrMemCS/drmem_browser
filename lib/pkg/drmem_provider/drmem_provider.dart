@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import "package:gql_websocket_link/gql_websocket_link.dart";
 import 'package:gql_http_link/gql_http_link.dart';
+import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/set_device.data.gql.dart';
+import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/set_device.req.gql.dart';
 import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/drmem.schema.gql.dart';
 import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/driver_info.data.gql.dart';
 import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/driver_info.req.gql.dart';
@@ -16,6 +18,8 @@ import 'package:ferry/ferry.dart';
 
 abstract class DevValue {
   const DevValue();
+
+  GSettingDataBuilder toBuilder();
 }
 
 /// Holds values returned by boolean devices.
@@ -24,6 +28,9 @@ class DevBool extends DevValue {
   final bool value;
 
   const DevBool(this.value);
+
+  @override
+  GSettingDataBuilder toBuilder() => GSettingDataBuilder()..Gbool = value;
 }
 
 /// Holds values returned by int devices.
@@ -32,6 +39,9 @@ class DevInt extends DevValue {
   final int value;
 
   const DevInt(this.value);
+
+  @override
+  GSettingDataBuilder toBuilder() => GSettingDataBuilder()..Gint = value;
 }
 
 /// Holds values returned by floating point devices.
@@ -40,6 +50,9 @@ class DevFlt extends DevValue {
   final double value;
 
   const DevFlt(this.value);
+
+  @override
+  GSettingDataBuilder toBuilder() => GSettingDataBuilder()..flt = value;
 }
 
 /// Holds values returned by devices that return strings.
@@ -48,6 +61,9 @@ class DevStr extends DevValue {
   final String value;
 
   const DevStr(this.value);
+
+  @override
+  GSettingDataBuilder toBuilder() => GSettingDataBuilder()..str = value;
 }
 
 /// Represents a reading of a device.
@@ -90,6 +106,12 @@ class Reading {
         throw (Exception("reading has multiple value types"));
     }
   }
+
+  /// Creates a [Reading] value from a GraphQL [setDevice] reply value.
+
+  Reading.fromSetResult(GSetDeviceData_setDevice reply)
+      : this.from(reply.stamp, reply.boolValue, reply.intValue,
+            reply.floatValue, reply.stringValue);
 }
 
 /// Represents the history associated with a device. This is a snapshot of the
@@ -281,6 +303,32 @@ class DrMem extends InheritedWidget {
       return Future.error(Exception('$node is not known'));
     }
   }
+
+  /// Sets a value of a DrMem device.
+  ///
+  /// The target device must be settable.
+  ///
+  /// [node] is the name of the DrMem node that hosts the device.
+  ///
+  /// [device] is the name fo the device.
+  ///
+  /// [value] is the value to set. Most devices enforce a value type. For
+  /// instance, "enable" devices are typically boolean. If the incorrect type
+  /// is sent, the driver will return an error. See the driver documentation
+  /// to see what data type is supported by the device.
+  ///
+  /// The functon returns a [Reading] structure echoing the setting and
+  /// containing the timestamp of when the setting was applied. Some drivers
+  /// will return an error when a setting value is out of range. Other drivers
+  /// may accept the value, but clip it to remain in range. See the driver docs
+  /// to understand the behavior.
+
+  Future<Reading> setDevice(String node, String device, DevValue value) => _rpc(
+      node,
+      GSetDeviceReq((b) => b
+        ..vars.device = device
+        ..vars.value = value.toBuilder()),
+      (result) => Reading.fromSetResult(result.setDevice));
 
   /// Retrieves driver information from a DrMem node.
   ///

@@ -1,11 +1,7 @@
 schema {
   query: Config
-  mutation: MutRoot
+  mutation: Control
   subscription: Subscription
-}
-
-type EditConfig {
-  modRedis(param: String!): Boolean!
 }
 
 # Describes data that can be sent to devices. When specifying data, one -- and only one -- field must be set.
@@ -102,12 +98,7 @@ type Subscription {
 # This group of queries perform modifications to devices.
 type Control {
   # Submits `value` to be applied to the device associated with the given `name`. If the data is in a format the device doesn't support an error is returned. The `value` parameter contains several fields. Only one should be set. It is an error to have all fields `null` or more than one field non-`null`.
-  setDevice(name: String!, value: SettingData!): Boolean
-}
-
-type MutRoot {
-  config: EditConfig!
-  control: Control!
+  setDevice(name: String!, value: SettingData!): Reading!
 }
 
 # Information about a driver in the running version of `drmemd`.
