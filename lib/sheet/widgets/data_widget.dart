@@ -27,42 +27,51 @@ extension on DevValue {
   // determines which subclass the object actually is to generate the
   // appropriate widget.
 
-  Widget build(BuildContext context, bool settable, String? units) {
-    final Color color = settable ? Colors.cyan : Colors.grey;
+  Widget build(BuildContext context, void Function()? setFunc, String? units) {
+    final Color color = setFunc != null ? Colors.cyan : Colors.grey;
     final TextStyle style = TextStyle(color: color);
     final data = this;
+    Widget? widget;
 
     // Booleans display a checkbox.
 
     if (data is DevBool) {
-      return Icon(
+      widget = Icon(
           data.value ? Icons.radio_button_checked : Icons.radio_button_off,
           color: color);
     }
 
     // Integers display their value with an optional units designation.
 
-    if (data is DevInt) {
-      return Text(units != null ? "${data.value} $units" : "${data.value}",
+    else if (data is DevInt) {
+      widget = Text(units != null ? "${data.value} $units" : "${data.value}",
           style: style);
     }
 
     // Doubles display their value with an optional units designation.
 
-    if (data is DevFlt) {
-      return Text(units != null ? "${data.value} $units" : "${data.value}",
+    else if (data is DevFlt) {
+      widget = Text(units != null ? "${data.value} $units" : "${data.value}",
           style: style);
     }
 
     // Strings are displayed as strings.
 
-    if (data is DevStr) {
-      return Text(data.value, style: style);
+    else if (data is DevStr) {
+      widget = Text(data.value, style: style);
     }
 
-    // If we don't recognize the type, display an error message.
+    if (widget != null) {
+      if (setFunc != null) {
+        return GestureDetector(onTap: setFunc, child: widget);
+      } else {
+        return widget;
+      }
+    } else {
+      // If we don't recognize the type, display an error message.
 
-    return buildErrorWidget(Theme.of(context), "unknown data type");
+      return buildErrorWidget(Theme.of(context), "unknown data type");
+    }
   }
 }
 
@@ -70,23 +79,41 @@ extension on DevValue {
 // monitor subscription so that it is the only widget that has to refresh when
 // new data arrives.
 
-class DataWidget extends StatelessWidget {
+class DataWidget extends StatefulWidget {
   final String device;
   final bool settable;
   final String? units;
 
   const DataWidget(this.device, this.settable, this.units, {super.key});
 
-  // Create the appropriate widget based on the type of the incoming data.
-
   @override
-  Widget build(BuildContext context) {
+  State<DataWidget> createState() => _DataWidgetState();
+}
+
+class _DataWidgetState extends State<DataWidget> {
+  bool _setDevice = false;
+
+  Widget _buildDisplayWidget(BuildContext context) {
     final DrMem drmem = DrMem.of(context);
+    void Function()? setFunc =
+        widget.settable ? () => setState(() => _setDevice = true) : null;
 
     return StreamBuilder(
-        stream: drmem.monitorDevice("rpi4", device),
+        stream: drmem.monitorDevice("rpi4", widget.device),
         builder: (context, snapshot) => snapshot.hasData
-            ? snapshot.data!.value.build(context, settable, units)
+            ? snapshot.data!.value.build(context, setFunc, widget.units)
             : Container());
+  }
+
+  Widget _buildSettingWidget(BuildContext context) {
+    return const Icon(Icons.ac_unit);
+  }
+
+  // Create the appropriate widget based on the type of the incoming data.
+  @override
+  Widget build(BuildContext context) {
+    return _setDevice
+        ? _buildSettingWidget(context)
+        : _buildDisplayWidget(context);
   }
 }
