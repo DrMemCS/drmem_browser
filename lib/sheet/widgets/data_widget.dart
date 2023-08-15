@@ -57,9 +57,8 @@ extension on DevValue {
     return switch (this) {
       DevBool() => buildBoolEditor(drmem, device, exitFunc),
       DevFlt() => buildFloatEditor(context, drmem, device, exitFunc),
-      DevInt() ||
-      DevStr() =>
-        const Icon(Icons.question_mark, color: Colors.red),
+      DevInt() => buildIntegerEditor(context, drmem, device, exitFunc),
+      DevStr() => buildStringEditor(context, drmem, device, exitFunc),
     };
   }
 
@@ -89,6 +88,51 @@ extension on DevValue {
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           }
         }
+      },
+    );
+  }
+
+  Widget buildIntegerEditor(
+      BuildContext context, drmem, String device, void Function() exitFunc) {
+    return TextField(
+      autofocus: true,
+      textAlign: TextAlign.end,
+      decoration: null,
+      minLines: 1,
+      maxLines: 1,
+      onSubmitted: (value) async {
+        exitFunc();
+
+        if (value.isNotEmpty) {
+          try {
+            int val = int.parse(value);
+
+            await drmem.setDevice("rpi4", device, DevInt(val));
+          } on FormatException {
+            const snackBar = SnackBar(
+              backgroundColor: Color.fromRGBO(183, 28, 28, 1),
+              content: Text('Bad numeric format.',
+                  style: TextStyle(color: Colors.yellow)),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        }
+      },
+    );
+  }
+
+  Widget buildStringEditor(
+      BuildContext context, drmem, String device, void Function() exitFunc) {
+    return TextField(
+      autofocus: true,
+      textAlign: TextAlign.end,
+      decoration: null,
+      minLines: 1,
+      maxLines: 1,
+      onSubmitted: (value) async {
+        exitFunc();
+        await drmem.setDevice("rpi4", device, DevStr(value));
       },
     );
   }
