@@ -6,18 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'dart:developer' as developer;
 
-// Display "parameter page".
-
-Widget displayParameters() {
-  return _ParamPage();
-}
-
-class _ParamPage extends StatefulWidget {
+class ParamPage extends StatefulWidget {
   @override
-  _SheetsState createState() => _SheetsState();
+  State<ParamPage> createState() => _SheetsState();
 }
 
-class _SheetsState extends State<_ParamPage> {
+class _SheetsState extends State<ParamPage> {
   bool editMode = false;
   final TextEditingController ctrlEditName = TextEditingController();
 

@@ -89,7 +89,7 @@ class BaseState extends State<BaseWidget> {
   Widget _display(BuildContext context) {
     switch (_selectIndex) {
       case 1:
-        return displayParameters();
+        return ParamPage();
 
       case 0:
       default:
