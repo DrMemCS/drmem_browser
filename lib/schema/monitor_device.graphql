@@ -1,9 +1,0 @@
-subscription MonitorDevice($device: String!) {
-  monitorDevice(device: $device) {
-    stamp
-    boolValue
-    intValue
-    floatValue
-    stringValue
-  }
-}

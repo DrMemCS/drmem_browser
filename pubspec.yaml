@@ -12,26 +12,26 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.2
-  flutter_markdown: ^0.6.14
-  path_provider: ^2.0.14
+  cupertino_icons: ^1.0.5
+  flutter_markdown: ^0.6.17
+  path_provider: ^2.0.15
 
-  nsd: ">=2.3.0"
+  nsd: "^2.3.1"
 
-  gql_http_link: ^1.0.0
-  gql_websocket_link: ^1.0.0
-  ferry: ^0.14.0+1
-  ferry_flutter: ^0.8.0+1
+  gql_http_link: ^1.0.1
+  gql_websocket_link: ^1.1.0
+  ferry: ^0.14.2+1
+  ferry_flutter: ^0.8.1
 
-  bloc: ^8.1.1
-  flutter_bloc: ^8.1.2
-  hydrated_bloc: ^9.1.0
+  bloc: ^8.1.2
+  flutter_bloc: ^8.1.3
+  hydrated_bloc: ^9.1.2
 
 dev_dependencies:
-  flutter_lints: ^2.0.1
+  flutter_lints: ^2.0.2
 
-  build_runner: ^2.3.3
-  ferry_generator: ^0.8.0+1
+  build_runner: ^2.4.6
+  ferry_generator: ^0.8.1
 
   flutter_test:
     sdk: flutter

@@ -1,5 +1,6 @@
-query GetDevice($name: String!) {
-  deviceInfo(pattern: $name) {
+query GetAllDevices {
+	deviceInfo {
+    deviceName
     settable
     units
     history {
@@ -18,6 +19,9 @@ query GetDevice($name: String!) {
         floatValue
         stringValue
       }
+    }
+    driver {
+      name
     }
   }
 }

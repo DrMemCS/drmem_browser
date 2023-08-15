@@ -1,13 +1,8 @@
-import 'dart:async';
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:ferry/ferry.dart';
-import 'package:drmem_browser/schema/__generated__/get_device.req.gql.dart';
-import 'package:drmem_browser/schema/__generated__/get_device.data.gql.dart';
-import 'package:drmem_browser/schema/__generated__/get_device.var.gql.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'widgets/data_widget.dart';
@@ -21,7 +16,7 @@ abstract class BaseRow {
   const BaseRow({required this.key});
 
   Widget buildRowEditor(BuildContext context, int index);
-  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient);
+  Widget buildRowRunner(BuildContext context);
   Icon getIcon();
 
   Map<String, dynamic> toJson();
@@ -66,7 +61,7 @@ class EmptyRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+  Widget buildRowRunner(BuildContext context) {
     return const Divider();
   }
 
@@ -98,7 +93,7 @@ class CommentRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+  Widget buildRowRunner(BuildContext context) {
     final ThemeData td = Theme.of(context);
 
     return Container(
@@ -145,8 +140,8 @@ class DeviceRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
-    return _DeviceWidget(qClient, sClient, label, name);
+  Widget buildRowRunner(BuildContext context) {
+    return _DeviceWidget(label, name);
   }
 
   @override
@@ -182,7 +177,7 @@ class PlotRow extends BaseRow {
   }
 
   @override
-  Widget buildRowRunner(BuildContext context, Client qClient, Client sClient) {
+  Widget buildRowRunner(BuildContext context) {
     return const Text("display plot");
   }
 
@@ -275,77 +270,19 @@ class _CommentEditorState extends State<_CommentEditor> {
   }
 }
 
-class _DeviceWidget extends StatefulWidget {
-  final Client qClient;
-  final Client sClient;
+class _DeviceWidget extends StatelessWidget {
   final String? label;
   final String name;
 
-  const _DeviceWidget(this.qClient, this.sClient, this.label, this.name,
-      {Key? key})
-      : super(key: key);
+  const _DeviceWidget(this.label, this.name, {Key? key}) : super(key: key);
 
-  @override
-  _DeviceWidgetState createState() => _DeviceWidgetState();
+  // Returns the text that needs to be displayed on the left side of the row.
 
   String get text => label != null && label!.isNotEmpty ? label! : name;
-}
-
-class _DeviceWidgetState extends State<_DeviceWidget> {
-  StreamSubscription? subMeta;
-  GGetDeviceData_deviceInfo? info;
-  String? errorText;
-
-  void _handleDeviceInfo(
-      OperationResponse<GGetDeviceData, GGetDeviceVars> response) {
-    developer.log("response: ${response.loading}", name: "graphql.GetDevice");
-    if (!response.loading) {
-      if (response.hasErrors) {
-        developer.log("error returned",
-            name: "graphql.GetDevice", error: "${response.graphqlErrors}");
-      } else if (response.data?.deviceInfo.isNotEmpty ?? false) {
-        setState(() {
-          errorText = null;
-          info = response.data?.deviceInfo.first;
-        });
-      } else {
-        setState(() => errorText = "Device not found.");
-      }
-
-      // Free up resources associated with the request.
-
-      subMeta?.cancel();
-      subMeta = null;
-    }
-  }
-
-  // Set up the GraphQL requests to populate the fields in the Device Row.
-
-  @override
-  void initState() {
-    // If a device name was given, start a GraphQL query to receive information
-    // about the device. Otherwise, set the error text and avoid doing the
-    // request/replies.
-
-    if (widget.name.isNotEmpty) {
-      subMeta = widget.qClient
-          .request(GGetDeviceReq(((b) => b..vars.name = widget.name)))
-          .listen(_handleDeviceInfo);
-    } else {
-      errorText = "No device name";
-    }
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    subMeta?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
+    final DrMem drmem = DrMem.of(context);
     final ThemeData td = Theme.of(context);
 
     return Container(
@@ -356,16 +293,30 @@ class _DeviceWidgetState extends State<_DeviceWidget> {
         children: [
           Expanded(
             child: Text(
-              widget.text,
+              text,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.colorScheme.primary),
             ),
           ),
-          errorText == null
-              ? (info == null
-                  ? Container()
-                  : DataWidget(widget.name, widget.sClient, info!.units))
-              : buildErrorWidget(td, errorText!)
+          FutureBuilder(
+              future: drmem.getDeviceInfo("rpi4", device: name),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data!;
+
+                  if (data.isNotEmpty) {
+                    final info = data.first;
+
+                    return DataWidget(name, info.settable, info.units);
+                  } else {
+                    return buildErrorWidget(td, "device not found");
+                  }
+                } else if (snapshot.hasError) {
+                  return buildErrorWidget(td, "${snapshot.error}");
+                } else {
+                  return const Text("loading ...");
+                }
+              }),
         ],
       ),
     );

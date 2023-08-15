@@ -37,6 +37,7 @@ class ChooserState extends State<DnsChooser> {
       developer.log("unregistered", name: "mdns.announce");
       stopDiscovery(discovery!);
       developer.log("stopped", name: "mdns.connection");
+      discovery = null;
     }
     super.dispose();
   }

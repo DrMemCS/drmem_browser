@@ -1,8 +1,8 @@
-query GetAllDevices {
-	deviceInfo {
+query GetDevice($name: String!) {
+  deviceInfo(pattern: $name) {
     deviceName
-    units
     settable
+    units
     history {
       totalPoints
       firstPoint {
@@ -19,9 +19,6 @@ query GetAllDevices {
         floatValue
         stringValue
       }
-    }
-    driver {
-      name
     }
   }
 }
