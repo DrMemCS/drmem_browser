@@ -56,11 +56,41 @@ extension on DevValue {
 
     return switch (this) {
       DevBool() => buildBoolEditor(drmem, device, exitFunc),
+      DevFlt() => buildFloatEditor(context, drmem, device, exitFunc),
       DevInt() ||
-      DevFlt() ||
       DevStr() =>
         const Icon(Icons.question_mark, color: Colors.red),
     };
+  }
+
+  Widget buildFloatEditor(
+      BuildContext context, drmem, String device, void Function() exitFunc) {
+    return TextField(
+      autofocus: true,
+      textAlign: TextAlign.end,
+      decoration: null,
+      minLines: 1,
+      maxLines: 1,
+      onSubmitted: (value) async {
+        exitFunc();
+
+        if (value.isNotEmpty) {
+          try {
+            double val = double.parse(value);
+
+            await drmem.setDevice("rpi4", device, DevFlt(val));
+          } on FormatException {
+            const snackBar = SnackBar(
+              backgroundColor: Color.fromRGBO(183, 28, 28, 1),
+              content: Text('Bad numeric format.',
+                  style: TextStyle(color: Colors.yellow)),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        }
+      },
+    );
   }
 
   // Returns a widget tree which sends boolean values to a device. For the
@@ -140,12 +170,14 @@ class _DataWidgetState extends State<DataWidget> {
     final editValue = _editValue;
 
     return editValue != null
-        ? TapRegion(
-            onTapOutside: (_) => setState(() => _editValue = null),
-            child: editValue.buildEditor(
-              context,
-              widget.device,
-              () => setState(() => _editValue = null),
+        ? Expanded(
+            child: TapRegion(
+              onTapOutside: (_) => setState(() => _editValue = null),
+              child: editValue.buildEditor(
+                context,
+                widget.device,
+                () => setState(() => _editValue = null),
+              ),
             ),
           )
         : _buildDisplayWidget(context);
