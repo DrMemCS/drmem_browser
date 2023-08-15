@@ -63,7 +63,9 @@ extension on DevValue {
     };
   }
 
-  // Returns a widget tree which sends boolean values to a device.
+  // Returns a widget tree which sends boolean values to a device. For the
+  // boolean editor, we display two buttons which send `true` and `false`
+  // values.
 
   Widget buildBoolEditor(
     DrMem drmem,
@@ -138,10 +140,13 @@ class _DataWidgetState extends State<DataWidget> {
     final editValue = _editValue;
 
     return editValue != null
-        ? editValue.buildEditor(
-            context,
-            widget.device,
-            () => setState(() => _editValue = null),
+        ? TapRegion(
+            onTapOutside: (_) => setState(() => _editValue = null),
+            child: editValue.buildEditor(
+              context,
+              widget.device,
+              () => setState(() => _editValue = null),
+            ),
           )
         : _buildDisplayWidget(context);
   }

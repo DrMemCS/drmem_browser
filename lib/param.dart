@@ -4,9 +4,10 @@ import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'dart:developer' as developer;
 
 class ParamPage extends StatefulWidget {
+  const ParamPage({super.key});
+
   @override
   State<ParamPage> createState() => _SheetsState();
 }
@@ -93,12 +94,9 @@ class _SheetsState extends State<ParamPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => developer.log("tapped outside"),
-      child: Column(children: [
-        editMode ? getEditorAppBar() : getRunnerAppBar(),
-        Expanded(child: editMode ? const SheetEditor() : const SheetRunner())
-      ]),
-    );
+    return Column(children: [
+      editMode ? getEditorAppBar() : getRunnerAppBar(),
+      Expanded(child: editMode ? const SheetEditor() : const SheetRunner())
+    ]);
   }
 }
