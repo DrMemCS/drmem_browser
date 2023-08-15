@@ -16,7 +16,7 @@ import 'package:ferry/ferry.dart';
 
 /// The base class for all types returned by a device.
 
-abstract class DevValue {
+sealed class DevValue {
   const DevValue();
 
   GSettingDataBuilder toBuilder();
@@ -151,6 +151,8 @@ class DevHistory {
     }
   }
 }
+
+/// The result type for the [DrMem.getDriverInfo] query.
 
 class DriverInfo {
   final String name;

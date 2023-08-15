@@ -30,48 +30,21 @@ extension on DevValue {
   Widget build(BuildContext context, void Function()? setFunc, String? units) {
     final Color color = setFunc != null ? Colors.cyan : Colors.grey;
     final TextStyle style = TextStyle(color: color);
-    final data = this;
-    Widget? widget;
 
-    // Booleans display a checkbox.
+    Widget widget = switch (this) {
+      DevBool(value: var v) => Icon(
+          v ? Icons.radio_button_checked : Icons.radio_button_off,
+          color: color),
+      DevInt(value: var v) =>
+        Text(units != null ? "$v $units" : "$v", style: style),
+      DevFlt(value: var v) =>
+        Text(units != null ? "$v $units" : "$v", style: style),
+      DevStr(value: var v) => Text(v, style: style),
+    };
 
-    if (data is DevBool) {
-      widget = Icon(
-          data.value ? Icons.radio_button_checked : Icons.radio_button_off,
-          color: color);
-    }
-
-    // Integers display their value with an optional units designation.
-
-    else if (data is DevInt) {
-      widget = Text(units != null ? "${data.value} $units" : "${data.value}",
-          style: style);
-    }
-
-    // Doubles display their value with an optional units designation.
-
-    else if (data is DevFlt) {
-      widget = Text(units != null ? "${data.value} $units" : "${data.value}",
-          style: style);
-    }
-
-    // Strings are displayed as strings.
-
-    else if (data is DevStr) {
-      widget = Text(data.value, style: style);
-    }
-
-    if (widget != null) {
-      if (setFunc != null) {
-        return GestureDetector(onTap: setFunc, child: widget);
-      } else {
-        return widget;
-      }
-    } else {
-      // If we don't recognize the type, display an error message.
-
-      return buildErrorWidget(Theme.of(context), "unknown data type");
-    }
+    return setFunc != null
+        ? GestureDetector(onTap: setFunc, child: widget)
+        : widget;
   }
 }
 
