@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
-import 'package:flutter/services.dart';
 
 // This builds widgets that show an error icon followed by red text
 // indicating an unsupported type was received. This could happen if
@@ -56,36 +55,37 @@ extension on DevValue {
     final DrMem drmem = DrMem.of(context);
 
     return switch (this) {
-      DevBool() => Focus(
-          onFocusChange: (value) => !value ? exitFunc() : (),
-          onKeyEvent: (node, event) {
-            if (event.logicalKey == LogicalKeyboardKey.escape) {
-              exitFunc();
-              return KeyEventResult.handled;
-            } else {
-              return KeyEventResult.ignored;
-            }
-          },
-          child: Row(
-            children: [
-              TextButton(
-                  onPressed: () async {
-                    exitFunc();
-                    await drmem.setDevice("rpi4", device, const DevBool(true));
-                  },
-                  child: const Text("true")),
-              TextButton(
-                  onPressed: () async {
-                    exitFunc();
-                    await drmem.setDevice("rpi4", device, const DevBool(false));
-                  },
-                  child: const Text("false")),
-            ],
-          ),
-        ),
-      DevInt() || DevFlt() || DevStr() => const Icon(Icons.ac_unit),
+      DevBool() => buildBoolEditor(drmem, device, exitFunc),
+      DevInt() ||
+      DevFlt() ||
+      DevStr() =>
+        const Icon(Icons.question_mark, color: Colors.red),
     };
   }
+
+  // Returns a widget tree which sends boolean values to a device.
+
+  Widget buildBoolEditor(
+    DrMem drmem,
+    String device,
+    void Function() exitFunc,
+  ) =>
+      Row(
+        children: [
+          TextButton(
+              onPressed: () async {
+                exitFunc();
+                await drmem.setDevice("rpi4", device, const DevBool(true));
+              },
+              child: const Text("true")),
+          TextButton(
+              onPressed: () async {
+                exitFunc();
+                await drmem.setDevice("rpi4", device, const DevBool(false));
+              },
+              child: const Text("false")),
+        ],
+      );
 }
 
 // This widget is responsible for displaying live data. It will start the
