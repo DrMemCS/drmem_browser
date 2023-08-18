@@ -20,6 +20,59 @@ Widget buildErrorWidget(ThemeData td, String msg) {
   );
 }
 
+// Displays an error message using the snackbar.
+
+void _displayError(BuildContext context, String msg) {
+  final snackBar = SnackBar(
+    backgroundColor: const Color.fromRGBO(183, 28, 28, 1),
+    content: Text(msg, style: const TextStyle(color: Colors.yellow)),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+class _SettingTextEditor extends StatelessWidget {
+  final DrMem drmem;
+  final Device device;
+  final void Function() exitFunc;
+  final TextInputType? inpType;
+  final DevValue? Function(BuildContext, String) parser;
+
+  const _SettingTextEditor(
+      {required this.drmem,
+      required this.device,
+      required this.exitFunc,
+      this.inpType,
+      required this.parser});
+
+  @override
+  Widget build(BuildContext context) {
+    final td = Theme.of(context);
+
+    return TextField(
+        autofocus: true,
+        style: td.textTheme.bodyMedium!.apply(color: Colors.cyan),
+        textAlign: TextAlign.end,
+        keyboardType: inpType,
+        decoration: null,
+        minLines: 1,
+        maxLines: 1,
+        onSubmitted: (value) async {
+          exitFunc();
+
+          final result = parser(context, value);
+
+          if (result != null) {
+            try {
+              await drmem.setDevice(device, result);
+            } catch (e) {
+              _displayError(context, e.toString());
+            }
+          }
+        });
+  }
+}
+
 // Define an extension on the `DevValue` hierarchy.
 
 extension on DevValue {
@@ -27,8 +80,7 @@ extension on DevValue {
   // determines which subclass the object actually is to generate the
   // appropriate widget.
 
-  Widget build(BuildContext context,
-      void Function() Function(DevValue)? setFunc, String? units) {
+  Widget build(void Function() Function(DevValue)? setFunc, String? units) {
     final Color color = setFunc != null ? Colors.cyan : Colors.grey;
     final TextStyle style = TextStyle(color: color);
 
@@ -62,80 +114,51 @@ extension on DevValue {
     };
   }
 
-  Widget buildFloatEditor(
-      BuildContext context, drmem, String device, void Function() exitFunc) {
-    return TextField(
-      autofocus: true,
-      textAlign: TextAlign.end,
-      decoration: null,
-      minLines: 1,
-      maxLines: 1,
-      onSubmitted: (value) async {
-        exitFunc();
+  Widget buildFloatEditor(BuildContext context, DrMem drmem, Device device,
+          void Function() exitFunc) =>
+      _SettingTextEditor(
+          drmem: drmem,
+          device: device,
+          exitFunc: exitFunc,
+          inpType: TextInputType.number,
+          parser: (context, value) {
+            if (value.isNotEmpty) {
+              try {
+                return DevFlt(double.parse(value));
+              } on FormatException {
+                _displayError(
+                    context, 'Bad numeric format ... setting ignored');
+              }
+            }
+            return null;
+          });
 
-        if (value.isNotEmpty) {
-          try {
-            double val = double.parse(value);
+  Widget buildIntegerEditor(BuildContext context, DrMem drmem, Device device,
+          void Function() exitFunc) =>
+      _SettingTextEditor(
+          drmem: drmem,
+          device: device,
+          exitFunc: exitFunc,
+          inpType: TextInputType.number,
+          parser: (context, value) {
+            if (value.isNotEmpty) {
+              try {
+                return DevInt(int.parse(value));
+              } on FormatException {
+                _displayError(
+                    context, 'Bad numeric format ... setting ignored');
+              }
+            }
+            return null;
+          });
 
-            await drmem.setDevice("rpi4", device, DevFlt(val));
-          } on FormatException {
-            const snackBar = SnackBar(
-              backgroundColor: Color.fromRGBO(183, 28, 28, 1),
-              content: Text('Bad numeric format.',
-                  style: TextStyle(color: Colors.yellow)),
-            );
-
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          }
-        }
-      },
-    );
-  }
-
-  Widget buildIntegerEditor(
-      BuildContext context, drmem, String device, void Function() exitFunc) {
-    return TextField(
-      autofocus: true,
-      textAlign: TextAlign.end,
-      decoration: null,
-      minLines: 1,
-      maxLines: 1,
-      onSubmitted: (value) async {
-        exitFunc();
-
-        if (value.isNotEmpty) {
-          try {
-            int val = int.parse(value);
-
-            await drmem.setDevice("rpi4", device, DevInt(val));
-          } on FormatException {
-            const snackBar = SnackBar(
-              backgroundColor: Color.fromRGBO(183, 28, 28, 1),
-              content: Text('Bad numeric format.',
-                  style: TextStyle(color: Colors.yellow)),
-            );
-
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          }
-        }
-      },
-    );
-  }
-
-  Widget buildStringEditor(
-      BuildContext context, drmem, String device, void Function() exitFunc) {
-    return TextField(
-      autofocus: true,
-      textAlign: TextAlign.end,
-      decoration: null,
-      minLines: 1,
-      maxLines: 1,
-      onSubmitted: (value) async {
-        exitFunc();
-        await drmem.setDevice("rpi4", device, DevStr(value));
-      },
-    );
-  }
+  Widget buildStringEditor(BuildContext context, DrMem drmem, Device device,
+          void Function() exitFunc) =>
+      _SettingTextEditor(
+          drmem: drmem,
+          device: device,
+          exitFunc: exitFunc,
+          parser: (_, value) => DevStr(value));
 
   // Returns a widget tree which sends boolean values to a device. For the
   // boolean editor, we display two buttons which send `true` and `false`
@@ -207,7 +230,7 @@ class _DataWidgetState extends State<DataWidget> {
           if (snapshot.hasData) {
             final data = snapshot.data!.value;
 
-            return data.build(context, setFunc, widget.units);
+            return data.build(setFunc, widget.units);
           } else {
             return Container();
           }
