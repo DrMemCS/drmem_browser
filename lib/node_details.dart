@@ -131,7 +131,7 @@ class _State extends State<_NodeInfo> {
                       propToString(info, "subscriptions")),
                   header(context, "Drivers"),
                   FutureBuilder(
-                    future: drmem.getDriverInfo("rpi4"),
+                    future: drmem.getDriverInfo(widget.node.name!),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return _DriversListView(drivers: snapshot.data!);
@@ -145,7 +145,9 @@ class _State extends State<_NodeInfo> {
                   ),
                   header(context, "Devices"),
                   FutureBuilder(
-                    future: drmem.getDeviceInfo("rpi4", device: "*"),
+                    future: drmem.getDeviceInfo(
+                        device:
+                            DevicePattern(node: widget.node.name!, name: "*")),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return _DevicesListView(devices: snapshot.data!);
