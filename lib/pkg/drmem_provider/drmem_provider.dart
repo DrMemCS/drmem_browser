@@ -324,6 +324,18 @@ class DrMem extends InheritedWidget {
           ))
       .toList();
 
+  // Gets the two GraphQL handles associated with the specified node.
+
+  (Client, Client) _getHandles(String node) {
+    final entry = _nodes[node];
+
+    if (entry != null) {
+      return entry;
+    } else {
+      throw Exception('node `$node` is not known');
+    }
+  }
+
   // This internal function generalizes a GraphQL "RPC" call. In the `ferry`
   // GraphQL package, all GraphQL interactions return a stream -- even RPCs.
   // The incoming packets indicate the states the request goes through. This
@@ -332,31 +344,25 @@ class DrMem extends InheritedWidget {
 
   Future<Result> _rpc<TData, TVars, Result>(String node,
       OperationRequest<TData, TVars> request, Result Function(TData) xlat) {
-    final entry = _nodes[node];
+    final (query, _) = _getHandles(node);
 
-    if (entry != null) {
-      final (query, _) = entry;
+    return query
+        .request(request)
+        .where((response) => !response.loading)
+        .first
+        .then((value) {
+      if (value.hasErrors) {
+        throw Exception(value.graphqlErrors);
+      } else {
+        final data = value.data;
 
-      return query
-          .request(request)
-          .where((response) => !response.loading)
-          .first
-          .then((value) {
-        if (value.hasErrors) {
-          throw Exception(value.graphqlErrors);
+        if (data != null) {
+          return xlat(data);
         } else {
-          final data = value.data;
-
-          if (data != null) {
-            return xlat(data);
-          } else {
-            throw Exception("no data was returned from request");
-          }
+          throw Exception("no data was returned from request");
         }
-      });
-    } else {
-      return Future.error(Exception('$node is not known'));
-    }
+      }
+    });
   }
 
   /// Sets a value of a DrMem device.
@@ -464,23 +470,18 @@ class DrMem extends InheritedWidget {
   ///
   /// DrMem's configuration determines the size of a device's history. This
   /// function can only return what's available.
-  Stream<Reading> monitorDevice(String node, String device,
+  Stream<Reading> monitorDevice(Device device,
       {DateTime? startTime, DateTime? endTime}) {
-    final entry = _nodes[node];
+    final dev = _resolve(device);
+    final (_, sub) = _getHandles(dev.node!);
 
-    if (entry != null) {
-      final (_, sub) = entry;
-
-      return sub
-          .request(GMonitorDeviceReq((b) => b
-            ..vars.device = device
-            ..vars.range = _buildDateRange(startTime, endTime)))
-          .where((response) => !response.loading && response.data != null)
-          .map((response) => response.data!.monitorDevice)
-          .map((data) => Reading.from(data.stamp, data.boolValue, data.intValue,
-              data.floatValue, data.stringValue));
-    } else {
-      throw (Exception('$node is not known'));
-    }
+    return sub
+        .request(GMonitorDeviceReq((b) => b
+          ..vars.device = device.name
+          ..vars.range = _buildDateRange(startTime, endTime)))
+        .where((response) => !response.loading && response.data != null)
+        .map((response) => response.data!.monitorDevice)
+        .map((data) => Reading.from(data.stamp, data.boolValue, data.intValue,
+            data.floatValue, data.stringValue));
   }
 }
