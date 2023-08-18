@@ -299,7 +299,8 @@ class _DeviceWidget extends StatelessWidget {
             ),
           ),
           FutureBuilder(
-              future: drmem.getDeviceInfo("rpi4", device: name),
+              future: drmem.getDeviceInfo(
+                  device: DevicePattern(node: "rpi4", name: name)),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final data = snapshot.data!;
@@ -307,7 +308,8 @@ class _DeviceWidget extends StatelessWidget {
                   if (data.isNotEmpty) {
                     final info = data.first;
 
-                    return DataWidget(name, info.settable, info.units);
+                    return DataWidget(
+                        Device(name: name), info.settable, info.units);
                   } else {
                     return buildErrorWidget(td, "device not found");
                   }

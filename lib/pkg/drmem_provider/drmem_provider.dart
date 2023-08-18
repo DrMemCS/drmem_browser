@@ -14,6 +14,35 @@ import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/get_device
 import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.req.gql.dart';
 import 'package:ferry/ferry.dart';
 
+/// Base class for Device-like types. All device-like types have a "name" field.
+
+sealed class DeviceLike {
+  final String name;
+
+  const DeviceLike({required this.name});
+}
+
+/// Identifies a DrMem device. Since devices are available across multiple
+/// instances of DrMem, a device has a node component. If the node field is
+/// `null`, the application has several ways to handle it: it can display an
+/// error, it can choose a default node, or it can prompt the user.
+
+class Device extends DeviceLike {
+  final String? node;
+
+  const Device({this.node, required super.name});
+}
+
+/// Defines a device "pattern" device. In this type, the name field can be
+/// a unique device name or can be a name pattern (using "glob" patterns). In
+/// this type, the node field cannot be `null`.
+
+class DevicePattern extends DeviceLike {
+  final String node;
+
+  const DevicePattern({required this.node, required super.name});
+}
+
 /// The base class for all types returned by a device.
 
 sealed class DevValue {
@@ -170,8 +199,8 @@ class DriverInfo {
 /// The result type for the [DrMem.getDeviceInfo] query.
 
 class DevInfo {
-  /// Full name of device.
-  final String name;
+  /// Full name and location of device.
+  final Device device;
 
   /// Indicates whether the device is settable.
   final bool settable;
@@ -185,7 +214,7 @@ class DevInfo {
   /// contain information related to it.
   final DevHistory? history;
 
-  const DevInfo(this.name, this.settable, this.units, this.history);
+  const DevInfo(this.device, this.settable, this.units, this.history);
 }
 
 /// The [DrMem] widget implements a "provider" widget for an application's
@@ -212,6 +241,30 @@ class DrMem extends InheritedWidget {
 
   static String _buildSubUri(String host, int port, String sEnd) =>
       Uri(scheme: "ws", host: host, port: port, path: sEnd).toString();
+
+  // Validates a device value by adding a default node, if the node was null,
+  // or verifying the node exists if it isn't null.
+
+  Device _resolve(Device dev) {
+    switch (dev) {
+      case Device(node: null):
+        {
+          if (_nodes.length == 1) {
+            return Device(node: _nodes.keys.first, name: dev.name);
+          } else {
+            throw Exception("device needs a node specified");
+          }
+        }
+      case Device(node: var node):
+        {
+          if (_nodes.containsKey(node)) {
+            return dev;
+          } else {
+            throw Exception("device on unknown node, '$node'");
+          }
+        }
+    }
+  }
 
   /// Adds a new node to the table of known DrMem nodes. When this completes,
   /// the application can interact with the node using the rest of the API.
@@ -264,7 +317,7 @@ class DrMem extends InheritedWidget {
 
   List<DevInfo> _toDevInfoList(GGetDeviceData result) => result.deviceInfo
       .map((e) => DevInfo(
-            e.deviceName,
+            Device(name: e.deviceName),
             e.settable,
             e.units,
             DevHistory.from(e.history),
@@ -310,8 +363,6 @@ class DrMem extends InheritedWidget {
   ///
   /// The target device must be settable.
   ///
-  /// [node] is the name of the DrMem node that hosts the device.
-  ///
   /// [device] is the name fo the device.
   ///
   /// [value] is the value to set. Most devices enforce a value type. For
@@ -325,10 +376,10 @@ class DrMem extends InheritedWidget {
   /// may accept the value, but clip it to remain in range. See the driver docs
   /// to understand the behavior.
 
-  Future<Reading> setDevice(String node, String device, DevValue value) => _rpc(
-      node,
+  Future<Reading> setDevice(Device device, DevValue value) => _rpc(
+      _resolve(device).node!,
       GSetDeviceReq((b) => b
-        ..vars.device = device
+        ..vars.device = device.name
         ..vars.value = value.toBuilder()),
       (result) => Reading.fromSetResult(result.setDevice));
 
@@ -359,8 +410,10 @@ class DrMem extends InheritedWidget {
   /// Returns a Future that resolves to a `List` of device information
   /// ([DevInfo]), or an error.
 
-  Future<List<DevInfo>> getDeviceInfo(String node, {required String device}) =>
-      _rpc(node, GGetDeviceReq((b) => b..vars.name = device), _toDevInfoList);
+  Future<List<DevInfo>> getDeviceInfo({required DevicePattern device}) => _rpc(
+      device.node,
+      GGetDeviceReq((b) => b..vars.name = device.name),
+      _toDevInfoList);
 
   // Returns a date builder or `null`, based on the date parameter.
 
@@ -396,9 +449,7 @@ class DrMem extends InheritedWidget {
   /// of these options may be limited, if the DrMem node is using the simple
   /// backend (which only saves one point of history.)
   ///
-  /// [node] is the name of the DrMem node that is sent the request.
-  ///
-  /// [device] is the name of the device whose readings should be streamed.
+  /// [device] is the device whose readings should be streamed.
   ///
   /// [startTime] and [endTime] are optional arguments which create a range
   /// of time in which readings should be returned. If both are `null`, the

@@ -281,11 +281,12 @@ Padding buildDevInfoRow(DevInfo info, BuildContext context) {
         width: double.infinity,
         child: GestureDetector(
           onDoubleTap: () {
-            Future.wait([Clipboard.setData(ClipboardData(text: info.name))]);
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Added ${info.name} to clipboard")));
+            Future.wait(
+                [Clipboard.setData(ClipboardData(text: info.device.name))]);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Added ${info.device.name} to clipboard")));
           },
-          child: Text(info.name,
+          child: Text(info.device.name,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).colorScheme.primary)),

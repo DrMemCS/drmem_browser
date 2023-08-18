@@ -51,7 +51,7 @@ extension on DevValue {
   // Builds a widget that can edit values of the current object type.
 
   Widget buildEditor(
-      BuildContext context, String device, void Function() exitFunc) {
+      BuildContext context, Device device, void Function() exitFunc) {
     final DrMem drmem = DrMem.of(context);
 
     return switch (this) {
@@ -143,23 +143,29 @@ extension on DevValue {
 
   Widget buildBoolEditor(
     DrMem drmem,
-    String device,
+    Device device,
     void Function() exitFunc,
   ) =>
       Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          TextButton(
-              onPressed: () async {
-                exitFunc();
-                await drmem.setDevice("rpi4", device, const DevBool(true));
-              },
-              child: const Text("true")),
-          TextButton(
-              onPressed: () async {
-                exitFunc();
-                await drmem.setDevice("rpi4", device, const DevBool(false));
-              },
-              child: const Text("false")),
+          Expanded(
+            child: ElevatedButton(
+                onPressed: () async {
+                  exitFunc();
+                  await drmem.setDevice(device, const DevBool(true));
+                },
+                child: const Text("true")),
+          ),
+          Expanded(
+            child: ElevatedButton(
+                onPressed: () async {
+                  exitFunc();
+                  await drmem.setDevice(device, const DevBool(false));
+                },
+                child: const Text("false")),
+          ),
         ],
       );
 }
@@ -169,7 +175,7 @@ extension on DevValue {
 // new data arrives.
 
 class DataWidget extends StatefulWidget {
-  final String device;
+  final Device device;
   final bool settable;
   final String? units;
 
@@ -196,7 +202,7 @@ class _DataWidgetState extends State<DataWidget> {
         widget.settable ? (v) => (() => setState(() => _editValue = v)) : null;
 
     return StreamBuilder(
-        stream: drmem.monitorDevice("rpi4", widget.device),
+        stream: drmem.monitorDevice(widget.device),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final data = snapshot.data!.value;
