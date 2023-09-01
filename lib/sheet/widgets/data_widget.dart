@@ -66,7 +66,9 @@ class _SettingTextEditor extends StatelessWidget {
             try {
               await drmem.setDevice(device, result);
             } catch (e) {
-              _displayError(context, e.toString());
+              if (context.mounted) {
+                _displayError(context, e.toString());
+              }
             }
           }
         });
