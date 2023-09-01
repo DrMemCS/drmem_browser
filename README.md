@@ -60,8 +60,8 @@ Here's an informal list of features to be added. If you're interested in helping
   - [ ] Displaying plots
   - [ ] Editing plot configuration
   - [ ] Should support strip plots (numeric device(s) vs. time), logic plots (boolean device(s) vs.time), and X-Y (numeric device(s) vs. numeric device)
-- [ ] Must be able to set the value of settable devices.
-- [-] Add unit tests
+- [X] Must be able to set the value of settable devices.
+- [ ] Add unit tests
 - [ ] Finish Sheet Editor
   - [X] Add controls to add sheets
   - [X] Add controls to delete sheets
