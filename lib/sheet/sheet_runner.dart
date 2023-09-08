@@ -1,3 +1,4 @@
+import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model.dart';
@@ -38,18 +39,30 @@ class _SheetRunnerState extends State<SheetRunner> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<Model, AppState>(builder: (context, state) {
+      List<Card> groups = state.selected.rows
+          .fold([<Widget>[]], (result, e) {
+            if (e is EmptyRow) {
+              result.add([]);
+            } else {
+              result.last.add(Padding(
+                  key: e.key,
+                  padding: const EdgeInsets.only(bottom: 2.0),
+                  child: e.buildRowRunner(context)));
+            }
+            return result;
+          })
+          .where((e) => e.isNotEmpty)
+          .map((e) => Card(
+              margin: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Column(mainAxisSize: MainAxisSize.max, children: e),
+              )))
+          .toList();
+
       return ListView(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          children:
-              // Loop through the rows and convert them to their Widget form.
-
-              state.selected.rows
-                  .map((e) => Padding(
-                        key: e.key,
-                        padding: const EdgeInsets.only(bottom: 2.0),
-                        child: e.buildRowRunner(context),
-                      ))
-                  .toList());
+          children: groups);
     });
   }
 }

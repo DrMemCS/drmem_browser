@@ -97,6 +97,7 @@ class CommentRow extends BaseRow {
     final ThemeData td = Theme.of(context);
 
     return Container(
+      width: double.infinity,
       constraints: const BoxConstraints(minHeight: 32.0),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
