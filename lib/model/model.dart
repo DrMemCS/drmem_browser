@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:drmem_browser/sheet/sheet.dart';
 import 'model_events.dart';
-import 'node_info.dart';
+import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 
 // Holds the configuration for one sheet of parameters.
 

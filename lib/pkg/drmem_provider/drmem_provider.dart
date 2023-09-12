@@ -14,6 +14,8 @@ import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/get_device
 import 'package:drmem_browser/pkg/drmem_provider/schema/__generated__/monitor_device.req.gql.dart';
 import 'package:ferry/ferry.dart';
 
+export 'node_info.dart' show NodeInfo;
+
 /// Base class for Device-like types. All device-like types have a "name" field.
 
 sealed class DeviceLike {
