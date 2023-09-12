@@ -115,6 +115,18 @@ class AppState {
       nodes: _nodes,
       defNode: defaultNode);
 
+  // Marks a node entry as "inactive". Returns true if the state was updated,
+  // false otherwise.
+
+  bool deactivateNode(String name) {
+    try {
+      _nodes.firstWhere((element) => element.name == name).active = false;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // Determines the next "Untitled##" name for an unnamed sheet. Hopefully users
   // name their sheets so that this function doesn't have to iterate too far to
   // find the next, available name.
@@ -161,6 +173,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     on<RenameSelectedSheet>(_renameSelectedSheet);
     on<AddSheet>(_addSheet);
     on<DeleteSheet>(_delSheet);
+    on<NodeInactive>(_nodeDown);
   }
 
   @override
@@ -261,5 +274,14 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
         ? state._sheets.keys.first
         : state.nextUntitled();
     emit(state.clone());
+  }
+
+  // Attempts to deactivate a node in the node list. If the state was changed,
+  // emit a new state so the widgets update properly.
+
+  void _nodeDown(NodeInactive event, Emitter<AppState> emit) {
+    if (state.deactivateNode(event.name)) {
+      emit(state.clone());
+    }
   }
 }
