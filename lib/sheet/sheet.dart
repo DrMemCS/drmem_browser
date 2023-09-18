@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
+import 'package:drmem_provider/drmem_provider.dart';
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'widgets/data_widget.dart';

@@ -3,9 +3,9 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:nsd/nsd.dart';
-import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
+import 'package:drmem_provider/drmem_provider.dart';
 import 'mdns_chooser.dart';
 import 'node_details.dart';
 import 'param.dart';
@@ -99,10 +99,6 @@ class BaseState extends State<BaseWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final DrMem drmem = DrMem.of(context);
-
-    drmem.addNode("rpi4", "192.168.1.103", 3000, "/drmem/q", "/drmem/s");
-
     return Scaffold(
         body: SafeArea(child: _display(context)),
         bottomNavigationBar: _buildNavBar());

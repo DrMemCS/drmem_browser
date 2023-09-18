@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
+import 'package:drmem_provider/drmem_provider.dart';
 import 'package:nsd/nsd.dart';
 import 'mdns_chooser.dart';
 
@@ -243,7 +243,7 @@ String makeDateChipContent(String label, DateTime dt) {
   return "$label: $year-$month-$day, $hour:$minute";
 }
 
-List<Widget> _buildChips(BuildContext context, DevInfo info) {
+List<Widget> _buildChips(BuildContext context, DeviceInfo info) {
   final ThemeData td = Theme.of(context);
   final List<Widget> tmp = [
     _buildChip(td, info.settable ? "settable" : "read-only")
@@ -273,7 +273,7 @@ List<Widget> _buildChips(BuildContext context, DevInfo info) {
   return tmp;
 }
 
-Padding buildDevInfoRow(DevInfo info, BuildContext context) {
+Padding buildDevInfoRow(DeviceInfo info, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.only(left: 20.0, bottom: 16.0),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -336,7 +336,7 @@ class _DriversListView extends StatelessWidget {
 // Local widget which displays a list of drivers.
 
 class _DevicesListView extends StatelessWidget {
-  final List<DevInfo> devices;
+  final List<DeviceInfo> devices;
 
   const _DevicesListView({Key? key, required this.devices}) : super(key: key);
 

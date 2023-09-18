@@ -55,3 +55,11 @@ class AddSheet extends ModelEvent {
 class DeleteSheet extends ModelEvent {
   const DeleteSheet();
 }
+
+class NodeActive extends ModelEvent {}
+
+class NodeInactive extends ModelEvent {
+  final String name;
+
+  const NodeInactive(this.name);
+}

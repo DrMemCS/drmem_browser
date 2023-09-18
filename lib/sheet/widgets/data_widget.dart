@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:drmem_browser/pkg/drmem_provider/drmem_provider.dart';
+import 'package:drmem_provider/drmem_provider.dart';
 
 // This builds widgets that show an error icon followed by red text
 // indicating an unsupported type was received. This could happen if
@@ -126,7 +126,7 @@ extension on DevValue {
           parser: (context, value) {
             if (value.isNotEmpty) {
               try {
-                return DevFlt(double.parse(value));
+                return DevFlt(value: double.parse(value));
               } on FormatException {
                 _displayError(
                     context, 'Bad numeric format ... setting ignored');
@@ -145,7 +145,7 @@ extension on DevValue {
           parser: (context, value) {
             if (value.isNotEmpty) {
               try {
-                return DevInt(int.parse(value));
+                return DevInt(value: int.parse(value));
               } on FormatException {
                 _displayError(
                     context, 'Bad numeric format ... setting ignored');
@@ -160,7 +160,7 @@ extension on DevValue {
           drmem: drmem,
           device: device,
           exitFunc: exitFunc,
-          parser: (_, value) => DevStr(value));
+          parser: (_, value) => DevStr(value: value));
 
   // Returns a widget tree which sends boolean values to a device. For the
   // boolean editor, we display two buttons which send `true` and `false`
@@ -179,7 +179,7 @@ extension on DevValue {
             child: ElevatedButton(
                 onPressed: () async {
                   exitFunc();
-                  await drmem.setDevice(device, const DevBool(true));
+                  await drmem.setDevice(device, const DevBool(value: true));
                 },
                 child: const Text("true")),
           ),
@@ -187,7 +187,7 @@ extension on DevValue {
             child: ElevatedButton(
                 onPressed: () async {
                   exitFunc();
-                  await drmem.setDevice(device, const DevBool(false));
+                  await drmem.setDevice(device, const DevBool(value: false));
                 },
                 child: const Text("false")),
           ),
