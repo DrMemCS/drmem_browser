@@ -201,12 +201,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
               .map((e) => MapEntry(e.key, PageConfig.fromJson(e.value)))),
           activeSheet: ss,
           defNode: defNode,
-          nodes: nodes
-              ?.map(
-                (e) => NodeInfo.fromJson(e),
-              )
-              .nonNulls
-              .toList());
+          nodes: nodes.map((e) => NodeInfo.fromJson(e)).nonNulls.toList());
     }
     developer.log("error reading state ... starting empty",
         name: "Model.fromJson");
