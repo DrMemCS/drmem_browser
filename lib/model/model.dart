@@ -196,7 +196,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
           'selectedSheet': String ss,
           'sheets': Map<String, dynamic> sheets,
           'defaultNode': String? defNode,
-          'nodes': List<Map<String, dynamic>>? nodes
+          'nodes': List nodes
         }) {
       return AppState(
           sheets: Map.fromEntries(sheets.entries
