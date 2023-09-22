@@ -112,7 +112,9 @@ void _testDeserialization() {
             {'type': "comment", 'content': "hello"}
           ]
         }
-      }
+      },
+      'defaultNode': null,
+      'nodes': []
     };
 
     AppState s = model.fromJson(json)!;
@@ -147,7 +149,9 @@ void _testStorage() async {
         'selectedSheet': "Untitled",
         'sheets': {
           'Untitled': {'rows': []}
-        }
+        },
+        'defaultNode': null,
+        'nodes': []
       });
 
       // Add a row to our sheet. Then check to see that it was added.
@@ -170,7 +174,9 @@ void _testStorage() async {
               {'type': "empty"}
             ]
           }
-        }
+        },
+        'defaultNode': null,
+        'nodes': []
       });
     });
   });
