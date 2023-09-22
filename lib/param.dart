@@ -70,6 +70,7 @@ class _SheetsState extends State<ParamPage> {
     ];
 
     return BlocBuilder<Model, AppState>(builder: (context, state) {
+      final FocusNode fn = FocusNode();
       List<String> items = state.sheetNames;
 
       return AppBar(
@@ -77,6 +78,7 @@ class _SheetsState extends State<ParamPage> {
           title: SizedBox(
             width: double.infinity,
             child: DropdownButton<String>(
+              focusNode: fn,
               underline: Container(),
               value: state.selectedSheet,
               items: items.map((String e) {
@@ -85,6 +87,7 @@ class _SheetsState extends State<ParamPage> {
               onChanged: (value) {
                 if (value != null) {
                   context.read<Model>().add(SelectSheet(value));
+                  fn.unfocus();
                 }
               },
             ),
