@@ -189,8 +189,6 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
 
   @override
   AppState? fromJson(Map<String, dynamic> json) {
-    developer.log("input: $json", name: "Model.fromJson");
-
     if (json
         case {
           'selectedSheet': String ss,
@@ -210,6 +208,8 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
               .nonNulls
               .toList());
     }
+    developer.log("error reading state ... starting empty",
+        name: "Model.fromJson");
     return null;
   }
 
