@@ -272,14 +272,14 @@ class _CommentEditorState extends State<_CommentEditor> {
 }
 
 class _DeviceWidget extends StatelessWidget {
-  final String? label;
-  final String name;
+  final String? _label;
+  final String _name;
 
-  const _DeviceWidget(this.label, this.name, {Key? key}) : super(key: key);
+  const _DeviceWidget(this._label, this._name, {Key? key}) : super(key: key);
 
   // Returns the text that needs to be displayed on the left side of the row.
 
-  String get text => label != null && label!.isNotEmpty ? label! : name;
+  String get label => _label != null && _label!.isNotEmpty ? _label! : _name;
 
   @override
   Widget build(BuildContext context) {
@@ -294,14 +294,14 @@ class _DeviceWidget extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              text,
+              label,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: td.colorScheme.primary),
             ),
           ),
           FutureBuilder(
               future: drmem.getDeviceInfo(
-                  device: DevicePattern(node: "rpi4", name: name)),
+                  device: DevicePattern(node: "rpi4", name: _name)),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final data = snapshot.data!;
@@ -310,7 +310,7 @@ class _DeviceWidget extends StatelessWidget {
                     final info = data.first;
 
                     return DataWidget(
-                        Device(name: name), info.settable, info.units);
+                        Device(name: _name), info.settable, info.units);
                   } else {
                     return buildErrorWidget(td, "device not found");
                   }
