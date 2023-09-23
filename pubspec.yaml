@@ -24,6 +24,7 @@ dependencies:
 
   drmem_provider:
     git: https://github.com/DrMemCS/drmem_widget.git
+  gql_code_builder: ^0.8.0
 
 dev_dependencies:
   flutter_lints: ^2.0.2
