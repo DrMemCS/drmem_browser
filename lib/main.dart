@@ -29,8 +29,7 @@ class DrMemApp extends StatelessWidget {
   const DrMemApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
       title: 'DrMem Browser',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -39,12 +38,12 @@ class DrMemApp extends StatelessWidget {
       // Provides the app model. This needs to be near the top of the widget
       // tree so that all subpages have access to the model data.
 
-      home: BlocProvider(
-        create: (_) => Model(),
-        child: DrMem(child: const BaseWidget()),
-      ),
-    );
-  }
+      home: DrMem(
+        child: BlocProvider(
+          create: (_) => Model(),
+          child: const BaseWidget(),
+        ),
+      ));
 }
 
 class BaseWidget extends StatefulWidget {
