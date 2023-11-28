@@ -150,7 +150,10 @@ class _State extends State<_NodeInfo> {
                             DevicePattern(node: widget.node.name!, name: "*")),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return _DevicesListView(devices: snapshot.data!);
+                        return _DevicesListView(
+                            devices: snapshot.data!
+                              ..sort((a, b) =>
+                                  a.device.name.compareTo(b.device.name)));
                       } else if (snapshot.hasError) {
                         return const Icon(Icons.error_outline,
                             color: Colors.red);
