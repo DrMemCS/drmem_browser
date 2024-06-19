@@ -201,7 +201,7 @@ InputDecoration _getTextFieldDecoration(BuildContext context, String label) {
       alignLabelWithHint: true,
       contentPadding: const EdgeInsets.all(12.0),
       hintStyle: td.textTheme.bodyMedium!
-          .copyWith(color: td.colorScheme.onBackground.withOpacity(0.25)),
+          .copyWith(color: td.colorScheme.onSurface.withOpacity(0.25)),
       hintText: label,
       isDense: true,
       hoverColor: td.colorScheme.secondary.withOpacity(0.25),
