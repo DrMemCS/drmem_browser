@@ -215,7 +215,7 @@ class _CommentEditor extends StatefulWidget {
   final int idx;
   final String text;
 
-  const _CommentEditor(this.idx, this.text, {Key? key}) : super(key: key);
+  const _CommentEditor(this.idx, this.text);
 
   @override
   _CommentEditorState createState() => _CommentEditorState();
@@ -275,7 +275,9 @@ class _DeviceWidget extends StatelessWidget {
   final String? _label;
   final String _name;
 
-  const _DeviceWidget(this._label, this._name, {Key? key}) : super(key: key);
+  const _DeviceWidget({String? label, required String device})
+      : _label = label,
+        _name = device;
 
   // Returns the text that needs to be displayed on the left side of the row.
 

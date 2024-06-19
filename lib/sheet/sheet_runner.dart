@@ -14,7 +14,7 @@ import 'package:drmem_browser/model/model.dart';
 // plot historical data for a set of devices.
 
 class SheetRunner extends StatefulWidget {
-  const SheetRunner({Key? key}) : super(key: key);
+  const SheetRunner({super.key});
 
   @override
   State<SheetRunner> createState() => _SheetRunnerState();

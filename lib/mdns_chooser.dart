@@ -18,7 +18,7 @@ String? propToString(Service info, String key) {
 class DnsChooser extends StatefulWidget {
   final void Function(Service) updState;
 
-  const DnsChooser(this.updState, {Key? key}) : super(key: key);
+  const DnsChooser(this.updState, {super.key});
 
   @override
   ChooserState createState() => ChooserState();

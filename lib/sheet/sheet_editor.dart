@@ -8,7 +8,7 @@ import 'sheet.dart';
 // editing.
 
 class SheetEditor extends StatefulWidget {
-  const SheetEditor({Key? key}) : super(key: key);
+  const SheetEditor({super.key});
 
   @override
   State<SheetEditor> createState() => _SheetEditorState();

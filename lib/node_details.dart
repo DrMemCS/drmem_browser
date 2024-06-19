@@ -10,7 +10,7 @@ import 'mdns_chooser.dart';
 class _NodeInfo extends StatefulWidget {
   final Service node;
 
-  const _NodeInfo(this.node, {Key? key}) : super(key: key);
+  const _NodeInfo(this.node);
 
   @override
   _State createState() => _State();
@@ -316,7 +316,7 @@ Padding buildDevInfoRow(DeviceInfo info, BuildContext context) {
 class _DriversListView extends StatelessWidget {
   final List<DriverInfo> drivers;
 
-  const _DriversListView({Key? key, required this.drivers}) : super(key: key);
+  const _DriversListView({required this.drivers});
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +341,7 @@ class _DriversListView extends StatelessWidget {
 class _DevicesListView extends StatelessWidget {
   final List<DeviceInfo> devices;
 
-  const _DevicesListView({Key? key, required this.devices}) : super(key: key);
+  const _DevicesListView({required this.devices});
 
   @override
   Widget build(BuildContext context) {

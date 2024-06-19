@@ -26,7 +26,7 @@ Future<void> main() async {
 }
 
 class DrMemApp extends StatelessWidget {
-  const DrMemApp({Key? key}) : super(key: key);
+  const DrMemApp({super.key});
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -47,7 +47,7 @@ class DrMemApp extends StatelessWidget {
 }
 
 class BaseWidget extends StatefulWidget {
-  const BaseWidget({Key? key}) : super(key: key);
+  const BaseWidget({super.key});
 
   @override
   BaseState createState() => BaseState();
