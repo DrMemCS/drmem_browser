@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_provider/drmem_provider.dart';
+
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'widgets/data_widget.dart';
+import 'package:drmem_browser/sheet/widgets/data_widget.dart';
 
 // The base class for all row types. A sheet is a list of objects derived
 // from BaseRow.

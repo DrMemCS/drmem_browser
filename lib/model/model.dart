@@ -1,9 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:drmem_provider/drmem_provider.dart';
-import 'model_events.dart';
+
+import 'package:drmem_browser/sheet/sheet.dart';
+import 'package:drmem_browser/model/model_events.dart';
 
 // Holds the configuration for one sheet of parameters.
 

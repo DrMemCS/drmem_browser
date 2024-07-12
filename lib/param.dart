@@ -1,9 +1,10 @@
-import 'package:drmem_browser/model/model_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:drmem_browser/model/model.dart';
 
 class ParamPage extends StatefulWidget {
   const ParamPage({super.key});

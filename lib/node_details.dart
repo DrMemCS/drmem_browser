@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 import 'package:nsd/nsd.dart';
-import 'mdns_chooser.dart';
+
+import 'package:drmem_browser/mdns_chooser.dart';
 
 // This is an immutable Widget that displays node information.
 

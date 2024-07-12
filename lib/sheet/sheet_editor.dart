@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'sheet.dart';
+import 'package:drmem_browser/sheet/sheet.dart';
 
 // Displays the sheet's contents as an editor. No data collection occurs while
 // editing.

@@ -1,7 +1,8 @@
-import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/sheet/sheet.dart';
 
 // A SheetRunner widget takes the state of a Sheet and renders it. The Sheet's
 // state is a list of BaseRow types. These rows are organized using a Column
