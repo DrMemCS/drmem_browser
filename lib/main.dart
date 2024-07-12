@@ -33,7 +33,7 @@ class DrMemApp extends StatelessWidget {
       title: 'DrMem Browser',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
 
       // Provides the app model. This needs to be near the top of the widget
       // tree so that all subpages have access to the model data.
