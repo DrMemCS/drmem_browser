@@ -1,35 +1,22 @@
 {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome",
+            "name": "drmem_browser",
             "request": "launch",
-            "type": "chrome",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
-        },
-    {
-        "name": "Attach to Chrome",
-        "port": 9222,
-        "request": "attach",
-        "type": "chrome",
-        "webRoot": "${workspaceFolder}"
-    },
-        {
-            "name": "Flutter",
-            "type": "dart",
-            "request": "launch",
-            "program": "lib/main.dart"
+            "type": "dart"
         },
         {
-            "name": "Flutter (profile mode)",
-            "program": "lib/main.dart",
+            "name": "drmem_browser (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "Flutter (release mode)",
-            "program": "lib/main.dart",
+            "name": "drmem_browser (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
