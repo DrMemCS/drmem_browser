@@ -57,12 +57,7 @@ class BaseState extends State<BaseWidget> {
   Service? nodeInfo;
   int _selectIndex = 0;
 
-  void changePage(value) {
-    setState(() {
-      _selectIndex = value;
-      nodeInfo = null;
-    });
-  }
+  void changePage(value) => setState(() => _selectIndex = value);
 
   // Creates the navigation bar. Right now it creates three icons to click on.
 
@@ -97,9 +92,7 @@ class BaseState extends State<BaseWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(child: _display(context)),
-        bottomNavigationBar: _buildNavBar());
-  }
+  Widget build(BuildContext context) => Scaffold(
+      body: SafeArea(child: _display(context)),
+      bottomNavigationBar: _buildNavBar());
 }
