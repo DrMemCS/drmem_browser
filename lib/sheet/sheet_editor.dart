@@ -105,10 +105,9 @@ class _SheetEditorState extends State<SheetEditor> {
                     context.read<Model>().add(MoveRow(oldIndex, newIndex)),
                 buildDefaultDragHandles: false,
                 padding: const EdgeInsets.all(4.0),
-                children: state.selected.rows.fold([], (acc, e) {
-                  acc.add(renderRow(context, true, e, acc.length, movable));
-                  return acc;
-                })),
+                children: state.selected.rows.indexed
+                    .map((e) => renderRow(context, true, e.$2, e.$1, movable))
+                    .toList()),
           ),
           Container(
             color: Theme.of(context).cardColor,
