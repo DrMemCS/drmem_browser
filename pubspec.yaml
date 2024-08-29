@@ -6,14 +6,14 @@ publish_to: 'none' # Remove this line if publishing to pub.dev
 version: 1.0.0+4
 
 environment:
-  sdk: ">=3.1.0 <4.0.0"
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   cupertino_icons: ^1.0.5
-  flutter_markdown: ^0.6.17
+  flutter_markdown: ^0.7.0
   path_provider: ^2.0.15
 
   nsd: "^3.0.0"
