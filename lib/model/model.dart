@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:drmem_provider/drmem_provider.dart';
@@ -210,8 +210,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
           defNode: defNode,
           nodes: nodes.map((e) => NodeInfo.fromJson(e)).nonNulls.toList());
     }
-    developer.log("error reading state ... starting empty",
-        name: "Model.fromJson");
+    dev.log("error reading state ... starting empty", name: "Model.fromJson");
     return null;
   }
 
@@ -260,7 +259,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
       state._sheets[event.newName] = conf;
       emit(state.clone());
     } else {
-      developer.log("can't rename sheet ... ${event.newName} already exists",
+      dev.log("can't rename sheet ... ${event.newName} already exists",
           name: "Model.renameSheet");
     }
   }
