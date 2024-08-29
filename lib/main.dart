@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:nsd/nsd.dart';
+import 'package:drmem_provider/drmem_provider.dart';
+
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
-import 'package:drmem_provider/drmem_provider.dart';
-import 'mdns_chooser.dart';
-import 'node_details.dart';
-import 'param.dart';
+import 'package:drmem_browser/mdns_chooser.dart';
+import 'package:drmem_browser/param.dart';
 
 // The entry point for the application.
 Future<void> main() async {
@@ -38,23 +37,20 @@ class DrMemApp extends StatelessWidget {
       // Provides the app model. This needs to be near the top of the widget
       // tree so that all subpages have access to the model data.
 
-      home: DrMem(
-        child: BlocProvider(
-          create: (_) => Model(),
-          child: const BaseWidget(),
-        ),
+      home: BlocProvider(
+        create: (_) => Model(),
+        child: const DrMem(child: _BaseWidget()),
       ));
 }
 
-class BaseWidget extends StatefulWidget {
-  const BaseWidget({super.key});
+class _BaseWidget extends StatefulWidget {
+  const _BaseWidget();
 
   @override
-  BaseState createState() => BaseState();
+  _BaseState createState() => _BaseState();
 }
 
-class BaseState extends State<BaseWidget> {
-  Service? nodeInfo;
+class _BaseState extends State<_BaseWidget> {
   int _selectIndex = 0;
 
   void changePage(value) => setState(() => _selectIndex = value);
@@ -69,15 +65,9 @@ class BaseState extends State<BaseWidget> {
           BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
           BottomNavigationBarItem(
               icon: Icon(Icons.web_stories), label: "Sheets"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: "Settings"),
         ]);
-  }
-
-  // Displays the list of nodes or the "details" subpage.
-
-  Widget _displayNodes(BuildContext context) {
-    return nodeInfo == null
-        ? DnsChooser((s) => setState(() => nodeInfo = s))
-        : displayNode(nodeInfo!);
   }
 
   Widget _display(BuildContext context) {
@@ -85,9 +75,12 @@ class BaseState extends State<BaseWidget> {
       case 1:
         return const ParamPage();
 
+      case 2:
+        return Container();
+
       case 0:
       default:
-        return _displayNodes(context);
+        return const DnsChooser();
     }
   }
 

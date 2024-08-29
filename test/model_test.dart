@@ -1,10 +1,12 @@
-import 'package:drmem_browser/model/model_events.dart';
-import 'package:drmem_browser/model/model.dart';
-import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:drmem_provider/drmem_provider.dart';
+
+import 'package:drmem_browser/model/model_events.dart';
+import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/sheet/row.dart';
 
 class MockStorage extends Mock implements Storage {}
 
@@ -84,7 +86,10 @@ void _testDeserialization() {
             {'type': "device", 'device': "junk"}
           ]
         }).content,
-        [EmptyRow(key: UniqueKey()), DeviceRow("junk", key: UniqueKey())]);
+        [
+          EmptyRow(key: UniqueKey()),
+          DeviceRow(Device(name: "junk"), key: UniqueKey())
+        ]);
     expect(
         PageConfig.fromJson({
           'rows': [
@@ -93,7 +98,10 @@ void _testDeserialization() {
             {'type': "device", 'device': "junk"}
           ]
         }).content,
-        [EmptyRow(key: UniqueKey()), DeviceRow("junk", key: UniqueKey())]);
+        [
+          EmptyRow(key: UniqueKey()),
+          DeviceRow(Device(name: "junk"), key: UniqueKey())
+        ]);
   });
 
   test("... deserialize Model", () {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:drmem_provider/drmem_provider.dart';
+
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'package:drmem_browser/sheet/sheet.dart';
+import 'package:drmem_browser/sheet/row.dart';
 
 // Displays the sheet's contents as an editor. No data collection occurs while
 // editing.
@@ -52,8 +54,9 @@ class _SheetEditorState extends State<SheetEditor> {
   // Returns a function that appends a device row to the sheet.
 
   void Function() mkAddDeviceRow(BuildContext context) {
-    return () =>
-        context.read<Model>().add(AppendRow(DeviceRow("", key: UniqueKey())));
+    return () => context
+        .read<Model>()
+        .add(AppendRow(DeviceRow(Device(name: ""), key: UniqueKey())));
   }
 
   // Returns a function that appends a plot row to the sheet.

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:drmem_browser/sheet/sheet.dart';
 import 'package:flutter_test/flutter_test.dart';
+import "package:drmem_provider/drmem_provider.dart";
+
+import 'package:drmem_browser/sheet/row.dart';
 
 void main() {
   group("Testing bad input", () {
@@ -42,18 +44,26 @@ void main() {
     });
 
     test("... DeviceRow", () {
-      final rowA = DeviceRow("device", key: UniqueKey());
-      final rowA2 = DeviceRow("device", key: UniqueKey());
-      final rowB = DeviceRow("device", label: "label", key: UniqueKey());
-      final rowB2 = DeviceRow("device", label: "label", key: UniqueKey());
-      final rowC = DeviceRow("device", label: "label2", key: UniqueKey());
-      final rowC2 = DeviceRow("device", label: "label2", key: UniqueKey());
-      final rowD = DeviceRow("device2", key: UniqueKey());
-      final rowD2 = DeviceRow("device2", key: UniqueKey());
-      final rowE = DeviceRow("device2", label: "label", key: UniqueKey());
-      final rowE2 = DeviceRow("device2", label: "label", key: UniqueKey());
-      final rowF = DeviceRow("device2", label: "label2", key: UniqueKey());
-      final rowF2 = DeviceRow("device2", label: "label2", key: UniqueKey());
+      final rowA = DeviceRow(Device(name: "device"), key: UniqueKey());
+      final rowA2 = DeviceRow(Device(name: "device"), key: UniqueKey());
+      final rowB =
+          DeviceRow(Device(name: "device"), label: "label", key: UniqueKey());
+      final rowB2 =
+          DeviceRow(Device(name: "device"), label: "label", key: UniqueKey());
+      final rowC =
+          DeviceRow(Device(name: "device"), label: "label2", key: UniqueKey());
+      final rowC2 =
+          DeviceRow(Device(name: "device"), label: "label2", key: UniqueKey());
+      final rowD = DeviceRow(Device(name: "device2"), key: UniqueKey());
+      final rowD2 = DeviceRow(Device(name: "device2"), key: UniqueKey());
+      final rowE =
+          DeviceRow(Device(name: "device2"), label: "label", key: UniqueKey());
+      final rowE2 =
+          DeviceRow(Device(name: "device2"), label: "label", key: UniqueKey());
+      final rowF =
+          DeviceRow(Device(name: "device2"), label: "label2", key: UniqueKey());
+      final rowF2 =
+          DeviceRow(Device(name: "device2"), label: "label2", key: UniqueKey());
       final rowG = EmptyRow(key: UniqueKey());
 
       expect(rowA == rowA, true);
@@ -120,7 +130,8 @@ void main() {
       // Test serialization of a device row which doesn't have a label.
 
       {
-        final DeviceRow tmp = DeviceRow("device:state", key: UniqueKey());
+        final DeviceRow tmp =
+            DeviceRow(Device(name: "device:state"), key: UniqueKey());
         final json = tmp.toJson();
 
         // Make sure that, when the label is null, we don't emit anything for
@@ -138,8 +149,8 @@ void main() {
       // Test serialization of a device row which has a label.
 
       {
-        final DeviceRow tmp =
-            DeviceRow("device:state", label: "tag", key: UniqueKey());
+        final DeviceRow tmp = DeviceRow(Device(name: "device:state"),
+            label: "tag", key: UniqueKey());
         final DeviceRow out =
             BaseRow.fromJson(tmp.toJson(), key: tmp.key) as DeviceRow;
 

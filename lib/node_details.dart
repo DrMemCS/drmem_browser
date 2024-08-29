@@ -94,8 +94,6 @@ class _State extends State<_NodeInfo> {
 
   @override
   Widget build(BuildContext context) {
-    final DrMem drmem = DrMem.of(context);
-
     final Service info = widget.node;
     final DateTime? bootTime =
         DateTime.tryParse(propToString(info, "boot-time") ?? "");
@@ -132,7 +130,7 @@ class _State extends State<_NodeInfo> {
                       propToString(info, "subscriptions")),
                   header(context, "Drivers"),
                   FutureBuilder(
-                    future: drmem.getDriverInfo(widget.node.name!),
+                    future: DrMem.getDriverInfo(context, widget.node.name!),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return _DriversListView(drivers: snapshot.data!);
@@ -146,7 +144,7 @@ class _State extends State<_NodeInfo> {
                   ),
                   header(context, "Devices"),
                   FutureBuilder(
-                    future: drmem.getDeviceInfo(
+                    future: DrMem.getDeviceInfo(context,
                         device:
                             DevicePattern(node: widget.node.name!, name: "*")),
                     builder: (context, snapshot) {

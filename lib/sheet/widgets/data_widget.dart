@@ -1,3 +1,4 @@
+import 'package:drmem_browser/sheet/widgets/device_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 
@@ -32,15 +33,13 @@ void _displayError(BuildContext context, String msg) {
 }
 
 class _SettingTextEditor extends StatelessWidget {
-  final DrMem drmem;
   final Device device;
   final void Function() exitFunc;
   final TextInputType? inpType;
   final DevValue? Function(BuildContext, String) parser;
 
   const _SettingTextEditor(
-      {required this.drmem,
-      required this.device,
+      {required this.device,
       required this.exitFunc,
       this.inpType,
       required this.parser});
@@ -64,7 +63,7 @@ class _SettingTextEditor extends StatelessWidget {
 
           if (result != null) {
             try {
-              await drmem.setDevice(device, result);
+              await DrMem.setDevice(context, device, result);
             } catch (e) {
               if (context.mounted) {
                 _displayError(context, e.toString());
@@ -75,6 +74,42 @@ class _SettingTextEditor extends StatelessWidget {
   }
 }
 
+String _hex(int v) => v.toRadixString(16).padLeft(2, '0');
+
+// Displays an integer device value. Also registers for the units field.
+
+class _DisplayIntWidget extends StatelessWidget {
+  final int value;
+  final Color color;
+
+  const _DisplayIntWidget({required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final units = DeviceWidget.getUnits(context);
+
+    return Text(units != null ? "$value $units" : "$value",
+        style: TextStyle(color: color));
+  }
+}
+
+// Displays a floating point device value. Also registers for the units field.
+
+class _DisplayFloatWidget extends StatelessWidget {
+  final double value;
+  final Color color;
+
+  const _DisplayFloatWidget({required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final units = DeviceWidget.getUnits(context);
+
+    return Text(units != null ? "$value $units" : "$value",
+        style: TextStyle(color: color));
+  }
+}
+
 // Define an extension on the `DevValue` hierarchy.
 
 extension on DevValue {
@@ -82,44 +117,42 @@ extension on DevValue {
   // determines which subclass the object actually is to generate the
   // appropriate widget.
 
-  Widget build(void Function() Function(DevValue)? setFunc, String? units) {
+  Widget build(void Function() Function(DevValue)? setFunc) {
     final Color color = setFunc != null ? Colors.cyan : Colors.grey;
-    final TextStyle style = TextStyle(color: color);
 
     Widget widget = switch (this) {
       DevBool(value: var v) => Icon(
           v ? Icons.radio_button_checked : Icons.radio_button_off,
           color: color),
-      DevInt(value: var v) =>
-        Text(units != null ? "$v $units" : "$v", style: style),
-      DevFlt(value: var v) =>
-        Text(units != null ? "$v $units" : "$v", style: style),
-      DevStr(value: var v) => Text(v, style: style),
+      DevInt(value: var v) => _DisplayIntWidget(value: v, color: color),
+      DevFlt(value: var v) => _DisplayFloatWidget(value: v, color: color),
+      DevStr(value: var v) => Text(v, style: TextStyle(color: color)),
+      DevColor(red: var r, green: var g, blue: var b) => Text(
+          "R${_hex(r)}G${_hex(g)}B${_hex(b)}",
+          style: TextStyle(color: Color.fromRGBO(r, g, b, 1.0)))
     };
 
-    return setFunc != null
-        ? GestureDetector(onTap: setFunc(this), child: widget)
-        : widget;
+    return GestureDetector(
+        onTap: setFunc != null ? setFunc(this) : null, child: widget);
   }
 
   // Builds a widget that can edit values of the current object type.
 
-  Widget buildEditor(
-      BuildContext context, Device device, void Function() exitFunc) {
-    final DrMem drmem = DrMem.of(context);
+  Widget buildEditor(BuildContext context, void Function() exitFunc) {
+    final device = DeviceWidget.getDevice(context);
 
     return switch (this) {
-      DevBool() => buildBoolEditor(drmem, device, exitFunc),
-      DevFlt() => buildFloatEditor(context, drmem, device, exitFunc),
-      DevInt() => buildIntegerEditor(context, drmem, device, exitFunc),
-      DevStr() => buildStringEditor(context, drmem, device, exitFunc),
+      DevBool() => buildBoolEditor(context, device, exitFunc),
+      DevFlt() => buildFloatEditor(context, device, exitFunc),
+      DevInt() => buildIntegerEditor(context, device, exitFunc),
+      DevStr() => buildStringEditor(context, device, exitFunc),
+      DevColor() => Container()
     };
   }
 
-  Widget buildFloatEditor(BuildContext context, DrMem drmem, Device device,
-          void Function() exitFunc) =>
+  Widget buildFloatEditor(
+          BuildContext context, Device device, void Function() exitFunc) =>
       _SettingTextEditor(
-          drmem: drmem,
           device: device,
           exitFunc: exitFunc,
           inpType: TextInputType.number,
@@ -135,10 +168,9 @@ extension on DevValue {
             return null;
           });
 
-  Widget buildIntegerEditor(BuildContext context, DrMem drmem, Device device,
-          void Function() exitFunc) =>
+  Widget buildIntegerEditor(
+          BuildContext context, Device device, void Function() exitFunc) =>
       _SettingTextEditor(
-          drmem: drmem,
           device: device,
           exitFunc: exitFunc,
           inpType: TextInputType.number,
@@ -154,10 +186,9 @@ extension on DevValue {
             return null;
           });
 
-  Widget buildStringEditor(BuildContext context, DrMem drmem, Device device,
-          void Function() exitFunc) =>
+  Widget buildStringEditor(
+          BuildContext context, Device device, void Function() exitFunc) =>
       _SettingTextEditor(
-          drmem: drmem,
           device: device,
           exitFunc: exitFunc,
           parser: (_, value) => DevStr(value: value));
@@ -167,7 +198,7 @@ extension on DevValue {
   // values.
 
   Widget buildBoolEditor(
-    DrMem drmem,
+    BuildContext context,
     Device device,
     void Function() exitFunc,
   ) =>
@@ -179,7 +210,8 @@ extension on DevValue {
             child: ElevatedButton(
                 onPressed: () async {
                   exitFunc();
-                  await drmem.setDevice(device, const DevBool(value: true));
+                  await DrMem.setDevice(
+                      context, device, const DevBool(value: true));
                 },
                 child: const Text("true")),
           ),
@@ -187,7 +219,8 @@ extension on DevValue {
             child: ElevatedButton(
                 onPressed: () async {
                   exitFunc();
-                  await drmem.setDevice(device, const DevBool(value: false));
+                  await DrMem.setDevice(
+                      context, device, const DevBool(value: false));
                 },
                 child: const Text("false")),
           ),
@@ -195,23 +228,37 @@ extension on DevValue {
       );
 }
 
+// This is the top-level widget that displays a `DevValue` type. This
+// functionality was split into its own widget because it registers for
+// reading updates. If the parent widget inlined this, then reading updates
+// would redraw the parent, too.
+
+class _DisplayValueWidget extends StatelessWidget {
+  final void Function() Function(DevValue)? setFunc;
+
+  const _DisplayValueWidget({required this.setFunc});
+
+  @override
+  Widget build(BuildContext context) {
+    final value = DeviceWidget.getReading(context);
+
+    return value?.build(setFunc) ?? Container();
+  }
+}
+
 // This widget is responsible for displaying live data. It will start the
 // monitor subscription so that it is the only widget that has to refresh when
 // new data arrives.
 
 class DataWidget extends StatefulWidget {
-  final Device device;
-  final bool settable;
-  final String? units;
-
-  const DataWidget(this.device, this.settable, this.units, {super.key});
+  const DataWidget({super.key});
 
   @override
   State<DataWidget> createState() => _DataWidgetState();
 }
 
 class _DataWidgetState extends State<DataWidget> {
-  // When `null`, we simply display the incoming data. If not-null, if is
+  // When `null`, we simply display the incoming data. If not-null, it is
   // the last value received from the stream and is an example of the data
   // we need to edit.
 
@@ -222,21 +269,12 @@ class _DataWidgetState extends State<DataWidget> {
   // widgets, they can incorporate this widget.
 
   Widget _buildDisplayWidget(BuildContext context) {
-    final DrMem drmem = DrMem.of(context);
-    void Function() Function(DevValue)? setFunc =
-        widget.settable ? (v) => (() => setState(() => _editValue = v)) : null;
+    final void Function() Function(DevValue)? setFunc =
+        DeviceWidget.getSettable(context)
+            ? (v) => () => setState(() => _editValue = v)
+            : null;
 
-    return StreamBuilder(
-        stream: drmem.monitorDevice(widget.device),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final data = snapshot.data!.value;
-
-            return data.build(setFunc, widget.units);
-          } else {
-            return Container();
-          }
-        });
+    return _DisplayValueWidget(setFunc: setFunc);
   }
 
   // Create the appropriate widget based on the type of the incoming data.
@@ -250,7 +288,6 @@ class _DataWidgetState extends State<DataWidget> {
               onTapOutside: (_) => setState(() => _editValue = null),
               child: editValue.buildEditor(
                 context,
-                widget.device,
                 () => setState(() => _editValue = null),
               ),
             ),
