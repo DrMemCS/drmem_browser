@@ -23,13 +23,18 @@ Widget buildErrorWidget(ThemeData td, String msg) {
 
 // Displays an error message using the snackbar.
 
-void _displayError(BuildContext context, String msg) {
-  final snackBar = SnackBar(
-    backgroundColor: const Color.fromRGBO(183, 28, 28, 1),
-    content: Text(msg, style: const TextStyle(color: Colors.yellow)),
-  );
+void displayError(BuildContext context, String msg) {
+  if (context.mounted) {
+    final snackBar = SnackBar(
+      backgroundColor: Colors.red,
+      content: Row(children: [
+        const Icon(Icons.error, color: Colors.white),
+        Text(msg, style: const TextStyle(color: Colors.yellow))
+      ]),
+    );
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }
 
 class _SettingTextEditor extends StatelessWidget {
@@ -65,9 +70,8 @@ class _SettingTextEditor extends StatelessWidget {
             try {
               await DrMem.setDevice(context, device, result);
             } catch (e) {
-              if (context.mounted) {
-                _displayError(context, e.toString());
-              }
+              // ignore: use_build_context_synchronously
+              displayError(context, e.toString());
             }
           }
         });
@@ -161,8 +165,7 @@ extension on DevValue {
               try {
                 return DevFlt(value: double.parse(value));
               } on FormatException {
-                _displayError(
-                    context, 'Bad numeric format ... setting ignored');
+                displayError(context, 'Bad numeric format ... setting ignored');
               }
             }
             return null;
@@ -179,8 +182,7 @@ extension on DevValue {
               try {
                 return DevInt(value: int.parse(value));
               } on FormatException {
-                _displayError(
-                    context, 'Bad numeric format ... setting ignored');
+                displayError(context, 'Bad numeric format ... setting ignored');
               }
             }
             return null;
