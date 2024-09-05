@@ -69,39 +69,45 @@ class DeviceWidget extends StatelessWidget {
     final cookedLabel = label ?? device.name;
 
     return (BuildContext context) async* {
-      // First, get device information from the node. This will tell us whether
-      // the device is settable and also provide the units, if any.
+      try {
+        // First, get device information from the node. This will tell us
+        // whether the device is settable and also provide the units, if any.
 
-      final di = await DrMem.getDeviceInfo(context, device: device);
+        final di = await DrMem.getDeviceInfo(context, device: device);
 
-      // If the query returns one instance of device information, we're good.
+        // If the query returns one instance of device information, we're good.
 
-      if (di case [DeviceInfo(settable: bool settable, units: String? units)]) {
-        // Yield the first InheritedModel. In this case, all fields except the
-        // reading field is complete.
+        if (di
+            case [DeviceInfo(settable: bool settable, units: String? units)]) {
+          // Yield the first InheritedModel. In this case, all fields except
+          // the reading field is complete.
 
-        yield _DeviceModel(
-            label: cookedLabel,
-            device: device,
-            units: units,
-            settable: settable,
-            child: const _DeviceRowWrapper());
+          yield _DeviceModel(
+              label: cookedLabel,
+              device: device,
+              units: units,
+              settable: settable,
+              child: const _DeviceRowWrapper());
 
-        // If the widget is still mounted in the tree, stream the readings of
-        // the device.
+          // If the widget is still mounted in the tree, stream the readings
+          // of the device.
 
-        if (context.mounted) {
-          yield* DrMem.monitorDevice(context, device).map((event) =>
-              _DeviceModel(
-                  label: cookedLabel,
-                  device: device,
-                  units: units,
-                  settable: settable,
-                  reading: (event.stamp, event.value),
-                  child: const _DeviceRowWrapper()));
+          if (context.mounted) {
+            yield* DrMem.monitorDevice(context, device).map((event) =>
+                _DeviceModel(
+                    label: cookedLabel,
+                    device: device,
+                    units: units,
+                    settable: settable,
+                    reading: (event.stamp, event.value),
+                    child: const _DeviceRowWrapper()));
+          }
+        } else {
+          throw Exception("bad device ${device.name}@${device.node}");
         }
-      } else {
-        throw Exception("bad device ${device.name}@${device.node}");
+      } catch (ex) {
+        // ignore: use_build_context_synchronously
+        displayError(context, ex.toString());
       }
     };
   }
@@ -231,7 +237,7 @@ class _DeviceEditorState extends State<DeviceEditor> {
                     onSubmitted: (value) => context.read<Model>().add(
                           UpdateRow(
                               widget._idx,
-                              DeviceRow(Device(name: value),
+                              DeviceRow(Device(name: value, node: "rpi4"),
                                   label: ctrlLabel.text, key: UniqueKey())),
                         )),
               ),
