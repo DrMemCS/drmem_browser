@@ -55,15 +55,15 @@ class SheetRunner extends StatelessWidget {
             // add them in a `Card`.
 
             .map((e) => Card(
-                margin: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
+                margin: const EdgeInsets.only(top: 8.0),
                 child: Padding(
-                  padding: const EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(mainAxisSize: MainAxisSize.max, children: e),
                 )))
             .toList();
 
         return ListView(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
             children: groups);
       });
 }
