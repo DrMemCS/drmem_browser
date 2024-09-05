@@ -41,7 +41,8 @@ class SheetRunner extends StatelessWidget {
                       DeviceRow() || PlotRow() || CommentRow() => result
                         ..last.add(Padding(
                             key: e.key,
-                            padding: const EdgeInsets.only(bottom: 2.0),
+                            padding:
+                                const EdgeInsets.only(top: 4.0, bottom: 4.0),
                             child: e.buildRowRunner(context)))
                     })
 
