@@ -159,6 +159,7 @@ class _DeviceRowWrapperState extends State<_DeviceRowWrapper> {
     final ThemeData td = Theme.of(context);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Row(
           mainAxisSize: MainAxisSize.max,
@@ -177,9 +178,21 @@ class _DeviceRowWrapperState extends State<_DeviceRowWrapper> {
             const DataWidget(),
           ],
         ),
-        if (_expand) const Text("show the timestamp"),
+        if (_expand) const _DisplayTimestamp(),
       ],
     );
+  }
+}
+
+class _DisplayTimestamp extends StatelessWidget {
+  const _DisplayTimestamp();
+
+  @override
+  Widget build(BuildContext context) {
+    final ts = DeviceWidget.getTimestamp(context);
+
+    return Text("${ts ?? 'no data'}",
+        style: const TextStyle(color: Colors.grey));
   }
 }
 
