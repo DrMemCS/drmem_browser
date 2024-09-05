@@ -33,7 +33,7 @@ sealed class BaseRow {
         return CommentRow(comment, key: key ?? UniqueKey());
 
       case {'type': "device", 'device': String device}:
-        return DeviceRow(Device(name: device),
+        return DeviceRow(Device(name: device, node: map['node'] ?? "rpi4"),
             label: map['label'], key: key ?? UniqueKey());
 
       case {'type': "plot"}:
@@ -143,7 +143,11 @@ class DeviceRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() {
-    var tmp = {'type': "device", 'device': name};
+    var tmp = {'type': "device", 'device': name.name};
+
+    if (name.node != null) {
+      tmp['node'] = name.node!;
+    }
 
     if (label != null && label!.isNotEmpty) {
       tmp['label'] = label!;
