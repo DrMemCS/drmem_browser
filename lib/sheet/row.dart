@@ -196,12 +196,11 @@ InputDecoration getTextFieldDecoration(BuildContext context, String label) {
       contentPadding: const EdgeInsets.all(12.0),
       hintStyle: td.textTheme.bodyMedium!
           .copyWith(color: td.colorScheme.onSurface.withOpacity(0.25)),
-      hintText: label,
+      labelText: label,
       isDense: true,
       hoverColor: td.colorScheme.secondary.withOpacity(0.25),
       focusColor: td.colorScheme.primary.withOpacity(0.25),
       fillColor: td.colorScheme.secondary.withOpacity(0.125),
-      filled: true,
       border: InputBorder.none);
 }
 
@@ -233,32 +232,34 @@ class _CommentEditorState extends State<_CommentEditor> {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: TextField(
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  autocorrect: true,
-                  minLines: 1,
-                  maxLines: null,
-                  decoration: getTextFieldDecoration(
-                      context, "Comment (using Markdown)"),
-                  keyboardType: TextInputType.multiline,
-                  controller: controller,
-                  onChanged: (value) => setState(() => changed = true)),
-            ),
-            TextButton(
-                onPressed: changed
-                    ? () {
-                        setState(() => changed = false);
-                        context.read<Model>().add(UpdateRow(widget.idx,
-                            CommentRow(controller.text, key: UniqueKey())));
-                      }
-                    : null,
-                child: const Text("Save"))
-          ],
+        child: Card(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Flexible(
+                fit: FlexFit.loose,
+                child: TextField(
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    autocorrect: true,
+                    minLines: 1,
+                    maxLines: null,
+                    decoration: getTextFieldDecoration(
+                        context, "Comment (uses Markdown)"),
+                    keyboardType: TextInputType.multiline,
+                    controller: controller,
+                    onChanged: (value) => setState(() => changed = true)),
+              ),
+              TextButton(
+                  onPressed: changed
+                      ? () {
+                          setState(() => changed = false);
+                          context.read<Model>().add(UpdateRow(widget.idx,
+                              CommentRow(controller.text, key: UniqueKey())));
+                        }
+                      : null,
+                  child: const Text("Save"))
+            ],
+          ),
         ),
       );
 }

@@ -211,69 +211,75 @@ class DeviceEditor extends StatefulWidget {
 class _DeviceEditorState extends State<DeviceEditor> {
   late final TextEditingController ctrlDevice;
   late final TextEditingController ctrlLabel;
+  late final TextEditingController ctrlNode;
   final RegExp re = RegExp(r'^[-:\w\d]*$');
 
   @override
   void initState() {
+    super.initState();
     ctrlDevice = TextEditingController(text: widget._device.name);
     ctrlLabel = TextEditingController(text: widget._label);
-    super.initState();
+    ctrlNode = TextEditingController(text: widget._device.node);
   }
 
   @override
   void dispose() {
     ctrlDevice.dispose();
     ctrlLabel.dispose();
+    ctrlNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Row(
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+        child: Card(
+          child: Row(
+            children: [
+              Flexible(
+                fit: FlexFit.loose,
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: TextField(
+                      autocorrect: false,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      inputFormatters: [
+                        TextInputFormatter.withFunction((oldValue, newValue) =>
+                            re.hasMatch(newValue.text) ? newValue : oldValue)
+                      ],
+                      minLines: 1,
+                      maxLines: 1,
+                      decoration:
+                          getTextFieldDecoration(context, "Device name"),
+                      controller: ctrlDevice,
+                      onSubmitted: (value) => context.read<Model>().add(
+                            UpdateRow(
+                                widget._idx,
+                                DeviceRow(Device(name: value, node: "rpi4"),
+                                    label: ctrlLabel.text, key: UniqueKey())),
+                          )),
+                ),
+              ),
+              Flexible(
+                fit: FlexFit.loose,
+                flex: 1,
                 child: TextField(
                     autocorrect: false,
                     style: Theme.of(context).textTheme.bodyMedium,
-                    inputFormatters: [
-                      TextInputFormatter.withFunction((oldValue, newValue) =>
-                          re.hasMatch(newValue.text) ? newValue : oldValue)
-                    ],
                     minLines: 1,
                     maxLines: 1,
-                    decoration: getTextFieldDecoration(context, "Device name"),
-                    controller: ctrlDevice,
+                    decoration:
+                        getTextFieldDecoration(context, "Label (optional)"),
+                    controller: ctrlLabel,
                     onSubmitted: (value) => context.read<Model>().add(
                           UpdateRow(
                               widget._idx,
-                              DeviceRow(Device(name: value, node: "rpi4"),
-                                  label: ctrlLabel.text, key: UniqueKey())),
+                              DeviceRow(Device(name: ctrlDevice.text),
+                                  label: value, key: UniqueKey())),
                         )),
               ),
-            ),
-            Flexible(
-              fit: FlexFit.loose,
-              flex: 1,
-              child: TextField(
-                  autocorrect: false,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  minLines: 1,
-                  maxLines: 1,
-                  decoration:
-                      getTextFieldDecoration(context, "Label (optional)"),
-                  controller: ctrlLabel,
-                  onSubmitted: (value) => context.read<Model>().add(
-                        UpdateRow(
-                            widget._idx,
-                            DeviceRow(Device(name: ctrlDevice.text),
-                                label: value, key: UniqueKey())),
-                      )),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 }
