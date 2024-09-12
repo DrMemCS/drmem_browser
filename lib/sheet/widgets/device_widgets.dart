@@ -233,41 +233,66 @@ class _DeviceEditorState extends State<DeviceEditor> {
   @override
   Widget build(BuildContext context) => Expanded(
         child: Card(
-          child: Row(
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: TextField(
-                      autocorrect: false,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      inputFormatters: [
-                        TextInputFormatter.withFunction((oldValue, newValue) =>
-                            re.hasMatch(newValue.text) ? newValue : oldValue)
-                      ],
-                      minLines: 1,
-                      maxLines: 1,
-                      decoration:
-                          getTextFieldDecoration(context, "Device name"),
-                      controller: ctrlDevice,
-                      onSubmitted: (value) => context.read<Model>().add(
-                            UpdateRow(
-                                widget._idx,
-                                DeviceRow(Device(name: value, node: "rpi4"),
-                                    label: ctrlLabel.text, key: UniqueKey())),
-                          )),
+          child: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: TextField(
+                            autocorrect: false,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            inputFormatters: [
+                              TextInputFormatter.withFunction(
+                                  (oldValue, newValue) =>
+                                      re.hasMatch(newValue.text)
+                                          ? newValue
+                                          : oldValue)
+                            ],
+                            minLines: 1,
+                            decoration:
+                                getTextFieldDecoration(context, "Device name"),
+                            controller: ctrlDevice,
+                            onSubmitted: (value) => context.read<Model>().add(
+                                  UpdateRow(
+                                      widget._idx,
+                                      DeviceRow(
+                                          Device(
+                                              name: value, node: ctrlNode.text),
+                                          label: ctrlLabel.text,
+                                          key: UniqueKey())),
+                                )),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                          autocorrect: false,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          minLines: 1,
+                          decoration: getTextFieldDecoration(context, "Node"),
+                          controller: ctrlNode,
+                          onSubmitted: (value) => context.read<Model>().add(
+                                UpdateRow(
+                                    widget._idx,
+                                    DeviceRow(
+                                        Device(
+                                            name: ctrlDevice.text, node: value),
+                                        label: ctrlLabel.text,
+                                        key: UniqueKey())),
+                              )),
+                    ),
+                  ],
                 ),
-              ),
-              Flexible(
-                fit: FlexFit.loose,
-                flex: 1,
-                child: TextField(
+                TextField(
                     autocorrect: false,
                     style: Theme.of(context).textTheme.bodyMedium,
                     minLines: 1,
-                    maxLines: 1,
                     decoration:
                         getTextFieldDecoration(context, "Label (optional)"),
                     controller: ctrlLabel,
@@ -277,8 +302,8 @@ class _DeviceEditorState extends State<DeviceEditor> {
                               DeviceRow(Device(name: ctrlDevice.text),
                                   label: value, key: UniqueKey())),
                         )),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );

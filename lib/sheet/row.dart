@@ -197,6 +197,7 @@ InputDecoration getTextFieldDecoration(BuildContext context, String label) {
       hintStyle: td.textTheme.bodyMedium!
           .copyWith(color: td.colorScheme.onSurface.withOpacity(0.25)),
       labelText: label,
+      labelStyle: const TextStyle(color: Colors.grey),
       isDense: true,
       hoverColor: td.colorScheme.secondary.withOpacity(0.25),
       focusColor: td.colorScheme.primary.withOpacity(0.25),
