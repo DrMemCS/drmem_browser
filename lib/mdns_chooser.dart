@@ -15,6 +15,45 @@ String? propToString(Service info, String key) {
       : null;
 }
 
+// Displays a star icon which is highlighted if the default node matches the
+// name associated with the widget.
+
+class _DefaultNode extends StatelessWidget {
+  final String name;
+
+  const _DefaultNode({required this.name});
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocBuilder<Model, AppState>(builder: (context, state) {
+        final ThemeData td = Theme.of(context);
+
+        return state.defaultNode == name
+            ? GestureDetector(
+                onTap: () => (),
+                child: Icon(Icons.star, color: td.colorScheme.secondary),
+              )
+            : GestureDetector(
+                onTap: () => state.defaultNode = name,
+                child: Icon(Icons.star_border_outlined,
+                    color: td.colorScheme.tertiary),
+              );
+      });
+}
+
+class _ShowLocation extends StatelessWidget {
+  final String location;
+  final ThemeData theme;
+
+  const _ShowLocation({required this.location, required this.theme});
+
+  @override
+  Widget build(BuildContext context) => Text(location,
+      softWrap: true,
+      style: theme.textTheme.bodyMedium!
+          .copyWith(color: theme.colorScheme.tertiary));
+}
+
 // Creates a widget that displays summary information for a node.
 
 class NodeTile extends StatelessWidget {
@@ -62,18 +101,8 @@ class NodeTile extends StatelessWidget {
                       )),
                   Expanded(
                       flex: 2,
-                      child: Text(info.location,
-                          softWrap: true,
-                          style: td.textTheme.bodyMedium!
-                              .copyWith(color: td.colorScheme.tertiary))),
-                  BlocBuilder<Model, AppState>(
-                      builder: (context, state) => state.defaultNode ==
-                              info.name
-                          ? Icon(Icons.star, color: td.colorScheme.secondary)
-                          : GestureDetector(
-                              onTap: () => state.defaultNode = info.name,
-                              child: Icon(Icons.star_border_outlined,
-                                  color: td.colorScheme.tertiary)))
+                      child: _ShowLocation(location: info.location, theme: td)),
+                  _DefaultNode(name: info.name)
                 ])
               : Text("ERROR: No info for node $name."),
         ),
