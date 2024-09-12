@@ -198,21 +198,43 @@ class _DeviceRowWrapperState extends State<_DeviceRowWrapper> {
   }
 }
 
+// Private widget that displays the timestamp of the readings. Rather than have
+// the containing widget register for timestamp updates (resulting in the whole
+// widget getting updated), we create a widget that registers for and only
+// displays the timestamp.
+
 class _DisplayTimestamp extends StatelessWidget {
   const _DisplayTimestamp();
 
+  // Convert local `DateTime` into a string.
+
+  static String _tsToString(DateTime ts) {
+    final year = ts.year.toRadixString(10).padLeft(4, '0');
+    final month = ts.month.toRadixString(10).padLeft(2, '0');
+    final day = ts.day.toRadixString(10).padLeft(2, '0');
+    final hour = ((ts.hour + 11) % 12 + 1).toRadixString(10).padLeft(2, '0');
+    final minute = ts.minute.toRadixString(10).padLeft(2, '0');
+    final second = ts.second.toRadixString(10).padLeft(2, '0');
+    final ampm = ts.hour < 12 ? "am" : "pm";
+
+    return "$year-$month-$day $hour:$minute:$second $ampm ${ts.timeZoneName}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ts = DeviceWidget.getTimestamp(context);
+    final ts = DeviceWidget.getTimestamp(context)?.toLocal();
 
-    return Text("${ts ?? 'no data'}",
+    // If the timestamp is `null`, the device doesn't have a value yet so we
+    // have to display something else.
+
+    return Text(ts != null ? _tsToString(ts) : "--",
         style: const TextStyle(color: Colors.grey));
   }
 }
 
 class DeviceEditor extends StatefulWidget {
   final int _idx;
-  final Device _device;
+  final Device? _device;
   final String _label;
 
   const DeviceEditor(this._idx, this._device, {String? label, super.key})
