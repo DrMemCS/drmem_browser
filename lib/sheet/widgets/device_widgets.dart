@@ -17,7 +17,7 @@ enum _DeviceModelAspect { label, name, units, settable, reading }
 class _DeviceModel extends InheritedModel<_DeviceModelAspect> {
   final bool settable;
   final String label;
-  final Device device;
+  final Device? device;
   final String? units;
   final (DateTime, DevValue)? reading;
 
@@ -57,8 +57,22 @@ class DeviceWidget extends StatelessWidget {
   // The constructor simply builds a function that is used to set up the stream
   // of readings from a device.
 
-  DeviceWidget({String? label, required Device device, super.key})
-      : _builder = _buildStream(label: label, device: device);
+  DeviceWidget({String? label, required Device? device, super.key})
+      : _builder = device != null
+            ? _buildStream(label: label, device: device)
+            : _singleton;
+
+  // Returns a stream that emits one value. This is used when the user hasn't
+  //  defined a device in the row.
+
+  static Stream<_DeviceModel> _singleton(BuildContext context) async* {
+    yield const _DeviceModel(
+        label: "no device specified",
+        device: null,
+        units: null,
+        settable: false,
+        child: _DeviceRowWrapper());
+  }
 
   // This private, helper method builds a closure which creates a stream that
   // returns `_DeviceModel` widgets. This allows the `DeviceWidget` to be
@@ -124,7 +138,7 @@ class DeviceWidget extends StatelessWidget {
   static bool getSettable(BuildContext context) =>
       _of(context, _DeviceModelAspect.settable).settable;
 
-  static Device getDevice(BuildContext context) =>
+  static Device? getDevice(BuildContext context) =>
       _of(context, _DeviceModelAspect.label).device;
 
   static DateTime? getTimestamp(BuildContext context) =>
@@ -217,9 +231,9 @@ class _DeviceEditorState extends State<DeviceEditor> {
   @override
   void initState() {
     super.initState();
-    ctrlDevice = TextEditingController(text: widget._device.name);
+    ctrlDevice = TextEditingController(text: widget._device?.name);
     ctrlLabel = TextEditingController(text: widget._label);
-    ctrlNode = TextEditingController(text: widget._device.node);
+    ctrlNode = TextEditingController(text: widget._device?.node);
   }
 
   @override

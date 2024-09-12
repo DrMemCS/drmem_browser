@@ -125,7 +125,7 @@ class CommentRow extends BaseRow {
 // This row type monitors a device.
 
 class DeviceRow extends BaseRow {
-  final Device name;
+  final Device? name;
   final String? label;
 
   const DeviceRow(this.name, {this.label, required super.key});
@@ -143,11 +143,7 @@ class DeviceRow extends BaseRow {
 
   @override
   Map<String, dynamic> toJson() {
-    var tmp = {'type': "device", 'device': name.name};
-
-    if (name.node != null) {
-      tmp['node'] = name.node!;
-    }
+    var tmp = {'type': "device", 'device': name?.name, 'node': name?.node};
 
     if (label != null && label!.isNotEmpty) {
       tmp['label'] = label!;

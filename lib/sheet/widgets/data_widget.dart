@@ -143,7 +143,7 @@ extension on DevValue {
   // Builds a widget that can edit values of the current object type.
 
   Widget buildEditor(BuildContext context, void Function() exitFunc) {
-    final device = DeviceWidget.getDevice(context);
+    final device = DeviceWidget.getDevice(context)!;
 
     return switch (this) {
       DevBool() => buildBoolEditor(context, device, exitFunc),

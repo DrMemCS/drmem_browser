@@ -54,9 +54,8 @@ class _SheetEditorState extends State<SheetEditor> {
   // Returns a function that appends a device row to the sheet.
 
   void Function() mkAddDeviceRow(BuildContext context) {
-    return () => context
-        .read<Model>()
-        .add(AppendRow(DeviceRow(Device(name: ""), key: UniqueKey())));
+    return () =>
+        context.read<Model>().add(AppendRow(DeviceRow(null, key: UniqueKey())));
   }
 
   // Returns a function that appends a plot row to the sheet.
