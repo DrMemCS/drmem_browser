@@ -335,8 +335,12 @@ class _DeviceEditorState extends State<DeviceEditor> {
                     onSubmitted: (value) => context.read<Model>().add(
                           UpdateRow(
                               widget._idx,
-                              DeviceRow(Device(name: ctrlDevice.text),
-                                  label: value, key: UniqueKey())),
+                              DeviceRow(
+                                  Device(
+                                      name: ctrlDevice.text,
+                                      node: ctrlNode.text),
+                                  label: value,
+                                  key: UniqueKey())),
                         )),
               ],
             ),

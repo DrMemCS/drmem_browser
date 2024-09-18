@@ -84,24 +84,42 @@ void _testDeserialization() {
         PageConfig.fromJson({
           'rows': [
             {'type': "empty"},
-            {'type': "device", 'device': "junk"}
+            {'type': "device", 'device': "junk", 'node': "host"}
           ]
         }).content,
         [
           EmptyRow(key: UniqueKey()),
-          DeviceRow(Device(name: "junk"), key: UniqueKey())
+          DeviceRow(Device(name: "junk", node: "host"), key: UniqueKey())
         ]);
     expect(
         PageConfig.fromJson({
           'rows': [
             {'type': "empty"},
             "hi",
-            {'type': "device", 'device': "junk"}
+            {'type': "device", 'device': "junk", 'node': "host"}
           ]
         }).content,
         [
           EmptyRow(key: UniqueKey()),
-          DeviceRow(Device(name: "junk"), key: UniqueKey())
+          DeviceRow(Device(name: "junk", node: "host"), key: UniqueKey())
+        ]);
+    expect(
+        PageConfig.fromJson({
+          'rows': [
+            {'type': "empty"},
+            "hi",
+            {
+              'type': "device",
+              'label': "label",
+              'device': "junk",
+              'node': "host"
+            }
+          ]
+        }).content,
+        [
+          EmptyRow(key: UniqueKey()),
+          DeviceRow(Device(name: "junk", node: "host"),
+              label: "label", key: UniqueKey())
         ]);
   });
 
