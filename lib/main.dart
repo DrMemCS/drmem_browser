@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
 import 'package:drmem_browser/mdns_chooser.dart';
@@ -39,8 +40,34 @@ class DrMemApp extends StatelessWidget {
 
       home: BlocProvider(
         create: (_) => Model(),
-        child: const DrMem(child: _BaseWidget()),
+        child: const DrMem(child: _NodeUpdater(child: _BaseWidget())),
       ));
+}
+
+class _NodeUpdater extends StatelessWidget {
+  final Widget child;
+
+  const _NodeUpdater({required this.child});
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder(
+      future: DrMem.mdnsSubscribe(context),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return BlocBuilder<Model, AppState>(
+              builder: (context, state) => StreamBuilder(
+                  stream: snapshot.data,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      context.read<Model>().add(AddNode(snapshot.data!));
+                      DrMem.addNode(context, snapshot.data!, state.clientId);
+                    }
+                    return child;
+                  }));
+        } else {
+          return const CircularProgressIndicator();
+        }
+      });
 }
 
 class _BaseWidget extends StatefulWidget {
