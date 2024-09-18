@@ -14,7 +14,7 @@ class AppState {
   UniqueKey id = UniqueKey();
   String _selectedSheet;
   final Map<String, PageConfig> _sheets;
-  String? _defNode;
+  String? defaultNode;
   final List<NodeInfo> _nodes;
 
   // Create an instance of `AppState`.
@@ -23,17 +23,16 @@ class AppState {
       {Map<String, PageConfig>? sheets,
       String activeSheet = "Untitled",
       List<NodeInfo>? nodes,
-      String? defNode})
+      this.defaultNode,
       : _sheets = sheets ?? {},
         _selectedSheet = activeSheet,
         _nodes =
-            (nodes?..sort((a, b) => a.name.compareTo(b.name)))?.toList() ?? [],
-        _defNode = defNode {
+            (nodes?..sort((a, b) => a.name.compareTo(b.name)))?.toList() ?? [] {
     // If the default node doesn't exist, then we need to clear it out.
 
-    if (_defNode != null && !_nodes.any((ii) => ii.name == _defNode)) {
-      dev.log("resetting default node -- $_defNode doesn't exist");
-      _defNode = null;
+    if (defaultNode != null && !_nodes.any((ii) => ii.name == defaultNode)) {
+      dev.log("resetting default node -- $defaultNode doesn't exist");
+      defaultNode = null;
     }
 
     // If the selected sheet doesn't exist, create a new, blank sheet
@@ -54,7 +53,7 @@ class AppState {
       : _sheets = other._sheets,
         _selectedSheet = other._selectedSheet,
         _nodes = other._nodes,
-        _defNode = other._defNode;
+        defaultNode = other.defaultNode;
 
   // Clones the current AppState.
 
@@ -100,12 +99,6 @@ class AppState {
 
   String get selectedSheet => _selectedSheet;
 
-  String? get defaultNode => _defNode;
-
-  set defaultNode(String? newNode) {
-    _defNode = newNode;
-  }
-
   set selectedSheet(String name) {
     if (!_sheets.containsKey(name)) {
       _sheets[name] = PageConfig();
@@ -134,7 +127,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
         'selectedSheet': state.selectedSheet,
         'sheets': Map.fromEntries(state._sheets.entries
             .map((e) => MapEntry(e.key, e.value.toJson()))),
-        'defaultNode': state._defNode,
+        'defaultNode': state.defaultNode,
         'nodes': state._nodes.map((info) => info.toJson()).toList()
       };
 
@@ -153,7 +146,7 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
           sheets: Map.fromEntries(sheets.entries
               .map((e) => MapEntry(e.key, PageConfig.fromJson(e.value)))),
           activeSheet: ss,
-          defNode: defNode,
+          defaultNode: defNode,
           nodes: nodes.map((e) => NodeInfo.fromJson(e)).nonNulls.toList());
     }
     dev.log("error reading state ... starting empty", name: "Model.fromJson");
