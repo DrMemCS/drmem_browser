@@ -6,6 +6,7 @@ import 'package:drmem_provider/drmem_provider.dart';
 
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/model/page_config.dart';
 import 'package:drmem_browser/sheet/row.dart';
 
 class MockStorage extends Mock implements Storage {}
