@@ -156,7 +156,12 @@ class DeviceRow extends BaseRow {
 
   @override
   bool operator ==(Object other) =>
-      other is DeviceRow && name == other.name && label == other.label;
+      other is DeviceRow &&
+      ((name == null && other.name == null) ||
+          (name != null &&
+              other.name != null &&
+              name!.compareTo(other.name!) == 0)) &&
+      label == other.label;
 }
 
 // This row type displays a plot.
