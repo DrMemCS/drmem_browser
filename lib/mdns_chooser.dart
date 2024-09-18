@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nsd/nsd.dart';
-import 'package:drmem_provider/drmem_provider.dart';
 
 import 'package:drmem_browser/model/model.dart';
 
@@ -62,53 +61,56 @@ class NodeTile extends StatelessWidget {
   const NodeTile({required this.name, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final info = DrMem.getNodeInfo(context: context, node: name);
-    final ThemeData td = Theme.of(context);
+  Widget build(BuildContext context) =>
+      BlocBuilder<Model, AppState>(builder: (context, state) {
+        final info = state.getNodeInfo(name);
+        final ThemeData td = Theme.of(context);
 
-    // Return a GestureDetector -> Card -> ListTile.
+        // Return a GestureDetector -> Card -> ListTile.
 
-    return GestureDetector(
-      key: Key(name),
-      onTap: info != null ? () => () : null,
-      child: Card(
-        elevation: 2.0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: info != null
-              ? Row(children: [
-                  Icon(Icons.developer_board,
-                      color: info.announcing
-                          ? td.colorScheme.secondary
-                          : td.colorScheme.tertiary),
-                  Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(info.name,
-                                    style: td.textTheme.titleLarge),
-                              ),
-                              Text("${info.addr.host} : ${info.addr.port}",
-                                  softWrap: true,
-                                  style: td.textTheme.bodySmall!
-                                      .copyWith(color: td.colorScheme.tertiary))
-                            ]),
-                      )),
-                  Expanded(
-                      flex: 2,
-                      child: _ShowLocation(location: info.location, theme: td)),
-                  _DefaultNode(name: info.name)
-                ])
-              : Text("ERROR: No info for node $name."),
-        ),
-      ),
-    );
-  }
+        return GestureDetector(
+          key: Key(name),
+          onTap: info != null ? () => () : null,
+          child: Card(
+            elevation: 2.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: info != null
+                  ? Row(children: [
+                      Icon(Icons.developer_board,
+                          color: info.announcing
+                              ? td.colorScheme.secondary
+                              : td.colorScheme.tertiary),
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(left: 16.0, right: 16.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(info.name,
+                                        style: td.textTheme.titleLarge),
+                                  ),
+                                  Text("${info.addr.host} : ${info.addr.port}",
+                                      softWrap: true,
+                                      style: td.textTheme.bodySmall!.copyWith(
+                                          color: td.colorScheme.tertiary))
+                                ]),
+                          )),
+                      Expanded(
+                          flex: 2,
+                          child: _ShowLocation(
+                              location: info.location, theme: td)),
+                      _DefaultNode(name: info.name)
+                    ])
+                  : Text("ERROR: No info for node $name."),
+            ),
+          ),
+        );
+      });
 }
 
 // A DnsChooser starts an mDNS client session which listens for DrMem
@@ -141,17 +143,18 @@ class DnsChooser extends StatelessWidget {
   // Builds the view based on the contents of the nodes table.
 
   @override
-  Widget build(BuildContext context) {
-    final nodes = DrMem.getNodeNames(context: context).toList()..sort();
+  Widget build(BuildContext context) =>
+      BlocBuilder<Model, AppState>(builder: (context, state) {
+        final nodes = state.getNodeNames();
 
-    return nodes.isEmpty
-        ? waitingWidget()
-        : Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ListView.builder(
-              itemCount: nodes.length,
-              itemBuilder: buildTile(nodes),
-            ),
-          );
-  }
+        return nodes.isEmpty
+            ? waitingWidget()
+            : Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: ListView.builder(
+                  itemCount: nodes.length,
+                  itemBuilder: buildTile(nodes),
+                ),
+              );
+      });
 }

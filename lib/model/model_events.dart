@@ -1,3 +1,4 @@
+import 'package:drmem_provider/drmem_provider.dart';
 import 'package:drmem_browser/sheet/row.dart';
 
 // This is the base class for all events that update the state of the page.
@@ -56,7 +57,11 @@ class DeleteSheet extends ModelEvent {
   const DeleteSheet();
 }
 
-class NodeActive extends ModelEvent {}
+class AddNode extends ModelEvent {
+  final NodeInfo info;
+
+  const AddNode(this.info);
+}
 
 class NodeInactive extends ModelEvent {
   final String name;
