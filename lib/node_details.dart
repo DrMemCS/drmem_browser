@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:drmem_provider/drmem_provider.dart';
-import 'package:nsd/nsd.dart';
-
-import 'package:drmem_browser/mdns_chooser.dart';
 
 // This is an immutable Widget that displays node information.
 
 class _NodeInfo extends StatefulWidget {
-  final Service node;
+  final NodeInfo node;
 
   const _NodeInfo(this.node);
 
@@ -84,8 +81,7 @@ class _State extends State<_NodeInfo> {
       child: Row(children: [
         const Icon(Icons.developer_board),
         Container(width: 12.0),
-        Text(widget.node.name ?? "** Unknown Name **",
-            style: Theme.of(context).textTheme.titleLarge),
+        Text(widget.node.name, style: Theme.of(context).textTheme.titleLarge),
       ]),
     );
   }
@@ -94,9 +90,7 @@ class _State extends State<_NodeInfo> {
 
   @override
   Widget build(BuildContext context) {
-    final Service info = widget.node;
-    final DateTime? bootTime =
-        DateTime.tryParse(propToString(info, "boot-time") ?? "");
+    final NodeInfo info = widget.node;
     const int nodePropFlex = 8;
     const int gqlPropFlex = 14;
 
@@ -113,24 +107,22 @@ class _State extends State<_NodeInfo> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildProperty(context, "version", nodePropFlex,
-                      propToString(info, "version")),
+                  buildProperty(context, "version", nodePropFlex, info.version),
                   buildProperty(context, "address", nodePropFlex,
-                      "${info.host}:${info.port}"),
-                  buildProperty(context, "location", nodePropFlex,
-                      propToString(info, "location")),
+                      "${info.addr.host}:${info.addr.port}"),
+                  buildProperty(
+                      context, "location", nodePropFlex, info.location),
                   buildProperty(context, "boot time", nodePropFlex,
-                      bootTime?.toLocal().toString() ?? "unknown"),
+                      info.bootTime?.toLocal().toString() ?? "unknown"),
                   header(context, "GraphQL Endpoints"),
-                  buildProperty(context, "queries", gqlPropFlex,
-                      propToString(info, "queries")),
-                  buildProperty(context, "mutations", gqlPropFlex,
-                      propToString(info, "mutations")),
+                  buildProperty(context, "queries", gqlPropFlex, info.queries),
+                  buildProperty(
+                      context, "mutations", gqlPropFlex, info.mutations),
                   buildProperty(context, "subscriptions", gqlPropFlex,
-                      propToString(info, "subscriptions")),
+                      info.subscriptions),
                   header(context, "Drivers"),
                   FutureBuilder(
-                    future: DrMem.getDriverInfo(context, widget.node.name!),
+                    future: DrMem.getDriverInfo(context, widget.node.name),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return _DriversListView(drivers: snapshot.data!);
@@ -146,7 +138,7 @@ class _State extends State<_NodeInfo> {
                   FutureBuilder(
                     future: DrMem.getDeviceInfo(context,
                         device:
-                            DevicePattern(node: widget.node.name!, name: "*")),
+                            DevicePattern(node: widget.node.name, name: "*")),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return _DevicesListView(
@@ -360,4 +352,4 @@ class _DevicesListView extends StatelessWidget {
 }
 // This public function returns the widget that displays node information.
 
-Widget displayNode(Service node) => _NodeInfo(node);
+Widget displayNode(NodeInfo node) => _NodeInfo(node);

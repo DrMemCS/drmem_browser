@@ -1,18 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nsd/nsd.dart';
 
 import 'package:drmem_browser/model/model.dart';
-
-String? propToString(Service info, String key) {
-  final Uint8List? tmp = info.txt?[key];
-
-  return tmp != null
-      ? const Utf8Decoder(allowMalformed: true).convert(tmp)
-      : null;
-}
 
 // Displays a star icon which is highlighted if the default node matches the
 // name associated with the widget.
