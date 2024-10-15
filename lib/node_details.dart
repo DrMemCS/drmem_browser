@@ -214,18 +214,16 @@ Padding buildDrvInfoRow(DriverInfo info, BuildContext context) {
   );
 }
 
-Widget _buildChip(ThemeData td, String content) {
-  return Container(
-    decoration: BoxDecoration(
-        border: Border.all(color: td.hintColor),
-        borderRadius: BorderRadius.circular(8.0),
-        shape: BoxShape.rectangle,
-        color: td.disabledColor),
-    child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Text(content, style: td.textTheme.labelMedium)),
-  );
-}
+Widget _buildChip(ThemeData td, String content) => Container(
+      decoration: BoxDecoration(
+          border: Border.all(color: td.hintColor),
+          borderRadius: BorderRadius.circular(8.0),
+          shape: BoxShape.rectangle,
+          color: td.disabledColor),
+      child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Text(content, style: td.textTheme.labelMedium)),
+    );
 
 String makeDateChipContent(String label, DateTime dt) {
   final year = dt.year.toString().padLeft(4, '0');
@@ -335,20 +333,15 @@ class _DevicesListView extends StatelessWidget {
   const _DevicesListView({required this.devices});
 
   @override
-  Widget build(BuildContext context) {
-    Iterable<Widget> d = devices.map((e) => buildDevInfoRow(e, context));
-    List<Widget> all = [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
-        child: Text(
-            "This node provides ${devices.length} devices. Double tap on a device name to copy it to the clipboard.",
-            style: TextStyle(color: Theme.of(context).hintColor)),
-      )
-    ];
-
-    all.addAll(d);
-    return Column(children: all);
-  }
+  Widget build(BuildContext context) => Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
+          child: Text(
+              "This node provides ${devices.length} devices. Double tap on a device name to copy it to the clipboard.",
+              style: TextStyle(color: Theme.of(context).hintColor)),
+        ),
+        ...devices.map((e) => _DeviceInfoRow(info: e))
+      ]);
 }
 // This public function returns the widget that displays node information.
 

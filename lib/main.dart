@@ -1,3 +1,5 @@
+import "dart:developer" as dev;
+
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,24 +53,52 @@ class _NodeUpdater extends StatelessWidget {
   const _NodeUpdater({required this.child});
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-      future: DrMem.mdnsSubscribe(context),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return BlocBuilder<Model, AppState>(
-              builder: (context, state) => StreamBuilder(
-                  stream: snapshot.data,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      context.read<Model>().add(AddNode(snapshot.data!));
-                      DrMem.addNode(context, snapshot.data!, state.clientId);
-                    }
-                    return child;
-                  }));
-        } else {
-          return const CircularProgressIndicator();
-        }
-      });
+  Widget build(BuildContext context) {
+    final clientId = context.read<Model>().state.clientId;
+
+    dev.log("adding _NodeUpdater to context", name: "foundation");
+
+    // Register all the known DrMem nodes with the `DrMem` widget.
+
+    context.read<Model>().state.getNodeNames().forEach((node) => DrMem.addNode(
+        context, context.read<Model>().state.getNodeInfo(node)!, clientId));
+
+    return FutureBuilder(
+        future: DrMem.mdnsSubscribe(context),
+        builder: (context, snapshot) {
+          // If the snapshot has data, then the future completed. The value
+          // returned from the future is the stream of mDNS announcements.
+
+          if (snapshot.hasData) {
+            dev.log("subscribed to mDNS", name: "foundation");
+            return StreamBuilder(
+                stream: snapshot.data,
+                builder: (context, snapshot) {
+                  // If the snapshot from the stream has data, then it's a node
+                  // announcement. Report the information to the application.
+
+                  if (snapshot.hasData) {
+                    final nodeState =
+                        snapshot.data!.bootTime == null ? "lost" : "found";
+
+                    dev.log("node ${snapshot.data!.name} was $nodeState",
+                        name: "foundation");
+
+                    // Add the node to our persistent storage.
+
+                    context.read<Model>().add(AddNode(snapshot.data!));
+
+                    // Have DrMem create client connection objects to the node.
+
+                    DrMem.addNode(context, snapshot.data!, clientId);
+                  }
+                  return child;
+                });
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
+  }
 }
 
 class _BaseWidget extends StatefulWidget {
@@ -85,32 +115,22 @@ class _BaseState extends State<_BaseWidget> {
 
   // Creates the navigation bar. Right now it creates three icons to click on.
 
-  BottomNavigationBar _buildNavBar() {
-    return BottomNavigationBar(
-        currentIndex: _selectIndex,
-        onTap: changePage,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.web_stories), label: "Sheets"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: "Settings"),
-        ]);
-  }
+  BottomNavigationBar _buildNavBar() => BottomNavigationBar(
+          currentIndex: _selectIndex,
+          onTap: changePage,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Nodes"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.web_stories), label: "Sheets"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: "Settings"),
+          ]);
 
-  Widget _display(BuildContext context) {
-    switch (_selectIndex) {
-      case 1:
-        return const ParamPage();
-
-      case 2:
-        return Container();
-
-      case 0:
-      default:
-        return const DnsChooser();
-    }
-  }
+  Widget _display(BuildContext context) => switch (_selectIndex) {
+        1 => const ParamPage(),
+        2 => Container(),
+        _ => const DnsChooser()
+      };
 
   @override
   Widget build(BuildContext context) => Scaffold(
