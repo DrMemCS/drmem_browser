@@ -39,6 +39,7 @@ class DrMemApp extends StatelessWidget {
       // tree so that all subpages have access to the model data.
 
       home: BlocProvider(
+        lazy: false,
         create: (_) => Model(),
         child: const DrMem(child: _NodeUpdater(child: _BaseWidget())),
       ));
