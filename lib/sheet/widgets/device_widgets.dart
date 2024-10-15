@@ -1,3 +1,6 @@
+import "dart:developer" as dev;
+import 'dart:io';
+
 import 'package:drmem_browser/sheet/widgets/data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,6 +69,8 @@ class DeviceWidget extends StatelessWidget {
   //  defined a device in the row.
 
   static Stream<_DeviceModel> _singleton(BuildContext context) async* {
+    dev.log("building empty stream", name: "DeviceWidget");
+
     yield const _DeviceModel(
         label: "no device specified",
         device: null,
@@ -81,8 +86,11 @@ class DeviceWidget extends StatelessWidget {
   static Stream<_DeviceModel>? Function(BuildContext) _buildStream(
       {String? label, required Device device}) {
     final cookedLabel = label ?? device.name;
+    dev.log("building monitor stream", name: "DeviceWidget");
 
     return (BuildContext context) async* {
+      dev.log("configured for ${device.name}@${device.node}",
+          name: "DeviceWidget");
       try {
         // First, get device information from the node. This will tell us
         // whether the device is settable and also provide the units, if any.
@@ -117,7 +125,7 @@ class DeviceWidget extends StatelessWidget {
                     child: const _DeviceRowWrapper()));
           }
         } else {
-          throw Exception("bad device ${device.name}@${device.node}");
+          throw HttpException("bad device ${device.name}@${device.node}");
         }
       } catch (ex) {
         // ignore: use_build_context_synchronously
@@ -173,6 +181,7 @@ class _DeviceRowWrapperState extends State<_DeviceRowWrapper> {
     final ThemeData td = Theme.of(context);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Row(
@@ -267,84 +276,74 @@ class _DeviceEditorState extends State<DeviceEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => Expanded(
-        child: Card(
-          child: Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: TextField(
-                            autocorrect: false,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            inputFormatters: [
-                              TextInputFormatter.withFunction(
-                                  (oldValue, newValue) =>
-                                      re.hasMatch(newValue.text)
-                                          ? newValue
-                                          : oldValue)
-                            ],
-                            minLines: 1,
-                            decoration:
-                                getTextFieldDecoration(context, "Device name"),
-                            controller: ctrlDevice,
-                            onSubmitted: (value) => context.read<Model>().add(
-                                  UpdateRow(
-                                      widget._idx,
-                                      DeviceRow(
-                                          Device(
-                                              name: value, node: ctrlNode.text),
-                                          label: ctrlLabel.text,
-                                          key: UniqueKey())),
-                                )),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: TextField(
-                          autocorrect: false,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          minLines: 1,
-                          decoration: getTextFieldDecoration(context, "Node"),
-                          controller: ctrlNode,
-                          onSubmitted: (value) => context.read<Model>().add(
-                                UpdateRow(
-                                    widget._idx,
-                                    DeviceRow(
-                                        Device(
-                                            name: ctrlDevice.text, node: value),
-                                        label: ctrlLabel.text,
-                                        key: UniqueKey())),
-                              )),
-                    ),
-                  ],
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: TextField(
+                        autocorrect: false,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        inputFormatters: [
+                          TextInputFormatter.withFunction((oldValue,
+                                  newValue) =>
+                              re.hasMatch(newValue.text) ? newValue : oldValue)
+                        ],
+                        minLines: 1,
+                        decoration:
+                            getTextFieldDecoration(context, "Device name"),
+                        controller: ctrlDevice,
+                        onSubmitted: (value) => context.read<Model>().add(
+                              UpdateRow(
+                                  widget._idx,
+                                  DeviceRow(
+                                      Device(name: value, node: ctrlNode.text),
+                                      label: ctrlLabel.text,
+                                      key: UniqueKey())),
+                            )),
+                  ),
                 ),
-                TextField(
-                    autocorrect: false,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    minLines: 1,
-                    decoration:
-                        getTextFieldDecoration(context, "Label (optional)"),
-                    controller: ctrlLabel,
-                    onSubmitted: (value) => context.read<Model>().add(
-                          UpdateRow(
-                              widget._idx,
-                              DeviceRow(
-                                  Device(
-                                      name: ctrlDevice.text,
-                                      node: ctrlNode.text),
-                                  label: value,
-                                  key: UniqueKey())),
-                        )),
+                Expanded(
+                  flex: 1,
+                  child: TextField(
+                      autocorrect: false,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      minLines: 1,
+                      decoration: getTextFieldDecoration(context, "Node"),
+                      controller: ctrlNode,
+                      onSubmitted: (value) => context.read<Model>().add(
+                            UpdateRow(
+                                widget._idx,
+                                DeviceRow(
+                                    Device(name: ctrlDevice.text, node: value),
+                                    label: ctrlLabel.text,
+                                    key: UniqueKey())),
+                          )),
+                ),
               ],
             ),
-          ),
+            TextField(
+                autocorrect: false,
+                style: Theme.of(context).textTheme.bodyMedium,
+                minLines: 1,
+                decoration: getTextFieldDecoration(context, "Label (optional)"),
+                controller: ctrlLabel,
+                onSubmitted: (value) => context.read<Model>().add(
+                      UpdateRow(
+                          widget._idx,
+                          DeviceRow(
+                              Device(
+                                  name: ctrlDevice.text, node: ctrlNode.text),
+                              label: value,
+                              key: UniqueKey())),
+                    )),
+          ],
         ),
       );
 }

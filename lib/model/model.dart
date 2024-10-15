@@ -16,6 +16,7 @@ class AppState {
   final Map<String, PageConfig> _sheets;
   String? defaultNode;
   final List<NodeInfo> _nodes;
+  ClientID clientId;
 
   // Create an instance of `AppState`.
 
@@ -24,10 +25,12 @@ class AppState {
       String activeSheet = "Untitled",
       List<NodeInfo>? nodes,
       this.defaultNode,
+      ClientID? clientId})
       : _sheets = sheets ?? {},
         _selectedSheet = activeSheet,
         _nodes =
-            (nodes?..sort((a, b) => a.name.compareTo(b.name)))?.toList() ?? [] {
+            (nodes?..sort((a, b) => a.name.compareTo(b.name)))?.toList() ?? [],
+        clientId = clientId ?? ClientID.generate() {
     // If the default node doesn't exist, then we need to clear it out.
 
     if (defaultNode != null && !_nodes.any((ii) => ii.name == defaultNode)) {
@@ -53,11 +56,22 @@ class AppState {
       : _sheets = other._sheets,
         _selectedSheet = other._selectedSheet,
         _nodes = other._nodes,
+        clientId = other.clientId,
         defaultNode = other.defaultNode;
 
   // Clones the current AppState.
 
   AppState clone() => AppState._raw(this);
+
+  NodeInfo? getNodeInfo(String node) {
+    try {
+      return _nodes.firstWhere((e) => e.name == node);
+    } on StateError {
+      return null;
+    }
+  }
+
+  List<String> getNodeNames() => _nodes.map((e) => e.name).toList()..sort();
 
   // Marks a node entry as "inactive". Returns true if the state was updated,
   // false otherwise.
@@ -119,6 +133,8 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     on<RenameSelectedSheet>(_renameSelectedSheet);
     on<AddSheet>(_addSheet);
     on<DeleteSheet>(_delSheet);
+    on<AddNode>(_addNode);
+    on<SetDefaultNode>(_setDefaultNode);
     on<NodeInactive>(_nodeDown);
   }
 
@@ -224,6 +240,24 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     state.selectedSheet = state._sheets.isNotEmpty
         ? state._sheets.keys.first
         : state.nextUntitled();
+    emit(state.clone());
+  }
+
+  void _addNode(AddNode event, Emitter<AppState> emit) {
+    final idx = state._nodes.indexWhere((e) => e.name == event.info.name);
+
+    if (idx != -1) {
+      state._nodes[idx] = event.info;
+    } else {
+      state._nodes.add(event.info);
+    }
+
+    emit(state.clone());
+  }
+
+  void _setDefaultNode(SetDefaultNode event, Emitter<AppState> emit) {
+    state.defaultNode = event.name;
+
     emit(state.clone());
   }
 

@@ -3,50 +3,56 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 
-// This is an immutable Widget that displays node information.
+class _Title extends StatelessWidget {
+  final String title;
 
-class _NodeInfo extends StatefulWidget {
-  final NodeInfo node;
-
-  const _NodeInfo(this.node);
+  const _Title({required this.title});
 
   @override
-  _State createState() => _State();
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
+        child: Row(children: [
+          const Icon(Icons.developer_board),
+          Container(width: 12.0),
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+        ]),
+      );
 }
 
-// This state object is necessary because, to display all the node information,
-// we need to make two GraphQL requests to the node.
+// Creates a widget that is used as a section separator when displaying node
+// information.
 
-class _State extends State<_NodeInfo> {
-  final EdgeInsets headerInsets =
-      const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0);
-  final EdgeInsets all8 = const EdgeInsets.all(8.0);
+class _Header extends StatelessWidget {
+  final String label;
 
-  // Returns a widget that serves as a section header.
+  const _Header({required this.label});
 
-  Widget header(BuildContext context, String label) {
-    final ThemeData td = Theme.of(context);
+  @override
+  Widget build(BuildContext context) => Padding(
+      padding:
+          const EdgeInsets.only(top: 16.0, bottom: 8.0, left: 4.0, right: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
+            child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
+          )
+        ],
+      ));
+}
 
-    return Padding(
-        padding: const EdgeInsets.only(
-            top: 16.0, bottom: 8.0, left: 4.0, right: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
-              child: Text(label, style: td.textTheme.bodyLarge),
-            )
-          ],
-        ));
-  }
+class _ShowProperty extends StatelessWidget {
+  final String label;
+  final int labelFlex;
+  final String? value;
 
-  // Returns a widget that renders property information. This consists of a
-  // dimmed label followed by its value in a highlighted color.
+  const _ShowProperty(
+      {required this.label, required this.labelFlex, this.value});
 
-  Widget buildProperty(
-      BuildContext context, String label, int labelFlex, String? value) {
+  @override
+  Widget build(BuildContext context) {
     final ThemeData td = Theme.of(context);
 
     return Row(
@@ -71,112 +77,134 @@ class _State extends State<_NodeInfo> {
       ],
     );
   }
+}
 
-  // Returns a widget that displays the title of the page. The title
-  // includes a gratuitous icon followed by the name of the node.
+// This is an immutable Widget that displays node information.
 
-  Widget titleWidget(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
-      child: Row(children: [
-        const Icon(Icons.developer_board),
-        Container(width: 12.0),
-        Text(widget.node.name, style: Theme.of(context).textTheme.titleLarge),
-      ]),
-    );
-  }
+class _NodeInfo extends StatelessWidget {
+  final NodeInfo node;
+  final List<DriverInfo> driverInfo;
+  final List<DeviceInfo> deviceInfo;
+
+  const _NodeInfo(
+      {required this.node, required this.driverInfo, required this.deviceInfo});
+
+  static const EdgeInsets _all8 = EdgeInsets.all(8.0);
 
   // Build the widget.
-
   @override
   Widget build(BuildContext context) {
-    final NodeInfo info = widget.node;
     const int nodePropFlex = 8;
     const int gqlPropFlex = 14;
 
     return Padding(
-      padding: all8,
+      padding: _all8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          titleWidget(context),
+          _Title(title: node.name),
           Expanded(
-            child: SingleChildScrollView(
-              clipBehavior: Clip.hardEdge,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildProperty(context, "version", nodePropFlex, info.version),
-                  buildProperty(context, "address", nodePropFlex,
-                      "${info.addr.host}:${info.addr.port}"),
-                  buildProperty(
-                      context, "location", nodePropFlex, info.location),
-                  buildProperty(context, "boot time", nodePropFlex,
-                      info.bootTime?.toLocal().toString() ?? "unknown"),
-                  header(context, "GraphQL Endpoints"),
-                  buildProperty(context, "queries", gqlPropFlex, info.queries),
-                  buildProperty(
-                      context, "mutations", gqlPropFlex, info.mutations),
-                  buildProperty(context, "subscriptions", gqlPropFlex,
-                      info.subscriptions),
-                  header(context, "Drivers"),
-                  FutureBuilder(
-                    future: DrMem.getDriverInfo(context, widget.node.name),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return _DriversListView(drivers: snapshot.data!);
-                      } else if (snapshot.hasError) {
-                        return const Icon(Icons.error_outline,
-                            color: Colors.red);
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-                  header(context, "Devices"),
-                  FutureBuilder(
-                    future: DrMem.getDeviceInfo(context,
-                        device:
-                            DevicePattern(node: widget.node.name, name: "*")),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return _DevicesListView(
-                            devices: snapshot.data!
-                              ..sort((a, b) =>
-                                  a.device.name.compareTo(b.device.name)));
-                      } else if (snapshot.hasError) {
-                        return const Icon(Icons.error_outline,
-                            color: Colors.red);
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-                ],
+            child: Scaffold(
+              body: SingleChildScrollView(
+                clipBehavior: Clip.hardEdge,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ShowProperty(
+                        label: "version",
+                        labelFlex: nodePropFlex,
+                        value: node.version),
+                    _ShowProperty(
+                        label: "address",
+                        labelFlex: nodePropFlex,
+                        value: "${node.addr.host}:${node.addr.port}"),
+                    _ShowProperty(
+                        label: "location",
+                        labelFlex: nodePropFlex,
+                        value: node.location),
+                    if (node.bootTime != null)
+                      _ShowProperty(
+                          label: "boot time",
+                          labelFlex: nodePropFlex,
+                          value: node.bootTime!.toLocal().toString()),
+                    const _Header(label: "GraphQL Endpoints"),
+                    _ShowProperty(
+                        label: "queries",
+                        labelFlex: gqlPropFlex,
+                        value: node.queries),
+                    _ShowProperty(
+                        label: "mutations",
+                        labelFlex: gqlPropFlex,
+                        value: node.mutations),
+                    _ShowProperty(
+                        label: "subscriptions",
+                        labelFlex: gqlPropFlex,
+                        value: node.subscriptions),
+                    const _Header(label: "Drivers"),
+                    _DriversListView(drivers: driverInfo),
+                    const _Header(label: "Devices"),
+                    _DevicesListView(devices: deviceInfo),
+                  ],
+                ),
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Center(
+              child: TextButton(
+                  autofocus: true,
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Close")),
+            ),
+          )
         ],
       ),
     );
   }
 }
 
+class _DisplayDriverInfo extends StatelessWidget {
+  final String description;
+
+  const _DisplayDriverInfo({required this.description});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Card(
+            color: Theme.of(context).cardColor,
+            child: Column(
+              children: [
+                Expanded(child: Markdown(data: description)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text("Close")),
+                )
+              ],
+            )),
+      );
+}
+
 // Builds a row of driver information, including the Help button which brings
 // up a window containing the description text for the driver.
 
-Padding buildDrvInfoRow(DriverInfo info, BuildContext context) {
+Widget _buildDrvInfoRow(DriverInfo info, BuildContext context) {
   final ThemeData td = Theme.of(context);
 
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 8.0),
+  return Container(
+    margin: const EdgeInsets.only(left: 16.0, bottom: 8.0, right: 16.0),
+    padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+    decoration: const BoxDecoration(color: Colors.white10),
     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Flexible(
           flex: 8,
           fit: FlexFit.tight,
           child: Text(info.name,
-              textAlign: TextAlign.end,
+              textAlign: TextAlign.center,
               style: TextStyle(color: td.colorScheme.primary))),
       Container(width: 10.0),
       Flexible(
@@ -186,29 +214,11 @@ Padding buildDrvInfoRow(DriverInfo info, BuildContext context) {
       Container(width: 10.0),
       IconButton(
           color: td.colorScheme.secondary,
-          onPressed: () async {
-            return showDialog(
-              context: context,
-              builder: (context) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                      color: Theme.of(context).cardColor,
-                      child: Column(
-                        children: [
-                          Expanded(child: Markdown(data: info.description)),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text("Close")),
-                          )
-                        ],
-                      )),
-                );
-              },
-            );
-          },
+          onPressed: () async => showDialog(
+                context: context,
+                builder: (context) =>
+                    _DisplayDriverInfo(description: info.description),
+              ),
           icon: const Icon(Icons.help))
     ]),
   );
@@ -225,7 +235,7 @@ Widget _buildChip(ThemeData td, String content) => Container(
           child: Text(content, style: td.textTheme.labelMedium)),
     );
 
-String makeDateChipContent(String label, DateTime dt) {
+String _makeDateChipContent(String label, DateTime dt) {
   final year = dt.year.toString().padLeft(4, '0');
   final month = dt.month.toString().padLeft(2, '0');
   final day = dt.day.toString().padLeft(2, '0');
@@ -235,69 +245,87 @@ String makeDateChipContent(String label, DateTime dt) {
   return "$label: $year-$month-$day, $hour:$minute";
 }
 
-List<Widget> _buildChips(BuildContext context, DeviceInfo info) {
-  final ThemeData td = Theme.of(context);
-  final List<Widget> tmp = [
-    _buildChip(td, info.settable ? "settable" : "read-only")
-  ];
+List<Widget> _buildChips(ThemeData td, DeviceInfo info) => [
+      if (info.units != null) _buildChip(td, "units: ${info.units}"),
+      if (info.history != null) ...[
+        _buildChip(td, "points: ${info.history!.totalPoints}"),
+        _buildChip(
+            td, _makeDateChipContent("oldest", info.history!.oldest.stamp)),
+        _buildChip(
+            td, _makeDateChipContent("last", info.history!.newest.stamp)),
+      ]
+    ];
 
-  // TODO: Add this back in.
-  //
-  // if (info.driver != null) {
-  //   tmp.add(_buildChip(td, "driver: ${info.driver.name}"));
-  // }
+class _DeviceInfoRow extends StatelessWidget {
+  final DeviceInfo info;
 
-  if (info.units != null) {
-    tmp.add(_buildChip(td, "units: ${info.units}"));
-  }
+  const _DeviceInfoRow({required this.info});
 
-  // If there's a "history" record with this device, add chips that display
-  // this information.
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData td = Theme.of(context);
 
-  if (info.history != null) {
-    tmp.add(_buildChip(td, "points: ${info.history!.totalPoints}"));
-    tmp.add(_buildChip(
-        td, makeDateChipContent("oldest", info.history!.oldest.stamp)));
-    tmp.add(_buildChip(
-        td, makeDateChipContent("last", info.history!.newest.stamp)));
-  }
-
-  return tmp;
-}
-
-Padding buildDevInfoRow(DeviceInfo info, BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.only(left: 20.0, bottom: 16.0),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SizedBox(
-        width: double.infinity,
-        child: GestureDetector(
-          onDoubleTap: () {
-            Future.wait(
-                [Clipboard.setData(ClipboardData(text: info.device.name))]);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Added ${info.device.name} to clipboard")));
-          },
-          child: Text(info.device.name,
-              textAlign: TextAlign.start,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(top: 4.0, left: 20.0, right: 20.0),
-        child: SizedBox(
+    return Container(
+      margin: const EdgeInsets.only(left: 16.0, bottom: 8.0, right: 16.0),
+      padding: const EdgeInsets.only(top: 4.0, left: 8.0, bottom: 4.0),
+      decoration: const BoxDecoration(color: Colors.white10),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(
           width: double.infinity,
-          child: Wrap(
-            spacing: 10.0,
-            runSpacing: 8.0,
-            alignment: WrapAlignment.end,
-            children: _buildChips(context, info),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onDoubleTap: () {
+                    Future.wait([
+                      Clipboard.setData(ClipboardData(text: info.device.name))
+                    ]);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content:
+                            Text("Added ${info.device.name} to clipboard")));
+                  },
+                  child: Text(info.device.name,
+                      textAlign: TextAlign.start,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: td.colorScheme.primary)),
+                ),
+              ),
+              if (info.settable)
+                const Expanded(
+                  child: Text(
+                    "settable",
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              else
+                const Expanded(
+                  child: Text(
+                    "read-only",
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+            ],
           ),
         ),
-      )
-    ]),
-  );
+        Padding(
+          padding: const EdgeInsets.only(
+              top: 4.0, left: 20.0, right: 20.0, bottom: 4.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              spacing: 10.0,
+              runSpacing: 8.0,
+              alignment: WrapAlignment.end,
+              children: _buildChips(td, info),
+            ),
+          ),
+        )
+      ]),
+    );
+  }
 }
 
 // Local widget which displays a list of drivers.
@@ -309,7 +337,7 @@ class _DriversListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> d = drivers.map((e) => buildDrvInfoRow(e, context)).toList();
+    List<Widget> d = drivers.map((e) => _buildDrvInfoRow(e, context)).toList();
     List<Widget> all = [
       Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0.0, 8.0, 16.0),
@@ -345,4 +373,19 @@ class _DevicesListView extends StatelessWidget {
 }
 // This public function returns the widget that displays node information.
 
-Widget displayNode(NodeInfo node) => _NodeInfo(node);
+Future<void> displayNode(NodeInfo node, BuildContext context) async {
+  final driverInfo = await DrMem.getDriverInfo(context, node.name);
+
+  if (context.mounted) {
+    final deviceInfo = await DrMem.getDeviceInfo(context,
+        device: DevicePattern(node: node.name, name: "*"));
+
+    if (context.mounted) {
+      showDialog(
+          context: context,
+          builder: (context) => Dialog.fullscreen(
+              child: _NodeInfo(
+                  node: node, driverInfo: driverInfo, deviceInfo: deviceInfo)));
+    }
+  }
+}

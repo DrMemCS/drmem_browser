@@ -33,7 +33,7 @@ sealed class BaseRow {
         return CommentRow(comment, key: key ?? UniqueKey());
 
       case {'type': "device", 'device': String device}:
-        return DeviceRow(Device(name: device, node: map['node'] ?? "rpi4"),
+        return DeviceRow(Device(name: device, node: map['node'] ?? ""),
             label: map['label'], key: key ?? UniqueKey());
 
       case {'type': "plot"}:
@@ -56,8 +56,7 @@ class EmptyRow extends BaseRow {
 
   @override
   Widget buildRowEditor(BuildContext context, int index) {
-    return const Expanded(
-        child: Padding(padding: EdgeInsets.only(top: 8.0), child: Divider()));
+    return const Padding(padding: EdgeInsets.only(top: 8.0), child: Divider());
   }
 
   @override
@@ -233,35 +232,33 @@ class _CommentEditorState extends State<_CommentEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => Expanded(
-        child: Card(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
-                child: TextField(
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    autocorrect: true,
-                    minLines: 1,
-                    maxLines: null,
-                    decoration: getTextFieldDecoration(
-                        context, "Comment (uses Markdown)"),
-                    keyboardType: TextInputType.multiline,
-                    controller: controller,
-                    onChanged: (value) => setState(() => changed = true)),
-              ),
-              TextButton(
-                  onPressed: changed
-                      ? () {
-                          setState(() => changed = false);
-                          context.read<Model>().add(UpdateRow(widget.idx,
-                              CommentRow(controller.text, key: UniqueKey())));
-                        }
-                      : null,
-                  child: const Text("Save"))
-            ],
-          ),
+  Widget build(BuildContext context) => Card(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Flexible(
+              fit: FlexFit.loose,
+              child: TextField(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  autocorrect: true,
+                  minLines: 1,
+                  maxLines: null,
+                  decoration: getTextFieldDecoration(
+                      context, "Comment (uses Markdown)"),
+                  keyboardType: TextInputType.multiline,
+                  controller: controller,
+                  onChanged: (value) => setState(() => changed = true)),
+            ),
+            TextButton(
+                onPressed: changed
+                    ? () {
+                        setState(() => changed = false);
+                        context.read<Model>().add(UpdateRow(widget.idx,
+                            CommentRow(controller.text, key: UniqueKey())));
+                      }
+                    : null,
+                child: const Text("Save"))
+          ],
         ),
       );
 }

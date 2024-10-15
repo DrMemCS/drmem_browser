@@ -31,7 +31,7 @@ class _SheetEditorState extends State<SheetEditor> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              e.buildRowEditor(context, idx),
+              Expanded(child: e.buildRowEditor(context, idx)),
               IconButton(
                   visualDensity: VisualDensity.compact,
                   onPressed: () => context.read<Model>().add(DeleteRow(idx)),

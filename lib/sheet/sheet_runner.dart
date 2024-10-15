@@ -23,7 +23,7 @@ class SheetRunner extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<Model, AppState>(builder: (context, state) {
-        final List<Card> groups = state.selected.rows
+        final List<Widget> groups = state.selected.rows
 
             // Build a list of lists of widgets. We start with a list that has
             // one empty list. As we iterate across the row types on the page,

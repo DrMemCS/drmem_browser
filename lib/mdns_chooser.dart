@@ -1,4 +1,5 @@
 import 'package:drmem_browser/model/model_events.dart';
+import 'package:drmem_browser/node_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +24,7 @@ class _DefaultNode extends StatelessWidget {
                 child: Icon(Icons.star, color: td.colorScheme.secondary),
               )
             : GestureDetector(
-                onTap: () => state.defaultNode = name,
+                onTap: () => context.read<Model>().add(SetDefaultNode(name)),
                 child: Icon(Icons.star_border_outlined,
                     color: td.colorScheme.tertiary),
               );
@@ -60,7 +61,9 @@ class NodeTile extends StatelessWidget {
 
         return GestureDetector(
           key: Key(name),
-          onTap: info != null ? () => () : null,
+          onTap: info != null
+              ? () async => await displayNode(info, context)
+              : null,
           child: Card(
             elevation: 2.0,
             child: Padding(
@@ -77,6 +80,7 @@ class NodeTile extends StatelessWidget {
                             padding:
                                 const EdgeInsets.only(left: 16.0, right: 16.0),
                             child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
@@ -120,6 +124,7 @@ class DnsChooser extends StatelessWidget {
 
   Widget waitingWidget() => const Center(
           child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
