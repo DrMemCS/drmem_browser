@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 
+import 'snacks.dart';
+
 class _Title extends StatelessWidget {
   final String title;
 
@@ -374,18 +376,25 @@ class _DevicesListView extends StatelessWidget {
 // This public function returns the widget that displays node information.
 
 Future<void> displayNode(NodeInfo node, BuildContext context) async {
-  final driverInfo = await DrMem.getDriverInfo(context, node.name);
-
-  if (context.mounted) {
-    final deviceInfo = await DrMem.getDeviceInfo(context,
-        device: DevicePattern(node: node.name, name: "*"));
+  try {
+    final driverInfo = await DrMem.getDriverInfo(context, node.name);
 
     if (context.mounted) {
-      showDialog(
-          context: context,
-          builder: (context) => Dialog.fullscreen(
-              child: _NodeInfo(
-                  node: node, driverInfo: driverInfo, deviceInfo: deviceInfo)));
+      final deviceInfo = await DrMem.getDeviceInfo(context,
+          device: DevicePattern(node: node.name, name: "*"));
+
+      if (context.mounted) {
+        showDialog(
+            context: context,
+            builder: (context) => Dialog.fullscreen(
+                child: _NodeInfo(
+                    node: node,
+                    driverInfo: driverInfo,
+                    deviceInfo: deviceInfo)));
+      }
     }
+  } on Exception catch (e) {
+    // ignore: use_build_context_synchronously
+    displayError(context, e.toString());
   }
 }

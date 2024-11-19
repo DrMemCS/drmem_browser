@@ -11,6 +11,8 @@ import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/sheet/row.dart';
 
+import 'package:drmem_browser/snacks.dart';
+
 enum _DeviceModelAspect { label, name, units, settable, reading }
 
 // This is an `InheritedModel` widget which holds the latest information

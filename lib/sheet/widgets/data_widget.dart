@@ -2,6 +2,8 @@ import 'package:drmem_browser/sheet/widgets/device_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:drmem_provider/drmem_provider.dart';
 
+import 'package:drmem_browser/snacks.dart';
+
 // This builds widgets that show an error icon followed by red text
 // indicating an unsupported type was received. This could happen if
 // an older version of the app is reading a new version of DrMem.
@@ -19,22 +21,6 @@ Widget buildErrorWidget(ThemeData td, String msg) {
       Text(msg, style: TextStyle(color: errorColor))
     ],
   );
-}
-
-// Displays an error message using the snackbar.
-
-void displayError(BuildContext context, String msg) {
-  if (context.mounted) {
-    final snackBar = SnackBar(
-      backgroundColor: Colors.red,
-      content: Row(children: [
-        const Icon(Icons.error, color: Colors.white),
-        Text(msg, style: const TextStyle(color: Colors.yellow))
-      ]),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
 }
 
 class _SettingTextEditor extends StatelessWidget {
