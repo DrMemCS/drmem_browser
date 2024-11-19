@@ -21,8 +21,8 @@ dependencies:
   hydrated_bloc: ^9.1.2
 
   drmem_provider:
-    # git: https://github.com/DrMemCS/drmem_widget.git
-    path: /Users/rich/AndroidStudioProjects/drmem_widget
+    git: https://github.com/DrMemCS/drmem_widget.git
+
   gql_code_builder: ^0.13.0
 
 dev_dependencies:
