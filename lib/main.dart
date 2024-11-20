@@ -126,6 +126,18 @@ class _BaseState extends State<_BaseWidget> {
                 icon: Icon(Icons.settings), label: "Settings"),
           ]);
 
+  NavigationRail _buildNavRail() => NavigationRail(
+          selectedIndex: _selectIndex,
+          onDestinationSelected: changePage,
+          destinations: const [
+            NavigationRailDestination(
+                icon: Icon(Icons.devices), label: Text("Nodes")),
+            NavigationRailDestination(
+                icon: Icon(Icons.web_stories), label: Text("Sheets")),
+            NavigationRailDestination(
+                icon: Icon(Icons.settings), label: Text("Settings"))
+          ]);
+
   Widget _display(BuildContext context) => switch (_selectIndex) {
         1 => const ParamPage(),
         2 => Container(),
@@ -133,7 +145,22 @@ class _BaseState extends State<_BaseWidget> {
       };
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      body: SafeArea(child: _display(context)),
-      bottomNavigationBar: _buildNavBar());
+  Widget build(BuildContext context) =>
+      LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return Scaffold(
+              body: SafeArea(
+                  child: Row(
+            children: [
+              _buildNavRail(),
+              const VerticalDivider(),
+              Expanded(child: _display(context)),
+            ],
+          )));
+        } else {
+          return Scaffold(
+              body: SafeArea(child: _display(context)),
+              bottomNavigationBar: _buildNavBar());
+        }
+      });
 }
