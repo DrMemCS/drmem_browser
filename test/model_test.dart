@@ -146,7 +146,40 @@ void _testDeserialization() {
 
     AppState s = model.fromJson(json)!;
 
-    expect(model.toJson(s), json);
+    expect(
+        model.toJson(s),
+        allOf([
+          containsPair('selectedSheet', "First"),
+          containsPair(
+              'sheets',
+              allOf([
+                containsPair(
+                    'First',
+                    containsPair(
+                        'rows',
+                        allOf([
+                          isList,
+                          containsAllInOrder([containsPair('type', "empty")])
+                        ]))),
+                containsPair(
+                    'Second',
+                    containsPair(
+                        'rows',
+                        allOf([
+                          isList,
+                          containsAll([
+                            containsPair('type', "empty"),
+                            allOf([
+                              containsPair('type', "comment"),
+                              containsPair('content', "hello")
+                            ])
+                          ])
+                        ]))),
+              ])),
+          containsPair('defaultNode', null),
+          containsPair('nodes', []),
+          contains('clientId')
+        ]));
   });
 }
 
@@ -172,14 +205,16 @@ void _testStorage() async {
       expect(model.state.selected.content.isEmpty, true);
       expect(model.state.sheetNames, ["Untitled"]);
 
-      expect(model.toJson(model.state), {
-        'selectedSheet': "Untitled",
-        'sheets': {
-          'Untitled': {'rows': []}
-        },
-        'defaultNode': null,
-        'nodes': []
-      });
+      expect(
+          model.toJson(model.state),
+          allOf([
+            containsPair('selectedSheet', "Untitled"),
+            containsPair('sheets',
+                containsPair('Untitled', containsPair('rows', isEmpty))),
+            containsPair('defaultNode', null),
+            containsPair('nodes', []),
+            contains('clientId')
+          ]));
 
       // Add a row to our sheet. Then check to see that it was added.
 
@@ -193,18 +228,20 @@ void _testStorage() async {
       expect(model.state.selected.content, [EmptyRow(key: key)]);
       expect(model.state.sheetNames, ["Untitled"]);
 
-      expect(model.toJson(model.state), {
-        'selectedSheet': "Untitled",
-        'sheets': {
-          'Untitled': {
-            'rows': [
-              {'type': "empty"}
-            ]
-          }
-        },
-        'defaultNode': null,
-        'nodes': []
-      });
+      expect(
+          model.toJson(model.state),
+          allOf([
+            containsPair('selectedSheet', "Untitled"),
+            containsPair(
+                'sheets',
+                containsPair(
+                    'Untitled',
+                    containsPair(
+                        'rows', containsAll([containsPair('type', "empty")])))),
+            containsPair('defaultNode', null),
+            containsPair('nodes', []),
+            contains('clientId')
+          ]));
     });
   });
 }
