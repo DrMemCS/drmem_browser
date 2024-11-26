@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
-import 'sheet.dart';
+import 'package:drmem_browser/sheet/row.dart';
 
 // Displays the sheet's contents as an editor. No data collection occurs while
 // editing.
 
 class SheetEditor extends StatefulWidget {
-  const SheetEditor({Key? key}) : super(key: key);
+  const SheetEditor({super.key});
 
   @override
   State<SheetEditor> createState() => _SheetEditorState();
@@ -30,7 +31,7 @@ class _SheetEditorState extends State<SheetEditor> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              e.buildRowEditor(context, idx),
+              Expanded(child: e.buildRowEditor(context, idx)),
               IconButton(
                   visualDensity: VisualDensity.compact,
                   onPressed: () => context.read<Model>().add(DeleteRow(idx)),
@@ -53,7 +54,7 @@ class _SheetEditorState extends State<SheetEditor> {
 
   void Function() mkAddDeviceRow(BuildContext context) {
     return () =>
-        context.read<Model>().add(AppendRow(DeviceRow("", key: UniqueKey())));
+        context.read<Model>().add(AppendRow(DeviceRow(null, key: UniqueKey())));
   }
 
   // Returns a function that appends a plot row to the sheet.
@@ -80,7 +81,7 @@ class _SheetEditorState extends State<SheetEditor> {
 
     return FilledButton.icon(
       style: ButtonStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(
+        backgroundColor: WidgetStatePropertyAll<Color>(
             td.colorScheme.secondary.withOpacity(0.5)),
       ),
       onPressed: cb(context),
@@ -105,10 +106,9 @@ class _SheetEditorState extends State<SheetEditor> {
                     context.read<Model>().add(MoveRow(oldIndex, newIndex)),
                 buildDefaultDragHandles: false,
                 padding: const EdgeInsets.all(4.0),
-                children: state.selected.rows.fold([], (acc, e) {
-                  acc.add(renderRow(context, true, e, acc.length, movable));
-                  return acc;
-                })),
+                children: state.selected.rows.indexed
+                    .map((e) => renderRow(context, true, e.$2, e.$1, movable))
+                    .toList()),
           ),
           Container(
             color: Theme.of(context).cardColor,

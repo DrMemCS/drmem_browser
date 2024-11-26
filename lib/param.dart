@@ -1,9 +1,10 @@
-import 'package:drmem_browser/model/model_events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:drmem_browser/model/model.dart';
+import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/sheet/sheet_editor.dart';
 import 'package:drmem_browser/sheet/sheet_runner.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:drmem_browser/model/model.dart';
 
 class ParamPage extends StatefulWidget {
   const ParamPage({super.key});
@@ -70,6 +71,7 @@ class _SheetsState extends State<ParamPage> {
     ];
 
     return BlocBuilder<Model, AppState>(builder: (context, state) {
+      final FocusNode fn = FocusNode();
       List<String> items = state.sheetNames;
 
       return AppBar(
@@ -77,6 +79,7 @@ class _SheetsState extends State<ParamPage> {
           title: SizedBox(
             width: double.infinity,
             child: DropdownButton<String>(
+              focusNode: fn,
               underline: Container(),
               value: state.selectedSheet,
               items: items.map((String e) {
@@ -85,6 +88,7 @@ class _SheetsState extends State<ParamPage> {
               onChanged: (value) {
                 if (value != null) {
                   context.read<Model>().add(SelectSheet(value));
+                  fn.unfocus();
                 }
               },
             ),

@@ -1,66 +1,10 @@
-import 'dart:developer' as developer;
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:drmem_browser/sheet/sheet.dart';
-import 'model_events.dart';
+import 'package:drmem_provider/drmem_provider.dart';
 
-// Holds the configuration for one sheet of parameters.
-
-class PageConfig {
-  List<BaseRow> content;
-
-  PageConfig({List<BaseRow>? content}) : content = content ?? [];
-
-  // Serializes a PageConfig to a JSON object. The JSON object consists of one
-  // field containing an array of serialized rows.
-
-  Map<String, dynamic>? toJson() =>
-      {'rows': content.map((e) => e.toJson()).toList()};
-
-  // Deserializes a JSON object into a PageConfig.
-
-  static PageConfig fromJson(Map<String, dynamic> json) {
-    if (json case {'rows': List rows}) {
-      final items = rows
-          .map((e) => e is Map<String, dynamic> ? BaseRow.fromJson(e) : null)
-          .nonNulls
-          .toList();
-
-      return PageConfig(content: items);
-    }
-    return PageConfig();
-  }
-
-  List<BaseRow> get rows => content;
-
-  void appendRow(BaseRow row) => content.add(row);
-
-  void moveRow(int oIdx, int nIdx) {
-    if (oIdx >= 0 &&
-        oIdx < content.length &&
-        nIdx >= 0 &&
-        nIdx < content.length) {
-      final newIndex = oIdx < nIdx ? nIdx - 1 : nIdx;
-      final BaseRow element = content.removeAt(oIdx);
-
-      content.insert(newIndex, element);
-    }
-  }
-
-  void removeRow(int index) {
-    if (index >= 0 && index < content.length) {
-      content.removeAt(index);
-    }
-  }
-
-  void updateRow(int index, BaseRow row) {
-    if (index >= 0 && index < content.length) {
-      content[index] = row;
-    } else {
-      content.add(row);
-    }
-  }
-}
+import 'package:drmem_browser/model/model_events.dart';
+import 'package:drmem_browser/model/page_config.dart';
 
 // Holds the state of the app's data model. This model consists of the set of
 // DrMem nodes we know about and our local database of sheets that were
@@ -68,37 +12,78 @@ class PageConfig {
 
 class AppState {
   UniqueKey id = UniqueKey();
-  late String selectedSheet;
+  String _selectedSheet;
   final Map<String, PageConfig> _sheets;
+  String? defaultNode;
+  final List<NodeInfo> _nodes;
+  ClientID clientId;
 
-  // Resets the sheets environment to a single, empty sheet which is selected.
-  // Since the `_sheets` field is `final`, we have to call `.clear()` to empty
-  // it.
+  // Create an instance of `AppState`.
 
-  void _cleanSheets() {
-    _sheets.clear();
-    _sheets['Untitled'] = PageConfig();
-    selectedSheet = "Untitled";
+  AppState(
+      {Map<String, PageConfig>? sheets,
+      String activeSheet = "Untitled",
+      List<NodeInfo>? nodes,
+      this.defaultNode,
+      ClientID? clientId})
+      : _sheets = sheets ?? {},
+        _selectedSheet = activeSheet,
+        _nodes =
+            (nodes?..sort((a, b) => a.name.compareTo(b.name)))?.toList() ?? [],
+        clientId = clientId ?? ClientID.generate() {
+    // If the default node doesn't exist, then we need to clear it out.
+
+    if (defaultNode != null && !_nodes.any((ii) => ii.name == defaultNode)) {
+      dev.log("resetting default node -- $defaultNode doesn't exist");
+      defaultNode = null;
+    }
+
+    // If the selected sheet doesn't exist, create a new, blank sheet
+    // associated with the name. This covers two cases: 1) it guarantees
+    // the selected sheet refers to an entry in the map, and 2) it ensures
+    // the map is never empty.
+
+    if (!_sheets.containsKey(_selectedSheet)) {
+      _sheets[_selectedSheet] = PageConfig();
+    }
   }
 
-  // Create a default instance of `AppState`. This consists of one, empty page
-  // named "Untitled" and is the selected page.
+  // Private constructor. We don't want this public because it could be used to
+  // create an AppState with a bad configuration. This module uses it to clone
+  // other state object, which have already been validated.
 
-  AppState() : _sheets = {} {
-    _cleanSheets();
+  AppState._raw(AppState other)
+      : _sheets = other._sheets,
+        _selectedSheet = other._selectedSheet,
+        _nodes = other._nodes,
+        clientId = other.clientId,
+        defaultNode = other.defaultNode;
+
+  // Clones the current AppState.
+
+  AppState clone() => AppState._raw(this);
+
+  NodeInfo? getNodeInfo(String node) {
+    try {
+      return _nodes.firstWhere((e) => e.name == node);
+    } on StateError {
+      return null;
+    }
   }
 
-  // Create a new `AppState` using the passed parameters. If the selected sheet
-  // doesn't exist, then pick an existing key or set the state as `AppState()`
-  // does.
+  List<String> getNodeNames() => _nodes.map((e) => e.name).toList()..sort();
 
-  AppState.init(this.selectedSheet, this._sheets) {
-    if (!_sheets.containsKey(selectedSheet)) {
-      if (_sheets.isNotEmpty) {
-        selectedSheet = _sheets.keys.first;
-      } else {
-        _cleanSheets();
-      }
+  // Marks a node entry as "inactive". Returns true if the state was updated,
+  // false otherwise.
+
+  bool deactivateNode(String name) {
+    final idx = _nodes.indexWhere((e) => e.name == name);
+
+    if (idx >= 0) {
+      _nodes[idx].deactivate();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -117,13 +102,23 @@ class AppState {
     return name;
   }
 
-  List<String> get sheetNames =>
-      _sheets.isNotEmpty ? _sheets.keys.toList() : [nextUntitled()];
+  List<String> get sheetNames => _sheets.keys.toList()..sort();
 
-  // Returns the page that's currently selected. If `selectedSheet` refers to a
-  // non-existent entry, return an empty sheet.
+  // Returns the page that's currently selected.
 
-  PageConfig get selected => _sheets[selectedSheet]!;
+  PageConfig get selected => _sheets[_selectedSheet]!;
+
+  // These allow manipulation of and access to the selected sheet. It makes
+  // sure that `_sheets` and `_selectedSheet` are in a good state.
+
+  String get selectedSheet => _selectedSheet;
+
+  set selectedSheet(String name) {
+    if (!_sheets.containsKey(name)) {
+      _sheets[name] = PageConfig();
+    }
+    _selectedSheet = name;
+  }
 }
 
 // Defines the page's data model and handles events to modify it.
@@ -138,97 +133,105 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     on<RenameSelectedSheet>(_renameSelectedSheet);
     on<AddSheet>(_addSheet);
     on<DeleteSheet>(_delSheet);
+    on<AddNode>(_addNode);
+    on<SetDefaultNode>(_setDefaultNode);
+    on<NodeInactive>(_nodeDown);
+    on<ResetClientId>(_resetClientId);
   }
 
   @override
   Map<String, dynamic>? toJson(AppState state) => {
+        'clientId': state.clientId.toJson(),
         'selectedSheet': state.selectedSheet,
-        'sheets': Map.fromEntries(
-            state._sheets.entries.map((e) => MapEntry(e.key, e.value.toJson())))
+        'sheets': Map.fromEntries(state._sheets.entries
+            .map((e) => MapEntry(e.key, e.value.toJson()))),
+        'defaultNode': state.defaultNode,
+        'nodes': state._nodes.map((info) => info.toJson()).toList()
       };
 
   // Given a map (generated by JSON text), return an instance of `AppState`.
 
   @override
   AppState? fromJson(Map<String, dynamic> json) {
-    developer.log("input: $json", name: "Model.fromJson");
-
     if (json
         case {
           'selectedSheet': String ss,
           'sheets': Map<String, dynamic> sheets,
+          'defaultNode': String? defNode,
+          'nodes': List nodes
         }) {
-      return AppState.init(
-          ss,
-          Map.fromEntries(sheets.entries
-              .map((e) => MapEntry(e.key, PageConfig.fromJson(e.value)))));
+      late ClientID clientId;
+
+      // Pull the Client ID from the map. If it doesn't exist or throws an
+      // exception when deserializing, generate a new ID.
+
+      try {
+        clientId = ClientID.fromJson(json['clientId'] ?? {});
+        dev.log('read ID: ${clientId.fingerprint}', name: "AppState::fromJson");
+      } catch (_) {
+        clientId = ClientID.generate();
+        dev.log('generated fresh ID: ${clientId.fingerprint}',
+            name: "AppState::fromJson");
+      }
+
+      return AppState(
+          clientId: clientId,
+          sheets: Map.fromEntries(sheets.entries
+              .map((e) => MapEntry(e.key, PageConfig.fromJson(e.value)))),
+          activeSheet: ss,
+          defaultNode: defNode,
+          nodes: nodes.map((e) => NodeInfo.fromJson(e)).nonNulls.toList());
     }
+    dev.log("error reading state ... starting empty", name: "Model.fromJson");
     return null;
   }
 
   // Adds a new row to the end of the currently selected sheet.
 
   void _appendRow(AppendRow event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    tmp._sheets[tmp.selectedSheet]!.appendRow(event.newRow);
-    developer.log("new state: ${tmp.selected.content}",
-        name: "Model.appendRow");
-    emit(tmp);
+    state.selected.appendRow(event.newRow);
+    emit(state.clone());
   }
 
   // Removes the row specified by the index from the currently selected sheet.
 
   void _deleteRow(DeleteRow event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    tmp._sheets[tmp.selectedSheet]!.removeRow(event.index);
-    emit(tmp);
+    state.selected.removeRow(event.index);
+    emit(state.clone());
   }
 
   // This event is received when a child widget wants to change the type of a
   // row. This also needs to handle the case when the list of rows is empty.
 
   void _updateRow(UpdateRow event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    tmp._sheets[tmp.selectedSheet]!.updateRow(event.index, event.newRow);
-    emit(tmp);
+    state.selected.updateRow(event.index, event.newRow);
+    emit(state.clone());
   }
 
   void _moveRow(MoveRow event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    tmp._sheets[tmp.selectedSheet]!.moveRow(event.oldIndex, event.newIndex);
-    emit(tmp);
+    state.selected.moveRow(event.oldIndex, event.newIndex);
+    emit(state.clone());
   }
 
   void _selectSheet(SelectSheet event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    if (!tmp._sheets.containsKey(event.name)) {
-      tmp._sheets[event.name] = PageConfig();
-    }
-    tmp.selectedSheet = event.name;
-    emit(tmp);
+    state.selectedSheet = event.name;
+    emit(state.clone());
   }
 
   void _renameSelectedSheet(RenameSelectedSheet event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
     // If the new name doesn't exist, then we can proceed. If it does exist,
     // we ignore the request.
     //
     // TODO: We should report the error.
 
-    if (!tmp._sheets.containsKey(event.newName)) {
-      PageConfig conf = tmp._sheets.remove(tmp.selectedSheet)!;
+    if (!state._sheets.containsKey(event.newName)) {
+      PageConfig conf = state._sheets.remove(state.selectedSheet)!;
 
-      tmp.selectedSheet = event.newName;
-      tmp._sheets[event.newName] = conf;
-      emit(tmp);
+      state._selectedSheet = event.newName;
+      state._sheets[event.newName] = conf;
+      emit(state.clone());
     } else {
-      developer.log("can't rename sheet ... ${event.newName} already exists",
+      dev.log("can't rename sheet ... ${event.newName} already exists",
           name: "Model.renameSheet");
     }
   }
@@ -238,31 +241,56 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
   // availability.
 
   void _addSheet(AddSheet event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
-
-    tmp.selectedSheet = tmp.nextUntitled();
-    tmp._sheets[tmp.selectedSheet] = PageConfig();
-    emit(tmp);
+    state.selectedSheet = state.nextUntitled();
+    emit(state.clone());
   }
 
   void _delSheet(DeleteSheet event, Emitter<AppState> emit) {
-    AppState tmp = AppState.init(state.selectedSheet, state._sheets);
+    // Remove the current sheet.
 
-    // Remove the current sheet. XXX: The user should be prompted before
-    // deleting the sheet.
-
-    tmp._sheets.remove(tmp.selectedSheet);
+    state._sheets.remove(state.selectedSheet);
 
     // If we still have sheets, then pick the first key for the new selected
     // sheet. If the last sheet was deleted, determine the next, "Untitled"
     // name and create a blank page associated with it.
 
-    if (tmp._sheets.isNotEmpty) {
-      tmp.selectedSheet = tmp._sheets.keys.first;
+    state.selectedSheet = state._sheets.isNotEmpty
+        ? state._sheets.keys.first
+        : state.nextUntitled();
+    emit(state.clone());
+  }
+
+  void _addNode(AddNode event, Emitter<AppState> emit) {
+    final idx = state._nodes.indexWhere((e) => e.name == event.info.name);
+
+    if (idx != -1) {
+      state._nodes[idx] = event.info;
     } else {
-      tmp.selectedSheet = tmp.nextUntitled();
-      tmp._sheets[tmp.selectedSheet] = PageConfig();
+      state._nodes.add(event.info);
     }
+
+    emit(state.clone());
+  }
+
+  void _setDefaultNode(SetDefaultNode event, Emitter<AppState> emit) {
+    state.defaultNode = event.name;
+
+    emit(state.clone());
+  }
+
+  void _resetClientId(ResetClientId event, Emitter<AppState> emit) {
+    final tmp = state.clone();
+
+    tmp.clientId = ClientID.generate();
     emit(tmp);
+  }
+
+  // Attempts to deactivate a node in the node list. If the state was changed,
+  // emit a new state so the widgets update properly.
+
+  void _nodeDown(NodeInactive event, Emitter<AppState> emit) {
+    if (state.deactivateNode(event.name)) {
+      emit(state.clone());
+    }
   }
 }

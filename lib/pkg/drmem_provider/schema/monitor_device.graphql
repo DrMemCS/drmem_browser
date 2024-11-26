@@ -1,9 +1,0 @@
-subscription MonitorDevice($device: String!, $range: DateRange) {
-  monitorDevice(device: $device, range: $range) {
-    stamp
-    boolValue
-    intValue
-    floatValue
-    stringValue
-  }
-}

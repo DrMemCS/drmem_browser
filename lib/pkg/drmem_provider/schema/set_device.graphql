@@ -1,9 +1,0 @@
-mutation SetDevice($device: String!, $value: SettingData!) {
-    setDevice(name: $device, value: $value) {
-        stamp
-        boolValue
-        intValue
-        floatValue
-        stringValue
-    }
-}
