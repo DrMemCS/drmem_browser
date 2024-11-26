@@ -136,10 +136,12 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     on<AddNode>(_addNode);
     on<SetDefaultNode>(_setDefaultNode);
     on<NodeInactive>(_nodeDown);
+    on<ResetClientId>(_resetClientId);
   }
 
   @override
   Map<String, dynamic>? toJson(AppState state) => {
+        'clientId': state.clientId.toJson(),
         'selectedSheet': state.selectedSheet,
         'sheets': Map.fromEntries(state._sheets.entries
             .map((e) => MapEntry(e.key, e.value.toJson()))),
@@ -158,7 +160,22 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
           'defaultNode': String? defNode,
           'nodes': List nodes
         }) {
+      late ClientID clientId;
+
+      // Pull the Client ID from the map. If it doesn't exist or throws an
+      // exception when deserializing, generate a new ID.
+
+      try {
+        clientId = ClientID.fromJson(json['clientId'] ?? {});
+        dev.log('read ID: ${clientId.fingerprint}', name: "AppState::fromJson");
+      } catch (_) {
+        clientId = ClientID.generate();
+        dev.log('generated fresh ID: ${clientId.fingerprint}',
+            name: "AppState::fromJson");
+      }
+
       return AppState(
+          clientId: clientId,
           sheets: Map.fromEntries(sheets.entries
               .map((e) => MapEntry(e.key, PageConfig.fromJson(e.value)))),
           activeSheet: ss,
@@ -259,6 +276,13 @@ class Model extends HydratedBloc<ModelEvent, AppState> {
     state.defaultNode = event.name;
 
     emit(state.clone());
+  }
+
+  void _resetClientId(ResetClientId event, Emitter<AppState> emit) {
+    final tmp = state.clone();
+
+    tmp.clientId = ClientID.generate();
+    emit(tmp);
   }
 
   // Attempts to deactivate a node in the node list. If the state was changed,

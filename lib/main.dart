@@ -10,6 +10,7 @@ import 'package:drmem_browser/model/model_events.dart';
 import 'package:drmem_browser/model/model.dart';
 import 'package:drmem_browser/theme/theme.dart';
 import 'package:drmem_browser/mdns_chooser.dart';
+import 'package:drmem_browser/setting_page.dart';
 import 'package:drmem_browser/param.dart';
 
 // The entry point for the application.
@@ -51,7 +52,6 @@ class _NodeUpdater extends StatelessWidget {
   final Widget child;
 
   const _NodeUpdater({required this.child});
-
   @override
   Widget build(BuildContext context) {
     final clientId = context.read<Model>().state.clientId;
@@ -140,7 +140,7 @@ class _BaseState extends State<_BaseWidget> {
 
   Widget _display(BuildContext context) => switch (_selectIndex) {
         1 => const ParamPage(),
-        2 => Container(),
+        2 => const SettingPage(),
         _ => const DnsChooser()
       };
 
